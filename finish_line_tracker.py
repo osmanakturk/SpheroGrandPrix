@@ -3,14 +3,14 @@ import numpy as np
 import time
 from ultralytics import YOLO
 
-# Load YOLOv8 model
-model = YOLO("./models/yolo11n.pt") 
+# Load YOLO model
+model = YOLO("./models/yolo11n-seg.pt") 
 
 
 # Finish line configuration
-FINISH_X1 = 800
-FINISH_X2 = 1300
-FINISH_Y = 598  # horizontal finish line for upward crossings
+FINISH_X1 = 200
+FINISH_X2 = 440
+FINISH_Y = 280  # horizontal finish line for upward crossings
 
 # HSV color ranges
 COLOR_RANGES = {
@@ -27,12 +27,17 @@ color_prev_y = {}
 color_start_times = {}
 color_lap_times = {}
 
-cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(1, cv2.CAP_DSHOW)
+
+
+cap = cv2.VideoCapture("./sphero1.mp4")
 
 while cap.isOpened():
     ret, frame = cap.read()
     if not ret:
         break
+
+ 
     
     mask = np.zeros(frame.shape[:2], dtype=np.uint8)
     cv2.rectangle(mask, (FINISH_X1, 0), (FINISH_X2, frame.shape[0]), 255, -1)
@@ -40,9 +45,9 @@ while cap.isOpened():
     masked_frame = cv2.bitwise_and(frame, frame, mask=mask)
     frame[np.where(mask == 0)] = 255  # White background for better visibility
     
-    
-    # tracker="bytetrack.yaml" , tracker="botsort.yaml"
-    results = model.track(masked_frame, tracker="bytetrack.yaml", persist=True, verbose=False, stream=True)
+    # Alternative segmentation: tracker="botsort.yaml", tracker="bytetrack.yaml"
+    results = model.track(masked_frame, persist=True, verbose=False, stream=True)
+
 
     if results:
         for r in results:
@@ -111,7 +116,8 @@ while cap.isOpened():
     cv2.putText(frame, "FINISH LINE", (FINISH_X1 + 10, FINISH_Y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     
     cv2.imshow("Finish Line Tracker", frame)
-    if cv2.waitKey(1) & 0xFF == ord("q"):
+
+    if cv2.waitKey(1) & 0xFF == 27: #ESC key
         break
 
 cap.release()

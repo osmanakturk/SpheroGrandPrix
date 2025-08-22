@@ -101,8 +101,7 @@ while True:
     active = [k for k,v in MODE.items() if v]
     active_str = f"ACTIVE: {active[0]}" if active else "ACTIVE: none"
 
-    cv.putText(display, active_str, (display.shape[1]-150, 25),
-               cv.FONT_HERSHEY_SIMPLEX, 0.6, (50,240,50), 2, cv.LINE_AA)
+    cv.putText(display, active_str, (display.shape[1]-150, 25), cv.FONT_HERSHEY_SIMPLEX, 0.6, (50,240,50), 2, cv.LINE_AA)
 
     cv.imshow(window, display)
     key = cv.waitKey(10) & 0xFF

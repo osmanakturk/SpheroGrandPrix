@@ -7,40 +7,54 @@ from config import PATH, COLOR_RANGES_STRICT, COLOR_RANGES, COLORS_HSV, COLORS_B
 
 
 
-
 class SpheroBold():
 
     def __init__(self, 
                  color: str, 
-                 frame: cv.typing.MatLike, 
-                 background:cv.typing.MatLike, 
-                 username: str = "User", 
+                 username: str = "User",
+                 frame: cv.typing.MatLike = None, 
+                 background: cv.typing.MatLike = None, 
                  is_active: bool = False, 
                  start_time: datetime = None, 
                  finish_time: datetime = None, 
-                 path_previous_points: tuple = None, 
-                 path_center: tuple = None, 
+                 path_previous_centre: tuple = None, 
+                 path_centre: tuple = None, 
                  path_radius: int = None,
-                 finishline_center: tuple = None,
+                 finishline_centre: tuple = None,
                  finishline_radius: int = None,
-
+                 debug: bool = False,
                  ):
         
 
+        self._id = uuid.uuid4().hex
         self._color = color
         self._username = username
         self._background = background
         self._is_active = is_active
         self._start_time = start_time
         self._finish_time = finish_time
-        self._path_previous_points = path_previous_points
-        self._path_center = path_center
+        self._path_previous_centre = path_previous_centre
+        self._path_centre = path_centre
         self._path_radius = path_radius
-        self._finishline_center = finishline_center
+        self._finishline_centre = finishline_centre
         self._finishline_radius = finishline_radius
-        self._canvas = np.full_like(frame, 0, np.uint8)
+        self._frame = frame
+        self._canvas = np.full_like(self._frame, 0, np.uint8)
+        self._debug: bool = False
+  
 
-    
+
+
+
+    @property
+    def frame(self):
+        return self._frame
+
+
+    @frame.setter
+    def frame(self, frame: cv.typing.MatLike):
+        self._frame = frame
+
 
     @property
     def color(self):
@@ -92,20 +106,20 @@ class SpheroBold():
         self._finish_time = finish_time
 
     @property
-    def path_previous_points(self):
-        return self._path_previous_points
+    def path_previous_centre(self):
+        return self._path_previous_centre
 
-    @path_previous_points.setter
-    def path_previous_points(self, path_previous_points: tuple):
-        self._path_previous_points = path_previous_points
+    @path_previous_centre.setter
+    def path_previous_centre(self, path_previous_centre: tuple):
+        self._path_previous_centre = path_previous_centre
 
     @property
-    def path_center(self):
-        return self._path_center
+    def path_centre(self):
+        return self._path_centre
 
-    @path_center.setter
-    def path_center(self, path_center: tuple):
-        self._path_center = path_center
+    @path_centre.setter
+    def path_centre(self, path_centre: tuple):
+        self._path_centre = path_centre
 
     @property
     def path_radius(self):
@@ -118,12 +132,12 @@ class SpheroBold():
 
 
     @property
-    def finishline_center(self): 
-        return self._finishline_center
+    def finishline_centre(self): 
+        return self._finishline_centre
 
-    @finishline_center.setter
-    def finishline_center(self, finishline_center: tuple):
-        self._finishline_center = finishline_center
+    @finishline_centre.setter
+    def finishline_centre(self, finishline_centre: tuple):
+        self._finishline_centre = finishline_centre
 
 
 
@@ -141,7 +155,17 @@ class SpheroBold():
         return self._canvas
 
     @canvas.setter
-    def finishline_radius(self, frame: cv.typing.MatLike):
-        self._finishline_radius = np.full_like(frame, 0, np.uint8)
+    def canvas(self, frame: cv.typing.MatLike):
+        self._canvas = np.full_like(frame, 0, np.uint8)
+
+
+
+    @property
+    def debug(self):
+        return self._debug
+
+    @debug.setter
+    def debug(self, debug: bool):
+        self._debug = debug
 
 

@@ -12,7 +12,8 @@ class SpheroBold():
     def __init__(self, 
                  color: str, 
                  username: str = "User",
-                 frame: cv.typing.MatLike = None, 
+                 path_frame: cv.typing.MatLike = None, 
+                 finishline_frame: cv.typing.MatLike = None,
                  background: cv.typing.MatLike = None, 
                  is_active: bool = False, 
                  start_time: datetime = None, 
@@ -38,8 +39,9 @@ class SpheroBold():
         self._path_radius = path_radius
         self._finishline_centre = finishline_centre
         self._finishline_radius = finishline_radius
-        self._frame = frame
-        self._canvas = np.full_like(self._frame, 0, np.uint8)
+        self._path_frame = path_frame
+        self._finishline_frame = finishline_frame
+        self._canvas = np.full_like(self._path_frame, 0, np.uint8)
         self._debug: bool = False
   
 
@@ -47,13 +49,25 @@ class SpheroBold():
 
 
     @property
-    def frame(self):
-        return self._frame
+    def path_frame(self):
+        return self._path_frame
 
 
-    @frame.setter
-    def frame(self, frame: cv.typing.MatLike):
-        self._frame = frame
+    @path_frame.setter
+    def path_frame(self, path_frame: cv.typing.MatLike):
+        self._path_frame = path_frame
+
+
+    @property
+    def finishline_frame(self):
+        return self.finishline_frame
+
+
+    @finishline_frame.setter
+    def finishline_frame(self, finishline_frame: cv.typing.MatLike):
+        self._finishline_frame = finishline_frame
+
+
 
 
     @property

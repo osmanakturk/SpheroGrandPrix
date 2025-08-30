@@ -1,5 +1,6 @@
 flask
-opencv-python
+opencv-contrib-python
+#opencv-python
 numpy
 ultralytics
 pygrabber

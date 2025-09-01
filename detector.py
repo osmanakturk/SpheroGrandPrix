@@ -19,6 +19,7 @@ class Detector:
                 path_max_radius: int = None, 
                 finishline_min_radius: int = None, 
                 finishline_max_radius: int = None, 
+                finishline_y: int = None,
                 debug: bool = False,
                 is_strict: bool = True,
                 kernel_size: int = 9 
@@ -34,6 +35,7 @@ class Detector:
         self._path_max_radius = path_max_radius
         self._finishline_min_radius = finishline_min_radius
         self._finishline_max_radius = finishline_max_radius
+        self._finishline_y = finishline_y
         self._debug = debug
         self._is_strict = is_strict
         self._kernel_size = kernel_size
@@ -108,6 +110,15 @@ class Detector:
     def finishline_max_radius(self, finishline_max_radius: int):
         self._finishline_max_radius = finishline_max_radius
    
+
+    @property
+    def finishline_y(self):
+        return self._finishline_y
+
+    @finishline_y.setter
+    def finishline_y(self, finishline_y: int):
+        self._finishline_y = finishline_y
+
 
     @property
     def kernel_size(self):
@@ -415,6 +426,7 @@ class Detector:
                     print(f"Finishline, area: {area}, x: {x}, y: {y}, radius: {radius}")
 
 
+            cv.line(original_finishline_frame, (0, self._finishline_y), (original_finishline_frame.shape[1], self._finishline_y), COLORS_BGR["Red"], 2, cv.LINE_AA)
 
             return original_finishline_frame
 

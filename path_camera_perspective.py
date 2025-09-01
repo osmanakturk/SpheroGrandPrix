@@ -16,6 +16,7 @@ def trackbar_callback(val):
 #cap = cv.VideoCapture("./sphero/sphero1.mp4")
 cap = cv.VideoCapture(2, cv.CAP_DSHOW)
 
+cap.set(cv.CAP_PROP_SETTINGS, 1)
 
 cv.namedWindow("Trackbar", cv.WINDOW_NORMAL)
 cv.namedWindow("Camera", cv.WINDOW_KEEPRATIO)
@@ -80,10 +81,13 @@ while cap.isOpened():
     cv.putText(frame, f"BR:{br_x, br_y}", (br_x, br_y+15), cv.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
 
 
-    if all([tl_x, tl_y, tr_x, tr_y, bl_x, bl_y, br_x, br_y]):
+    if any([tl_x, tl_y, tr_x, tr_y, bl_x, bl_y, br_x, br_y]):
 
-        x_max = max(abs(tl_x - tr_x), abs(bl_x - br_x))
-        y_max = max(abs(tl_y - bl_y), abs(tr_y - br_y))
+        x_max = max(abs(tl_x - tr_x), abs(bl_x - br_x)) | 0
+        y_max = max(abs(tl_y - bl_y), abs(tr_y - br_y)) | 0
+
+        width = x_max
+        height = y_max
 
 
 
@@ -93,12 +97,12 @@ while cap.isOpened():
                             [bl_x, bl_y]], dtype=np.float32)
         
         pts_dst = np.array([[0, 0], 
-                            [x_max, 0], 
-                            [x_max, y_max], 
-                            [0, y_max]], dtype=np.float32)
+                            [width, 0], 
+                            [width, height], 
+                            [0, height]], dtype=np.float32)
 
         matrix = cv.getPerspectiveTransform(pts_src, pts_dst)
-        perspective = cv.warpPerspective(frame, matrix, (x_max, y_max))
+        perspective = cv.warpPerspective(frame, matrix, (width, height))
         cv.imshow("Perspective", perspective)
 
     
@@ -114,14 +118,19 @@ while cap.isOpened():
     if key & 0xFF == 27:
         break
     elif key == ord("c"):
-        print("*"*20)
-        print(f"Top-Left: {tl_x, tl_y}")
-        print(f"Top_Right: {tr_x, tr_y}") 
-        print(f"Bottom-Left: {bl_x, bl_y}") 
-        print(f"Bottom-Right: {br_x, br_y}")
-        print(f"Area: [{min(tl_y, tr_y)}:{max(bl_y, br_y)}, {min(tl_x, bl_x)}:{max(tr_x, br_x)}]")
-        print(f"x_max: {x_max}, y_max: {y_max}")
-        print("*"*20)
+
+        try:
+            print("*"*20)
+            print(f"Top-Left: {tl_x, tl_y}")
+            print(f"Top_Right: {tr_x, tr_y}") 
+            print(f"Bottom-Left: {bl_x, bl_y}") 
+            print(f"Bottom-Right: {br_x, br_y}")
+            print(f"Area: [{min(tl_y, tr_y)}:{max(bl_y, br_y)}, {min(tl_x, bl_x)}:{max(tr_x, br_x)}]")
+            print(f"x_max: {x_max}, y_max: {y_max}")
+            print(f"width: {width} height: {height}")
+            print("*"*20)
+        except Exception as e:
+            print(e)
 
 
 

@@ -23,7 +23,7 @@ class SpheroBold():
                  path_radius: int = None,
                  finishline_centre: tuple = None,
                  finishline_radius: int = None,
-                 debug: bool = False,
+                 debug: bool = False
                  ):
         
 
@@ -42,7 +42,7 @@ class SpheroBold():
         self._path_frame = path_frame
         self._finishline_frame = finishline_frame
         self._canvas = np.full_like(self._path_frame, 0, np.uint8)
-        self._debug: bool = False
+        self._debug = debug
   
 
 
@@ -172,8 +172,7 @@ class SpheroBold():
     def canvas(self, frame: cv.typing.MatLike):
         self._canvas = np.full_like(frame, 0, np.uint8)
 
-
-
+    
     @property
     def debug(self):
         return self._debug
@@ -181,5 +180,5 @@ class SpheroBold():
     @debug.setter
     def debug(self, debug: bool):
         self._debug = debug
-
+   
 

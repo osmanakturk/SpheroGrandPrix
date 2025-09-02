@@ -19,30 +19,36 @@ cap = cv.VideoCapture(1, cv.CAP_DSHOW)
 cap.set(cv.CAP_PROP_SETTINGS, 1)
 
 
-cv.namedWindow("Perspective", cv.WINDOW_NORMAL)
-cv.namedWindow("Trackbar", cv.WINDOW_NORMAL)
-cv.namedWindow("Camera", cv.WINDOW_KEEPRATIO)
+finishline_camera = "Finishline Camera"
+finishline_trackbar = "Finishline Trackbar"
+finishline_canvas = "Finishline Canvas"
+finishline_perspective = "Finishline Perspective"
+
+cv.namedWindow(finishline_canvas, cv.WINDOW_NORMAL)
+cv.namedWindow(finishline_perspective, cv.WINDOW_NORMAL)
+cv.namedWindow(finishline_trackbar, cv.WINDOW_NORMAL)
+cv.namedWindow(finishline_camera, cv.WINDOW_KEEPRATIO)
 
 FRAME_HEIGHT = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 FRAME_WIDTH = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
 
 
 
-cv.createTrackbar("TL_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("TL_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("TL_x", finishline_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("TL_y", finishline_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
 
-cv.createTrackbar("TR_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("TR_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
-
-
-cv.createTrackbar("BL_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("BL_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
-
-cv.createTrackbar("BR_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("BR_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("TR_x", finishline_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("TR_y", finishline_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
 
 
-cv.createTrackbar("F_y", "Perspective", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("BL_x", finishline_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("BL_y", finishline_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
+
+cv.createTrackbar("BR_x", finishline_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("BR_y", finishline_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
+
+
+cv.createTrackbar("F_y", finishline_perspective, 0, FRAME_HEIGHT, trackbar_callback)
 
 while cap.isOpened():
     
@@ -55,20 +61,20 @@ while cap.isOpened():
 
 
  
-    tl_x = int(cv.getTrackbarPos("TL_x", "Trackbar"))
-    tl_y = int(cv.getTrackbarPos("TL_y", "Trackbar"))
+    tl_x = int(cv.getTrackbarPos("TL_x", finishline_trackbar))
+    tl_y = int(cv.getTrackbarPos("TL_y", finishline_trackbar))
 
-    tr_x = int(cv.getTrackbarPos("TR_x", "Trackbar"))
-    tr_y = int(cv.getTrackbarPos("TR_y", "Trackbar"))
+    tr_x = int(cv.getTrackbarPos("TR_x", finishline_trackbar))
+    tr_y = int(cv.getTrackbarPos("TR_y", finishline_trackbar))
 
-    bl_x = int(cv.getTrackbarPos("BL_x", "Trackbar"))
-    bl_y = int(cv.getTrackbarPos("BL_y", "Trackbar"))
+    bl_x = int(cv.getTrackbarPos("BL_x", finishline_trackbar))
+    bl_y = int(cv.getTrackbarPos("BL_y", finishline_trackbar))
 
-    br_x = int(cv.getTrackbarPos("BR_x", "Trackbar"))
-    br_y = int(cv.getTrackbarPos("BR_y", "Trackbar"))
+    br_x = int(cv.getTrackbarPos("BR_x", finishline_trackbar))
+    br_y = int(cv.getTrackbarPos("BR_y", finishline_trackbar))
 
 
-    finishline = int(cv.getTrackbarPos("Finishline", "Perspective"))
+    finishline = int(cv.getTrackbarPos("F_y", finishline_perspective))
     
 
     
@@ -114,12 +120,12 @@ while cap.isOpened():
         perspective = cv.warpPerspective(frame, matrix, (width, height))
         cv.line(perspective, (0, finishline), (width, finishline), (0, 0, 255), 2, cv.LINE_AA)
         cv.putText(perspective, f"Finishline y:({finishline})", (0, finishline-15), cv.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1, cv.LINE_AA)
-        cv.imshow("Perspective", perspective)
+        cv.imshow(finishline_perspective, perspective)
 
     
 
-    cv.imshow("Camera", frame)
-    cv.imshow("Canvas", canvas)
+    cv.imshow(finishline_camera, frame)
+    cv.imshow(finishline_canvas, canvas)
     
 
 

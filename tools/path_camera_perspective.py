@@ -1,9 +1,6 @@
 
 import cv2 as cv
 import numpy as np
-import time
-
-
 
 
 
@@ -18,26 +15,34 @@ cap = cv.VideoCapture(2, cv.CAP_DSHOW)
 
 cap.set(cv.CAP_PROP_SETTINGS, 1)
 
-cv.namedWindow("Trackbar", cv.WINDOW_NORMAL)
-cv.namedWindow("Camera", cv.WINDOW_KEEPRATIO)
+path_camera = "Path Camera"
+path_trackbar = "Path Trackbar"
+path_canvas = "Path Canvas"
+path_perspective = "Path Perspective"
+
+
+cv.namedWindow(path_canvas, cv.WINDOW_NORMAL)
+cv.namedWindow(path_perspective, cv.WINDOW_NORMAL)
+cv.namedWindow(path_trackbar, cv.WINDOW_NORMAL)
+cv.namedWindow(path_camera, cv.WINDOW_KEEPRATIO)
 
 FRAME_HEIGHT = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 FRAME_WIDTH = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
 
 
 
-cv.createTrackbar("TL_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("TL_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("TL_x", path_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("TL_y", path_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
 
-cv.createTrackbar("TR_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("TR_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("TR_x", path_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("TR_y", path_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
 
 
-cv.createTrackbar("BL_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("BL_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("BL_x", path_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("BL_y", path_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
 
-cv.createTrackbar("BR_x", "Trackbar", 0, FRAME_WIDTH, trackbar_callback)
-cv.createTrackbar("BR_y", "Trackbar", 0, FRAME_HEIGHT, trackbar_callback)
+cv.createTrackbar("BR_x", path_trackbar, 0, FRAME_WIDTH, trackbar_callback)
+cv.createTrackbar("BR_y", path_trackbar, 0, FRAME_HEIGHT, trackbar_callback)
 
 
 
@@ -52,17 +57,17 @@ while cap.isOpened():
 
 
  
-    tl_x = int(cv.getTrackbarPos("TL_x", "Trackbar"))
-    tl_y = int(cv.getTrackbarPos("TL_y", "Trackbar"))
+    tl_x = int(cv.getTrackbarPos("TL_x", path_trackbar))
+    tl_y = int(cv.getTrackbarPos("TL_y", path_trackbar))
 
-    tr_x = int(cv.getTrackbarPos("TR_x", "Trackbar"))
-    tr_y = int(cv.getTrackbarPos("TR_y", "Trackbar"))
+    tr_x = int(cv.getTrackbarPos("TR_x", path_trackbar))
+    tr_y = int(cv.getTrackbarPos("TR_y", path_trackbar))
 
-    bl_x = int(cv.getTrackbarPos("BL_x", "Trackbar"))
-    bl_y = int(cv.getTrackbarPos("BL_y", "Trackbar"))
+    bl_x = int(cv.getTrackbarPos("BL_x", path_trackbar))
+    bl_y = int(cv.getTrackbarPos("BL_y", path_trackbar))
 
-    br_x = int(cv.getTrackbarPos("BR_x", "Trackbar"))
-    br_y = int(cv.getTrackbarPos("BR_y", "Trackbar"))
+    br_x = int(cv.getTrackbarPos("BR_x", path_trackbar))
+    br_y = int(cv.getTrackbarPos("BR_y", path_trackbar))
     
 
     
@@ -103,12 +108,12 @@ while cap.isOpened():
 
         matrix = cv.getPerspectiveTransform(pts_src, pts_dst)
         perspective = cv.warpPerspective(frame, matrix, (width, height))
-        cv.imshow("Perspective", perspective)
+        cv.imshow(path_perspective, perspective)
 
     
 
-    cv.imshow("Camera", frame)
-    cv.imshow("Canvas", canvas)
+    cv.imshow(path_camera, frame)
+    cv.imshow(path_canvas, canvas)
     
 
 

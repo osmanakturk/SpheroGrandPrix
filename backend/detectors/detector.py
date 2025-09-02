@@ -4,8 +4,8 @@ import numpy as np
 import math
 import cv2 as cv
 from datetime import datetime
-from config import PATH, COLOR_RANGES_STRICT, COLOR_RANGES, COLORS_HSV, COLORS_BGR
-from sphero_bolt import SpheroBold
+from backend.constants import PATH, COLOR_RANGES_STRICT, COLOR_RANGES, COLORS_HSV, COLORS_BGR
+from backend.models.sphero_bolt import SpheroBold
 
 
 

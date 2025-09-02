@@ -44,7 +44,7 @@ def draw_panel(img):
 
 
 #cap = cv.VideoCapture(0, cv.CAP_DSHOW)
-cap = cv.VideoCapture("./sphero1_270.mp4")
+cap = cv.VideoCapture("./tests/sphero1_270.mp4")
 
 ret, frame = cap.read()
     

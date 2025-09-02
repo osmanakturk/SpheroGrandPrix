@@ -1,0 +1,41 @@
+import cv2 as cv
+import numpy as np
+
+
+
+
+def set_camera_perspective(frame: cv.typing.MatLike, 
+                           top_left: tuple, 
+                           top_right: tuple, 
+                           bottom_left: tuple, 
+                           bottom_right: tuple, 
+                           width: int = None, 
+                           height: int = None) -> cv.typing.MatLike:
+    
+    
+    tl_x, tl_y = top_left
+    tr_x, tr_y = top_right
+    bl_x, bl_y = bottom_left
+    br_x, br_y = bottom_right
+
+    if width is None or height is None:
+        x_max = max(abs(tl_x - tr_x), abs(bl_x - br_x))
+        y_max = max(abs(tl_y - bl_y), abs(tr_y - br_y))
+
+        width = x_max
+        height = y_max
+
+    pts_src = np.array([[tl_x, tl_y], 
+                        [tr_x, tr_y], 
+                        [br_x, br_y],
+                        [bl_x, bl_y]], dtype=np.float32)
+        
+    pts_dst = np.array([[0, 0], 
+                        [width, 0], 
+                        [width, height], 
+                        [0, height]], dtype=np.float32)
+
+
+    matrix = cv.getPerspectiveTransform(pts_src, pts_dst)
+
+    return cv.warpPerspective(frame, matrix, (width, height))

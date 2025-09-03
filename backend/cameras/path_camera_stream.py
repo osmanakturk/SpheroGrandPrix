@@ -12,7 +12,7 @@ def get_path_camera_processed_stream(path_top_left: Optional[Tuple[int, int]] = 
                                     path_write: bool = False,
                                     path_width: Optional[int] = None, 
                                     path_height: Optional[int] = None,
-                                    cap_api: Optional[int] = cv.CAP_DSHOW
+                                    cap_api: int = cv.CAP_DSHOW
                                     ) -> Generator[cv.typing.MatLike, None, None]:
 
 

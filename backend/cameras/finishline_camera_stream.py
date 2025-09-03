@@ -13,7 +13,7 @@ def get_finishline_camera_processed_stream(
                                     finishline_write: bool = False,
                                     finishline_width: Optional[int] = None, 
                                     finishline_height: Optional[int] = None,
-                                    cap_api: Optional[int] = cv.CAP_DSHOW
+                                    cap_api: int = cv.CAP_DSHOW
                                     ) -> Generator[cv.typing.MatLike, None, None]:
 
 

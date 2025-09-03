@@ -16,7 +16,7 @@ COLOR_RANGES_STRICT = {
     "Purple": {"Lower" : (138, 140, 120), "Upper" : (158, 255, 255)}    
 }
 
-COLOR_RANGES = {
+COLOR_RANGES_WIDE = {
     "Red1"  : {"Lower" :(0, 50, 50),   "Upper" : (10, 255, 255)},
     "Red2"  : {"Lower" :(170, 50, 50), "Upper" : (179, 255, 255)},
     "Yellow": {"Lower" :(15, 50, 50),  "Upper" : (35, 255, 255)},
@@ -24,6 +24,21 @@ COLOR_RANGES = {
     "Blue"  : {"Lower" :(85, 40, 40),  "Upper" : (135, 255, 255)},
     "Purple": {"Lower" :(135, 40, 40), "Upper" : (160, 255, 255)}
 }
+
+COLOR_RANGES_NORMAL = {
+    "Red1"  : {"Lower" :(0, 100, 100),   "Upper" : (10, 255, 255)},
+    "Red2"  : {"Lower" :(160, 100, 100), "Upper" : (180, 255, 255)},
+    "Yellow": {"Lower" :(20, 100, 100),  "Upper" : (30, 255, 255)},
+    "Green" : {"Lower" :(40, 70, 70),    "Upper" : (85, 255, 255)},
+    "Blue"  : {"Lower" :(90, 70, 70),    "Upper" : (130, 255, 255)},
+    "Purple": {"Lower" :(130, 50, 50),   "Upper" : (160, 255, 255)}
+}
+
+COLOR_RANGES_MANUAL = {
+
+}
+
+
 
 COLORS_HSV = {
     "Red"   : (0, 255, 255),

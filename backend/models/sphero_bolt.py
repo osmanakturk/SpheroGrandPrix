@@ -3,7 +3,8 @@ import time
 import numpy as np
 import cv2 as cv
 from datetime import datetime
-from backend.constants import PATH, COLOR_RANGES_STRICT, COLOR_RANGES, COLORS_HSV, COLORS_BGR
+from backend.constants import PATH, COLOR_RANGES_STRICT, COLOR_RANGES_WIDE, COLORS_HSV, COLORS_BGR
+from typing import Optional, Tuple
 
 
 
@@ -11,25 +12,25 @@ class SpheroBold():
 
     def __init__(self, 
                  color: str, 
-                 username: str = "User",
-                 path_frame: cv.typing.MatLike = None, 
-                 finishline_frame: cv.typing.MatLike = None,
-                 background: cv.typing.MatLike = None, 
+                 username: Optional[str] = None,
+                 path_frame: Optional[cv.typing.MatLike] = None, 
+                 finishline_frame: Optional[cv.typing.MatLike] = None,
+                 background: Optional[cv.typing.MatLike] = None, 
                  is_active: bool = False, 
-                 start_time: datetime = None, 
-                 finish_time: datetime = None, 
-                 path_previous_centre: tuple = None, 
-                 path_centre: tuple = None, 
-                 path_radius: int = None,
-                 finishline_centre: tuple = None,
-                 finishline_radius: int = None,
+                 start_time: Optional[datetime] = None, 
+                 finish_time: Optional[datetime] = None, 
+                 path_previous_centre: Optional[Tuple[int, int]] = None, 
+                 path_centre: Optional[Tuple[int, int]] = None, 
+                 path_radius: Optional[int] = None,
+                 finishline_centre: Optional[Tuple[int, int]] = None,
+                 finishline_radius: Optional[int] = None,
                  debug: bool = False
                  ):
         
 
         self._id = uuid.uuid4().hex
         self._color = color
-        self._username = username
+        self._username = username if username is not None else self._color
         self._background = background
         self._is_active = is_active
         self._start_time = start_time

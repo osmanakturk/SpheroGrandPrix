@@ -1,16 +1,16 @@
 import cv2 as cv
 import numpy as np
-
+from typing import Tuple, Optional
 
 
 
 def set_camera_perspective(frame: cv.typing.MatLike, 
-                           top_left: tuple, 
-                           top_right: tuple, 
-                           bottom_left: tuple, 
-                           bottom_right: tuple, 
-                           width: int = None, 
-                           height: int = None) -> cv.typing.MatLike:
+                           top_left: Tuple[int, int], 
+                           top_right: Tuple[int, int], 
+                           bottom_left: Tuple[int, int], 
+                           bottom_right: Tuple[int, int], 
+                           width: Optional[int] = None, 
+                           height: Optional[int] = None) -> cv.typing.MatLike:
     
     
     tl_x, tl_y = top_left

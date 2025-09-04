@@ -16,6 +16,7 @@ def main():
     cap = cv.VideoCapture(1, cv.CAP_DSHOW)
 
     cv.namedWindow("Trackbar", cv.WINDOW_NORMAL)
+    cv.namedWindow("Camera", cv.WINDOW_KEEPRATIO)
 
     cv.createTrackbar("briteral_d", "Trackbar", 1, 255, trackbar)
     cv.createTrackbar("median_k", "Trackbar", 1, 255, trackbar)
@@ -51,7 +52,7 @@ def main():
 
 
             cv.imshow("Camera", frame)
-            cv.imshow("bilateral_blur", bilateral_blur)
+            cv.imshow("Bilateral Blur", bilateral_blur)
 
 
             hsv = cv.cvtColor(bilateral_blur, cv.COLOR_BGR2HSV)
@@ -71,16 +72,20 @@ def main():
             blue = cv.bitwise_and(frame, frame, mask=blue_mask)
             green = cv.bitwise_and(frame, frame, mask=green_mask)
 
-            cv.imshow("red", red)
-            cv.imshow("yellow", yellow)
-            cv.imshow("blue", blue)
-            cv.imshow("green", green)
+            cv.imshow("Red", red)
+            cv.imshow("Yellow", yellow)
+            cv.imshow("Blue", blue)
+            cv.imshow("Green", green)
 
+            red_median = cv.medianBlur(red, median_k)
+            yellow_median = cv.medianBlur(yellow, median_k)
+            blue_median = cv.medianBlur(blue, median_k)
+            green_median = cv.medianBlur(green, median_k)
 
-            cv.imshow("red-median", cv.medianBlur(red, median_k))
-            cv.imshow("yellow-median", cv.medianBlur(yellow, median_k))
-            cv.imshow("blue-median", cv.medianBlur(blue, median_k))
-            cv.imshow("green-median", cv.medianBlur(green, median_k))
+            cv.imshow("Red Median", red_median)
+            cv.imshow("Yellow Median", yellow_median)
+            cv.imshow("Blue Median", blue_median)
+            cv.imshow("Green Median", green_median)
 
             key = cv.waitKey(1) & 0xFF
             if key == 27:

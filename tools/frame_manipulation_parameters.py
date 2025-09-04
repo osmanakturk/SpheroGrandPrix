@@ -45,7 +45,6 @@ def main():
 
 
 
-
             bilateral_blur = cv.bilateralFilter(frame, briteral_d, sigma_color, sigma_space)
             
 
@@ -67,27 +66,64 @@ def main():
             blue_mask = cv.inRange(hsv, COLORS["Blue"]["Lower"], COLORS["Blue"]["Upper"])
             green_mask = cv.inRange(hsv, COLORS["Green"]["Lower"], COLORS["Green"]["Upper"])
 
-            red = cv.bitwise_and(frame, frame, mask=red_mask)
-            yellow = cv.bitwise_and(frame, frame, mask=yellow_mask)
-            blue = cv.bitwise_and(frame, frame, mask=blue_mask)
-            green = cv.bitwise_and(frame, frame, mask=green_mask)
+
+            cv.imshow("Red Mask", red_mask)
+            cv.imshow("Yellow Mask", yellow_mask)
+            cv.imshow("Blue Mask", blue_mask)
+            cv.imshow("Green Mask", green_mask)
+
+
+            red_mask_median = cv.medianBlur(red_mask, median_k)
+            yellow_mask_median = cv.medianBlur(yellow_mask, median_k)
+            blue_mask_median = cv.medianBlur(blue_mask, median_k)
+            green_mask_median = cv.medianBlur(green_mask, median_k)
+
+            cv.imshow("Red Mask Median", red_mask_median)
+            cv.imshow("Yellow Mask Median", yellow_mask_median)
+            cv.imshow("Blue Mask Median", blue_mask_median)
+            cv.imshow("Green Mask Median", green_mask_median)
+
+
+
+            red = cv.bitwise_and(frame, frame, mask=red_mask_median)
+            yellow = cv.bitwise_and(frame, frame, mask=yellow_mask_median)
+            blue = cv.bitwise_and(frame, frame, mask=blue_mask_median)
+            green = cv.bitwise_and(frame, frame, mask=green_mask_median)
 
             cv.imshow("Red", red)
             cv.imshow("Yellow", yellow)
             cv.imshow("Blue", blue)
             cv.imshow("Green", green)
 
-            red_median = cv.medianBlur(red, median_k)
-            yellow_median = cv.medianBlur(yellow, median_k)
-            blue_median = cv.medianBlur(blue, median_k)
-            green_median = cv.medianBlur(green, median_k)
 
-            cv.imshow("Red Median", red_median)
-            cv.imshow("Yellow Median", yellow_median)
-            cv.imshow("Blue Median", blue_median)
-            cv.imshow("Green Median", green_median)
+            green_contours_frame = frame.copy()
+            yellow_contours_frame = frame.copy()
+            red_contours_frame = frame.copy()
+            blue_contours_frame = frame.copy()
+
+
+            green_contours, green_hierarchy = cv.findContours(green_mask_median, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            cv.drawContours(green_contours_frame, green_contours, -1, (0, 0, 255), 3)
+
+            yellow_contours, yellow_hierarchy = cv.findContours(yellow_mask_median, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            cv.drawContours(yellow_contours_frame, yellow_contours, -1, (0, 0, 255), 3)
+            
+            red_contours, red_hierarchy = cv.findContours(red_mask_median, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            cv.drawContours(red_contours_frame, red_contours, -1, (0, 0, 255), 3)
+            
+            blue_contours, blue_hierarchy = cv.findContours(blue_mask_median, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_NONE)
+            cv.drawContours(blue_contours_frame, blue_contours, -1, (0, 0, 255), 3)
+    
+            
+            cv.imshow("Green Contours", green_contours_frame)
+            cv.imshow("Yellow Contours", yellow_contours_frame)
+            cv.imshow("Red Contours", red_contours_frame)
+            cv.imshow("Blue Contours", blue_contours_frame)
+
+
 
             key = cv.waitKey(1) & 0xFF
+            
             if key == 27:
                 break
             elif key == ord("c"):

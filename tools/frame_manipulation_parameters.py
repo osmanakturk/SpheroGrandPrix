@@ -49,7 +49,8 @@ def main():
             sigma_space = sigma_space if sigma_space >= 1 else 1
             clahe_clip = max(1, cv.getTrackbarPos("clahe_clip", "Trackbar"))
             clahe_grid = max(2, cv.getTrackbarPos("clahe_grid", "Trackbar"))
-            morph_kernel_size = max(1, cv.getTrackbarPos("morph_ksize", "Trackbar"))
+            morph_kernel_size = cv.getTrackbarPos("morph_ksize", "Trackbar")
+            morph_kernel_size = max(1, morph_kernel_size if morph_kernel_size%2==1 else morph_kernel_size+1)
             morph_iterator = max(1, cv.getTrackbarPos("morph_iter", "Trackbar"))
 
 
@@ -184,7 +185,7 @@ def main():
                 print(f"Bilateral Sigma Color: {sigma_color}")
                 print(f"Bilateral Sigma Space: {sigma_space}")
                 print(f"Median Kernel Size: {median_k}")
-                print(f"Clahe Clip Limit Size: {clahe_clip}")
+                print(f"Clahe Clip Limit Size: {clahe_clip}.0")
                 print(f"Clahe Tile Grid Size: {clahe_grid}")
                 print(f"Morphology Kernel Size: {morph_kernel_size}")
                 print(f"Morphology Iterator: {morph_iterator}")

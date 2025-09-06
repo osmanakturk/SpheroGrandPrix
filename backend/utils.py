@@ -1,6 +1,26 @@
 import cv2 as cv
 import numpy as np
 from typing import Tuple, Optional
+from enum import Enum
+from .constants import HSV_RANGES_MANUAL, HSV_RANGES_NORMAL, HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_BGR, COLORS_HSV
+
+
+class HsvColorsRange(Enum):
+    NORMAL = HSV_RANGES_NORMAL
+    WIDE = HSV_RANGES_WIDE
+    STRICT = HSV_RANGES_STRICT
+    MANUAL = HSV_RANGES_MANUAL
+
+
+
+
+class SpheroColor(Enum):
+    RED = "Red"
+    BLUE = "Blue"
+    GREEN = "Green"
+    YELLOW = "Yellow"
+
+
 
 
 

@@ -21,6 +21,7 @@ class SpheroBolt():
                  is_finished: bool = False,
                  start_time: Optional[datetime] = None, 
                  finish_time: Optional[datetime] = None, 
+                 lap_time: Optional[datetime] = None,
                  path_previous_center: Optional[Tuple[int, int]] = None, 
                  path_center: Optional[Tuple[int, int]] = None, 
                  path_radius: Optional[int] = None,
@@ -38,6 +39,7 @@ class SpheroBolt():
         self._is_finished = is_finished
         self._start_time = start_time
         self._finish_time = finish_time
+        self._lap_time = lap_time
         self._path_previous_center = path_previous_center
         self._path_center = path_center
         self._path_radius = path_radius
@@ -133,6 +135,16 @@ class SpheroBolt():
     def finish_time(self, finish_time: datetime):
         if self._is_finished:
             self._finish_time = finish_time
+
+    @property
+    def lap_time(self):
+        return self._lap_time
+
+    @lap_time.setter
+    def lap_time(self, lap_time: datetime):
+        if self._is_finished:
+            self._lap_time = lap_time
+
 
     @property
     def path_previous_center(self):

@@ -5,8 +5,9 @@ import math
 import cv2 as cv
 from typing import Optional, Tuple
 from datetime import datetime
-from backend.constants import COLOR_RANGES_STRICT, COLOR_RANGES_WIDE, COLORS_HSV, COLORS_BGR, COLOR_RANGES_NORMAL, COLOR_RANGES_MANUAL
-from backend.models.sphero_bolt import SpheroBold
+from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR, HSV_RANGES_NORMAL, HSV_RANGES_MANUAL
+from backend.models.sphero_bolt import SpheroBolt
+from backend.utils import HsvColorsRange, SpheroColor
 
 
 
@@ -16,15 +17,10 @@ class Detector:
     @staticmethod
     def get_detected_path_frame(
         frame: cv.typing.MatLike, 
-        sphero_color: str, 
-        sphero_canvas: cv.typing.MatLike,
-        sphero_username: str,
-        color_type: str = "Normal", 
+        sphero_bolt: SpheroBolt, 
+        hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
         min_radius: Optional[int] = None, 
         max_radius: Optional[int] = None,
-        sphero_path_center: Optional[Tuple[int, int]] = None,
-        sphero_path_previous_center: Optional[Tuple[int, int]] = None,
-        sphero_path_radius: Optional[int] = None,
         bilateral_diameter: int = 9,
         bilateral_sigma_color: int = 75,
         bilateral_sigma_space: int = 75,
@@ -35,11 +31,7 @@ class Detector:
         morph_iterator: int = 1,
         contours_chain_approx_simple: bool = True,
         debug: bool = False
-        ) -> Tuple[Optional[cv.typing.MatLike], 
-                   Optional[cv.typing.MatLike], 
-                   Optional[Tuple[int, int]], 
-                   Optional[Tuple[int, int]], 
-                   Optional[int]]:
+        ) -> Optional[cv.typing.MatLike]:
 
 
             bilateral_diameter = max(1, bilateral_diameter if bilateral_diameter%2 == 1 else bilateral_diameter+1)
@@ -50,6 +42,8 @@ class Detector:
             morph_iterator = max(1, morph_iterator)
             clahe_clip_limit = max(1.0, clahe_clip_limit)
             clahe_tile_grid_size = max(2, clahe_tile_grid_size)
+
+            HSV_RANGES = hsv_ranges.value
 
 
             original_frame_copy = frame.copy()
@@ -70,25 +64,16 @@ class Detector:
             hsv = cv.merge([h, s, v_clahe])
 
                     
-            match(color_type):
-                case "Normal":
-                    COLORS = COLOR_RANGES_NORMAL
-                case "Wide":
-                    COLORS = COLOR_RANGES_WIDE
-                case "Strict":
-                    COLORS = COLOR_RANGES_STRICT
-                case "Manual":
-                    COLORS = COLOR_RANGES_MANUAL
-            
+
 
             contours = None
 
-            if sphero_color == "Red":
-                red1_mask = cv.inRange(hsv, COLORS["Red1"]["Lower"], COLORS["Red1"]["Upper"])
-                red2_mask = cv.inRange(hsv, COLORS["Red2"]["Lower"], COLORS["Red2"]["Upper"])
+            if sphero_bolt.color is SpheroColor.RED:
+                red1_mask = cv.inRange(hsv, HSV_RANGES["Red1"]["Lower"], HSV_RANGES["Red1"]["Upper"])
+                red2_mask = cv.inRange(hsv, HSV_RANGES["Red2"]["Lower"], HSV_RANGES["Red2"]["Upper"])
                 mask = cv.bitwise_or(red1_mask, red2_mask)
             else:
-                mask = cv.inRange(hsv, COLORS[sphero_color]["Lower"], COLORS[sphero_color]["Upper"])
+                mask = cv.inRange(hsv, HSV_RANGES[sphero_bolt.color.value]["Lower"], HSV_RANGES[sphero_bolt.color.value]["Upper"])
 
           
 
@@ -107,11 +92,11 @@ class Detector:
 
 
             if debug:
-                cv.imshow(f"{sphero_color} Masked", masked_frame)
-                cv.imshow(f"{sphero_color} Median Mask", median_mask)
-                cv.imshow(f"{sphero_color} Median Mask Morphology", median_mask_morph)
+                cv.imshow(f"{sphero_bolt.color.value} Masked", masked_frame)
+                cv.imshow(f"{sphero_bolt.color.value} Median Mask", median_mask)
+                cv.imshow(f"{sphero_bolt.color.value} Median Mask Morphology", median_mask_morph)
                 contours_frame = cv.drawContours(frame.copy(), contours, -1, (0, 0, 255), 3)
-                cv.imshow(f"{sphero_color} Contours", contours_frame)
+                cv.imshow(f"{sphero_bolt.color.value} Contours", contours_frame)
             
 
 
@@ -133,26 +118,26 @@ class Detector:
                         
                     if min_radius is not None and max_radius is not None and radius >= min_radius and radius <= max_radius:
                         
-                        sphero_path_center = (x, y)
-                        sphero_path_radius = radius
+                        sphero_bolt.path_center = (x, y)
+                        sphero_bolt.path_radius = radius
 
-                        if sphero_path_previous_center is None:
-                            sphero_path_previous_center = (x, y)
+                        if sphero_bolt.path_previous_center is None:
+                            sphero_bolt.path_previous_center = (x, y)
 
-                        cv.circle(original_frame_copy, sphero_path_center, radius, 
-                                  COLORS_BGR[sphero_color], 2, cv.LINE_AA)
+                        cv.circle(original_frame_copy, sphero_bolt.path_center, sphero_bolt.path_radius, 
+                                  COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
 
-                        cv.line(original_frame_copy, sphero_path_previous_center, sphero_path_center, 
-                                COLORS_BGR[sphero_color], 3, cv.LINE_AA)
+                        cv.line(original_frame_copy, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
+                                COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
                 
-                        cv.line(sphero_canvas, sphero_path_previous_center, sphero_path_center, 
-                                COLORS_BGR[sphero_color], 3, cv.LINE_AA)
+                        cv.line(sphero_bolt.canvas, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
+                                COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
 
-                        sphero_path_previous_center = sphero_path_center
+                        sphero_bolt.path_previous_center = (x, y)
 
 
-                        cv.putText(original_frame_copy, sphero_username, (x, y-2*radius), 
-                                cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_color], 2, cv.LINE_AA)
+                        cv.putText(original_frame_copy, sphero_bolt.username, (x, y-2*sphero_bolt.path_radius), 
+                                cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                             
 
                     if debug:
@@ -162,7 +147,7 @@ class Detector:
 
 
     
-            return (original_frame_copy, sphero_canvas, sphero_path_center, sphero_path_previous_center, sphero_path_radius)
+            return original_frame_copy
         
 
 
@@ -171,13 +156,10 @@ class Detector:
     @staticmethod
     def get_detected_finishline_frame(
         frame: cv.typing.MatLike, 
-        sphero_color: str, 
-        sphero_username: str,
-        color_type: str = "Normal", 
+        sphero_bolt: SpheroBolt, 
+        hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
         min_radius: Optional[int] = None, 
         max_radius: Optional[int] = None,
-        sphero_finishline_center: Optional[Tuple[int, int]] = None,
-        sphero_finishline_radius: Optional[int] = None,
         start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
         stop_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
         bilateral_diameter: int = 9,
@@ -190,9 +172,7 @@ class Detector:
         morph_iterator: int = 1,
         contours_chain_approx_simple: bool = True,
         debug: bool = False
-        ) -> Tuple[Optional[cv.typing.MatLike], 
-                   Optional[Tuple[int, int]], 
-                   Optional[int]]:
+        ) -> Optional[cv.typing.MatLike]:
             
             bilateral_diameter = max(1, bilateral_diameter if bilateral_diameter%2 == 1 else bilateral_diameter+1)
             bilateral_sigma_color = max(1, bilateral_sigma_color)
@@ -203,7 +183,7 @@ class Detector:
             clahe_clip_limit = max(1.0, clahe_clip_limit)
             clahe_tile_grid_size = max(2, clahe_tile_grid_size)
 
-
+            HSV_RANGES = hsv_ranges.value
 
 
             original_frame_copy = frame.copy()
@@ -224,25 +204,15 @@ class Detector:
             hsv = cv.merge([h, s, v_clahe])
 
                     
-            match(color_type):
-                case "Normal":
-                    COLORS = COLOR_RANGES_NORMAL
-                case "Wide":
-                    COLORS = COLOR_RANGES_WIDE
-                case "Strict":
-                    COLORS = COLOR_RANGES_STRICT
-                case "Manual":
-                    COLORS = COLOR_RANGES_MANUAL
-            
 
             contours = None
 
-            if sphero_color == "Red":
-                red1_mask = cv.inRange(hsv, COLORS["Red1"]["Lower"], COLORS["Red1"]["Upper"])
-                red2_mask = cv.inRange(hsv, COLORS["Red2"]["Lower"], COLORS["Red2"]["Upper"])
+            if sphero_bolt.color is SpheroColor.RED:
+                red1_mask = cv.inRange(hsv, HSV_RANGES["Red1"]["Lower"], HSV_RANGES["Red1"]["Upper"])
+                red2_mask = cv.inRange(hsv, HSV_RANGES["Red2"]["Lower"], HSV_RANGES["Red2"]["Upper"])
                 mask = cv.bitwise_or(red1_mask, red2_mask)
             else:
-                mask = cv.inRange(hsv, COLORS[sphero_color]["Lower"], COLORS[sphero_color]["Upper"])
+                mask = cv.inRange(hsv, HSV_RANGES[sphero_bolt.color.value]["Lower"], HSV_RANGES[sphero_bolt.color.value]["Upper"])
 
           
 
@@ -261,11 +231,11 @@ class Detector:
 
 
             if debug:
-                cv.imshow(f"{sphero_color} Masked", masked_frame)
-                cv.imshow(f"{sphero_color} Median Mask", median_mask)
-                cv.imshow(f"{sphero_color} Median Mask Morphology", median_mask_morph)
+                cv.imshow(f"{sphero_bolt.color.value} Masked", masked_frame)
+                cv.imshow(f"{sphero_bolt.color.value} Median Mask", median_mask)
+                cv.imshow(f"{sphero_bolt.color.value} Median Mask Morphology", median_mask_morph)
                 contours_frame = cv.drawContours(frame.copy(), contours, -1, (0, 0, 255), 3)
-                cv.imshow(f"{sphero_color} Contours", contours_frame)
+                cv.imshow(f"{sphero_bolt.color.value} Contours", contours_frame)
                     
 
             
@@ -288,13 +258,14 @@ class Detector:
                         
                     if min_radius is not None and max_radius is not None and radius >= min_radius and radius <= max_radius:
                         
-                        sphero_finishline_center = (x, y)
-                        sphero_finishline_radius = radius
+                        sphero_bolt.finishline_center = (x, y)
+                        sphero_bolt.finishline_radius = radius
 
-                        cv.circle(original_frame_copy, (x, y), radius, COLORS_BGR[sphero_color], 2, cv.LINE_AA)
+                        cv.circle(original_frame_copy, sphero_bolt.finishline_center, sphero_bolt.finishline_radius, 
+                                  COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                         
-                        cv.putText(original_frame_copy, sphero_username, (x, y-2*radius), 
-                                cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_color], 2, cv.LINE_AA)
+                        cv.putText(original_frame_copy, sphero_bolt.username, (x, y-2*sphero_bolt.finishline_radius), 
+                                cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                             
 
                     if debug:
@@ -312,7 +283,7 @@ class Detector:
 
 
 
-            return (original_frame_copy, sphero_finishline_center, sphero_finishline_radius)
+            return original_frame_copy
     
 
 

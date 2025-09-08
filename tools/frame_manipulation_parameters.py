@@ -1,10 +1,10 @@
 import cv2 as cv
 import numpy as np
-from backend.constants import COLOR_RANGES_STRICT, COLOR_RANGES_WIDE, COLOR_RANGES_NORMAL
+from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, HSV_RANGES_NORMAL
 
 
 
-COLORS = COLOR_RANGES_NORMAL
+COLORS = HSV_RANGES_NORMAL
 
 def trackbar(_):
     pass

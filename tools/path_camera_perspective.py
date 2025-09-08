@@ -70,6 +70,16 @@ while cap.isOpened():
     br_y = int(cv.getTrackbarPos("BR_y", path_trackbar))
     
 
+    #TODO: Delete after test
+    #tl_x, tl_y = (200, 0)
+    #tr_x, tr_y = (370, 0)
+    #bl_x, bl_y = (200, 480)
+    #br_x, br_y = (370, 480)
+ 
+
+
+    
+
     
     canvas = np.full_like(frame, 0, np.uint8)
     canvas[min(tl_y, tr_y):max(bl_y, br_y)+1, min(tl_x, bl_x):max(tr_x, br_x)+1] = frame[min(tl_y, tr_y):max(bl_y, br_y)+1, min(tl_x, bl_x):max(tr_x, br_x)+1]
@@ -137,6 +147,15 @@ while cap.isOpened():
         except Exception as e:
             print(e)
 
+    elif key == ord("w"):
+        try:
+            ok = cv.imwrite("paths/background.png", perspective)
+            if ok:
+                print("Background written")
+            else:
+                print("Background not written")
+        except Exception as e:
+            print(e)
 
 
 

@@ -86,6 +86,19 @@ while cap.isOpened():
     stop_line_y = int(cv.getTrackbarPos("stop_y", finishline_trackbar))
     stop_line_w = int(cv.getTrackbarPos("stop_w", finishline_trackbar))
 
+
+
+    #TODO: Delete after test
+
+    #tl_x, tl_y = (200, 0)
+    #tr_x, tr_y = (490, 0)
+    #bl_x, bl_y = (200, 480)
+    #br_x, br_y = (490, 480)
+    #start_line_w, start_line_y = (131, 240)
+    #stop_line_w, stop_line_y = (160, 240)
+
+
+
     
     canvas = np.full_like(frame, 0, np.uint8)
     canvas[min(tl_y, tr_y):max(bl_y, br_y)+1, min(tl_x, bl_x):max(tr_x, br_x)+1] = frame[min(tl_y, tr_y):max(bl_y, br_y)+1, min(tl_x, bl_x):max(tr_x, br_x)+1]
@@ -156,8 +169,8 @@ while cap.isOpened():
             print(f"Top_Right: {tr_x, tr_y}") 
             print(f"Bottom-Left: {bl_x, bl_y}") 
             print(f"Bottom-Right: {br_x, br_y}")
-            print(f"Start_Line: ({0, start_line_y}), ({start_line_w, start_line_y})")
-            print(f"Stop_Line: ({stop_line_w, stop_line_y}), ({width, stop_line_y})")
+            print(f"Start_Line: ({0, start_line_y}, {start_line_w, start_line_y})")
+            print(f"Stop_Line: ({stop_line_w, stop_line_y}, {width, stop_line_y})")
             print(f"Area: [{min(tl_y, tr_y)}:{max(bl_y, br_y)}, {min(tl_x, bl_x)}:{max(tr_x, br_x)}]")
             print(f"x_max: {x_max}, y_max: {y_max}")
             print(f"width: {width} height: {height}")

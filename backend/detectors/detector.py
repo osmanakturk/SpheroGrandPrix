@@ -345,7 +345,7 @@ class Detector:
 
                 if sphero_bolt.finishline_center is not None: 
                     if start_line[0][1] > sphero_bolt.finishline_center[1] and start_line[1][0] > sphero_bolt.finishline_center[0]:
-                        if start_line[0][1] <= sphero_bolt.finishline_previous_center[1] and start_line[1][0] > sphero_bolt.finishline_previous_center[0]:
+                        #if start_line[0][1] <= sphero_bolt.finishline_previous_center[1] and start_line[1][0] > sphero_bolt.finishline_previous_center[0]:
                             if not sphero_bolt.is_started and sphero_bolt.is_lap_started:
                                 sphero_bolt.is_started = True
                                 sphero_bolt.start_time = datetime.now()
@@ -358,13 +358,14 @@ class Detector:
 
                 if sphero_bolt.finishline_center is not None:
                     if finish_line[0][1] > sphero_bolt.finishline_center[1] and sphero_bolt.finishline_center[0] > finish_line[0][0]:
-                        if finish_line[0][1] <= sphero_bolt.finishline_previous_center[1] and sphero_bolt.finishline_previous_center[0] > finish_line[0][0]:
+                        #if finish_line[0][1] <= sphero_bolt.finishline_previous_center[1] and sphero_bolt.finishline_previous_center[0] > finish_line[0][0]:
                             if not sphero_bolt.is_finished and sphero_bolt.is_started:
                                 sphero_bolt.is_finished = True
                                 sphero_bolt.finish_time = datetime.now()
                                 sphero_bolt.total_lap_time = (sphero_bolt.finish_time - sphero_bolt.start_time).total_seconds()
                                 print(f"{sphero_bolt.color.value} finished, Finish Time: {sphero_bolt.finish_time.strftime('%H:%M:%S')} sec")
                                 print(f"{sphero_bolt.color.value} Lap Time: {sphero_bolt.total_lap_time} sec")
+                                sphero_bolt.save_path_img()
 
 
             

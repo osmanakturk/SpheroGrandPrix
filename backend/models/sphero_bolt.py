@@ -57,6 +57,7 @@ class SpheroBolt():
         self._path_frame = path_frame.copy() if path_frame is not None else None
         self._finishline_frame = finishline_frame.copy() if finishline_frame is not None else None
         self._canvas = np.zeros_like(self._path_frame, np.uint8) if self._path_frame is not None else None
+        self._path_img = None
         self._debug = debug
   
 
@@ -245,6 +246,15 @@ class SpheroBolt():
     def finishline_radius(self, finishline_radius: Optional[int]) -> None:
         self._finishline_radius = finishline_radius
 
+    @property
+    def path_img(self) -> Optional[cv.typing.MatLike]:
+        return self._path_img
+
+
+    @path_img.setter
+    def path_img(self, path_img: Optional[cv.typing.MatLike]) -> None:
+        self._path_img = path_img
+
 
     @property
     def canvas(self) -> Optional[cv.typing.MatLike]:
@@ -343,6 +353,34 @@ class SpheroBolt():
             )
 
 
+
+    def save_path_img(self):
+        try:
+            temp = cv.bitwise_or(self._canvas, self._background)
+            self._path_img = np.zeros((temp.shape[0]+50, temp.shape[1], 3), np.uint8)
+            self._path_img[50:, :] = temp[:, :]
+
+            cv.rectangle(img=self._path_img, 
+                         pt1=(0, 0), pt2=(self.path_img.shape[1]-1, 47), 
+                         color=(0, 0, 255), 
+                         thickness=1, 
+                         lineType=cv.LINE_AA)
+
+            cv.putText(img=self._path_img, 
+                       text=f"User: {self._username}", 
+                       org=(10, 20), fontFace=cv.FONT_HERSHEY_COMPLEX_SMALL, fontScale=0.5, 
+                       color=(255, 255, 255), thickness=1, lineType=cv.LINE_AA)
+            
+            cv.putText(img=self._path_img, 
+                       text=f"Lap Time: {self._total_lap_time} sec", 
+                       org=(10, 40), fontFace=cv.FONT_HERSHEY_COMPLEX_SMALL, fontScale=0.5, 
+                       color=(255, 255, 255), thickness=1, lineType=cv.LINE_AA)
+            
+            cv.imwrite(filename=f"paths/{self._id}.png", img=self._path_img)
+            print(f"{self._id}.png saved")
+        except Exception as e:
+            print(f"{self._id}.png could not be saved")
+            print(e)
 
 
 

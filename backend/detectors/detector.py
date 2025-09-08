@@ -11,28 +11,31 @@ from backend.utils import HsvColorsRange, SpheroColor
 
 
 
+
+
 class Detector:
         
         
     @staticmethod
     def get_detected_path_frame(
-        frame: cv.typing.MatLike, 
         sphero_bolt: SpheroBolt, 
         hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
         min_radius: Optional[int] = None, 
-        max_radius: Optional[int] = None,
+        max_radius: Optional[int] = None, 
         bilateral_diameter: int = 9,
         bilateral_sigma_color: int = 75,
         bilateral_sigma_space: int = 75,
         median_kernel_size: int = 9,
-        clahe_clip_limit : float = 4.0,
-        clahe_tile_grid_size : int = 9,
+        clahe_clip_limit: float = 4.0,
+        clahe_tile_grid_size: int = 9,
         morph_kernel_size: int = 5,
         morph_iterator: int = 1,
         contours_chain_approx_simple: bool = True,
         debug: bool = False
         ) -> Optional[cv.typing.MatLike]:
 
+            if sphero_bolt.path_frame is None:
+                return None
 
             bilateral_diameter = max(1, bilateral_diameter if bilateral_diameter%2 == 1 else bilateral_diameter+1)
             bilateral_sigma_color = max(1, bilateral_sigma_color)
@@ -45,10 +48,13 @@ class Detector:
 
             HSV_RANGES = hsv_ranges.value
 
+            
+            
+            path_frame = sphero_bolt.path_frame.copy()
 
-            original_frame_copy = frame.copy()
+            processed_path_frame = path_frame.copy()
 
-            path_bilateral = cv.bilateralFilter(frame, bilateral_diameter, bilateral_sigma_color, bilateral_sigma_space)
+            path_bilateral = cv.bilateralFilter(path_frame, bilateral_diameter, bilateral_sigma_color, bilateral_sigma_space)
 
 
             if debug:
@@ -92,11 +98,11 @@ class Detector:
 
 
             if debug:
-                masked_frame = cv.bitwise_and(frame, frame, mask=median_mask_morph)
+                masked_frame = cv.bitwise_and(path_frame, path_frame, mask=median_mask_morph)
                 cv.imshow(f"{sphero_bolt.color.value} Masked", masked_frame)
                 cv.imshow(f"{sphero_bolt.color.value} Median Mask", median_mask)
                 cv.imshow(f"{sphero_bolt.color.value} Median Mask Morphology", median_mask_morph)
-                contours_frame = cv.drawContours(frame.copy(), contours, -1, (0, 0, 255), 3)
+                contours_frame = cv.drawContours(path_frame.copy(), contours, -1, (0, 0, 255), 3)
                 cv.imshow(f"{sphero_bolt.color.value} Contours", contours_frame)
             
 
@@ -107,6 +113,7 @@ class Detector:
                 best_radius = -1
                 best_contour_index = 0
                 total_contours = len(contours)
+                best_area = 0.0
 
                 for idx, contour in enumerate(contours, 1):
                     
@@ -146,27 +153,30 @@ class Detector:
 
                         sphero_bolt.path_previous_center = (b_x, b_y)
 
-                    cv.circle(original_frame_copy, sphero_bolt.path_center, sphero_bolt.path_radius, 
+                    cv.circle(processed_path_frame, sphero_bolt.path_center, sphero_bolt.path_radius, 
                               COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                     
-                    cv.line(original_frame_copy, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
+                    cv.line(processed_path_frame, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
                             COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
             
-                    cv.line(sphero_bolt.canvas, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
-                            COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
+                    if sphero_bolt.canvas is not None:
+                        cv.line(sphero_bolt.canvas, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
+                                COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
+                        #processed_path_frame = cv.bitwise_or(processed_path_frame, sphero_bolt.canvas)
                     
                     sphero_bolt.path_previous_center = (b_x, b_y)
 
-                    cv.putText(original_frame_copy, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.path_radius), 
+                    cv.putText(processed_path_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.path_radius), 
                             cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                         
                     if debug:
                         print(f"Path, area: {best_area}, x: {b_x}, y: {b_y}, radius: {b_radius}, total contours: {total_contours}, best contour index: {best_contour_index}")
 
-
+            if sphero_bolt.canvas is not None:
+                processed_path_frame = cv.bitwise_or(processed_path_frame, sphero_bolt.canvas)
 
     
-            return original_frame_copy
+            return processed_path_frame
         
 
 
@@ -174,7 +184,6 @@ class Detector:
 
     @staticmethod
     def get_detected_finishline_frame(
-        frame: cv.typing.MatLike, 
         sphero_bolt: SpheroBolt, 
         hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
         min_radius: Optional[int] = None, 
@@ -185,18 +194,22 @@ class Detector:
         bilateral_sigma_color: int = 75,
         bilateral_sigma_space: int = 75,
         median_kernel_size: int = 9,
-        clahe_clip_limit : float = 4.0,
-        clahe_tile_grid_size : int = 9,
+        clahe_clip_limit: float = 4.0,
+        clahe_tile_grid_size: int = 9,
         morph_kernel_size: int = 5,
         morph_iterator: int = 1,
         contours_chain_approx_simple: bool = True,
         debug: bool = False
         ) -> Optional[cv.typing.MatLike]:
             
+            if sphero_bolt.finishline_frame is None:
+                return None
+            
+
             bilateral_diameter = max(1, bilateral_diameter if bilateral_diameter%2 == 1 else bilateral_diameter+1)
             bilateral_sigma_color = max(1, bilateral_sigma_color)
             bilateral_sigma_space = max(1, bilateral_sigma_space)
-            median_kernel_size = max(1, median_kernel_size if median_kernel_size%2 == 1 else median_kernel_size + 1)
+            median_kernel_size = max(3, median_kernel_size if median_kernel_size%2 == 1 else median_kernel_size + 1)
             morph_kernel_size = max(1, morph_kernel_size if morph_kernel_size%2==1 else morph_kernel_size+1)
             morph_iterator = max(1, morph_iterator)
             clahe_clip_limit = max(1.0, clahe_clip_limit)
@@ -204,10 +217,14 @@ class Detector:
 
             HSV_RANGES = hsv_ranges.value
 
+            
 
-            original_frame_copy = frame.copy()
+            finishline_frame = sphero_bolt.finishline_frame.copy()
+        
 
-            finishline_bilateral = cv.bilateralFilter(frame, bilateral_diameter, bilateral_sigma_color, bilateral_sigma_space)
+            processed_finishline_frame = finishline_frame.copy()
+
+            finishline_bilateral = cv.bilateralFilter(finishline_frame, bilateral_diameter, bilateral_sigma_color, bilateral_sigma_space)
 
 
             if debug:
@@ -250,15 +267,16 @@ class Detector:
 
 
             if debug:
-                masked_frame = cv.bitwise_and(frame, frame, mask=median_mask_morph)
+                masked_frame = cv.bitwise_and(finishline_frame, finishline_frame, mask=median_mask_morph)
                 cv.imshow(f"{sphero_bolt.color.value} Masked", masked_frame)
                 cv.imshow(f"{sphero_bolt.color.value} Median Mask", median_mask)
                 cv.imshow(f"{sphero_bolt.color.value} Median Mask Morphology", median_mask_morph)
-                contours_frame = cv.drawContours(frame.copy(), contours, -1, (0, 0, 255), 3)
+                contours_frame = cv.drawContours(finishline_frame.copy(), contours, -1, (0, 0, 255), 3)
                 cv.imshow(f"{sphero_bolt.color.value} Contours", contours_frame)
                     
 
             
+           
 
             if contours:
 
@@ -266,6 +284,8 @@ class Detector:
                 best_radius = -1
                 best_contour_index = 0
                 total_contours = len(contours)
+                best_area = 0.0
+                
 
 
                 for idx, contour in enumerate(contours, 1):
@@ -298,16 +318,19 @@ class Detector:
                     b_x = int(b_x)
                     b_y = int(b_y)
                     b_radius = int(b_radius)
-
+                    
 
                     sphero_bolt.finishline_center = (b_x, b_y)
                     sphero_bolt.finishline_radius = b_radius
 
+                    if sphero_bolt.finishline_previous_center is None:
+                        sphero_bolt.finishline_previous_center = (b_x, b_y)
 
-                    cv.circle(original_frame_copy, sphero_bolt.finishline_center, sphero_bolt.finishline_radius, 
+
+                    cv.circle(processed_finishline_frame, sphero_bolt.finishline_center, sphero_bolt.finishline_radius, 
                               COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                     
-                    cv.putText(original_frame_copy, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.finishline_radius), 
+                    cv.putText(processed_finishline_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.finishline_radius), 
                             cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                         
 
@@ -318,30 +341,36 @@ class Detector:
             
 
             if start_line is not None:
-                cv.line(original_frame_copy, start_line[0], start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+                cv.line(processed_finishline_frame, start_line[0], start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
 
-                if sphero_bolt.finishline_center is not None and sphero_bolt.finishline_center[1] > start_line[0][1]:
-                    if not sphero_bolt.is_started:
-                        sphero_bolt.is_started = True
-                        sphero_bolt.start_time = datetime.now()
-                        print(f"{sphero_bolt.color.value} started, Start Time: {sphero_bolt.start_time.strftime('%H:%M:%S')} sec")
+                if sphero_bolt.finishline_center is not None: 
+                    if start_line[0][1] > sphero_bolt.finishline_center[1] and start_line[1][0] > sphero_bolt.finishline_center[0]:
+                        if start_line[0][1] <= sphero_bolt.finishline_previous_center[1] and start_line[1][0] > sphero_bolt.finishline_previous_center[0]:
+                            if not sphero_bolt.is_started and sphero_bolt.is_lap_started:
+                                sphero_bolt.is_started = True
+                                sphero_bolt.start_time = datetime.now()
+                                print(f"{sphero_bolt.color.value} started, Start Time: {sphero_bolt.start_time.strftime('%H:%M:%S')} sec")
 
 
 
             if finish_line is not None:
-                cv.line(original_frame_copy, finish_line[0], finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+                cv.line(processed_finishline_frame, finish_line[0], finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
 
-                if sphero_bolt.finishline_center is not None and sphero_bolt.finishline_center[1] > finish_line[0][1]:
-                    if not sphero_bolt.is_finished and sphero_bolt.is_started:
-                        sphero_bolt.is_finished = True
-                        sphero_bolt.finish_time = datetime.now()
-                        sphero_bolt.lap_time = (sphero_bolt.finish_time - sphero_bolt.start_time).total_seconds()
-                        print(f"{sphero_bolt.color.value} finished, Finish Time: {sphero_bolt.finish_time.strftime('%H:%M:%S')} sec")
-                        print(f"{sphero_bolt.color.value} Lap Time: {sphero_bolt.lap_time} sec")
+                if sphero_bolt.finishline_center is not None:
+                    if finish_line[0][1] > sphero_bolt.finishline_center[1] and sphero_bolt.finishline_center[0] > finish_line[0][0]:
+                        if finish_line[0][1] <= sphero_bolt.finishline_previous_center[1] and sphero_bolt.finishline_previous_center[0] > finish_line[0][0]:
+                            if not sphero_bolt.is_finished and sphero_bolt.is_started:
+                                sphero_bolt.is_finished = True
+                                sphero_bolt.finish_time = datetime.now()
+                                sphero_bolt.total_lap_time = (sphero_bolt.finish_time - sphero_bolt.start_time).total_seconds()
+                                print(f"{sphero_bolt.color.value} finished, Finish Time: {sphero_bolt.finish_time.strftime('%H:%M:%S')} sec")
+                                print(f"{sphero_bolt.color.value} Lap Time: {sphero_bolt.total_lap_time} sec")
 
 
+            
+            sphero_bolt.finishline_previous_center = sphero_bolt.finishline_center
 
-            return original_frame_copy
+            return processed_finishline_frame
     
 
 

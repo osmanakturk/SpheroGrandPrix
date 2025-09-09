@@ -390,10 +390,12 @@ class SpheroBolt():
         try:
             self._is_started = False
             self._is_finished = False
-            self._canvas = np.zeros_like(self._canvas, dtype=np.uint8)
+
             self._start_time = None
             self._finish_time = None
             self._total_lap_time = None
+            
+            self._canvas = np.zeros_like(self._canvas, dtype=np.uint8) if self._canvas is not None else None
 
             self._path_center = None
             self._path_previous_center = None
@@ -408,7 +410,7 @@ class SpheroBolt():
                 print(f"{self._id}.png deleted")
 
             self._path_img = None
-            
+
             print(f"{self._username} resetted")
         except Exception as e:
             print(f"{self._username} could not be resetted")

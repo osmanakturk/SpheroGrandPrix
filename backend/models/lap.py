@@ -10,27 +10,50 @@ from typing import Optional, Tuple
 
 
 class Lap:
-    def __init__(self,
+
+    def __init__(self, 
+                 debug_red: bool = False, 
+                 debug_yellow: bool = False, 
+                 debug_blue: bool = False, 
+                 debug_green: bool = False):
+        
+        self._debug_red = debug_red
+        self._debug_yellow = debug_yellow
+        self._debug_blue = debug_blue
+        self._debug_green = debug_green
+        self._id: Optional[str] = None
+        self._is_started: bool = False
+        self._is_stopped: bool = False
+        self._path_frame: Optional[cv.typing.MatLike]  = None 
+        self._finishline_frame: Optional[cv.typing.MatLike] = None 
+        self._background_img: Optional[cv.typing.MatLike] = None 
+        self._sphero_bolt_red: Optional[SpheroBolt] = None 
+        self._sphero_bolt_green: Optional[SpheroBolt] = None 
+        self._sphero_bolt_yellow: Optional[SpheroBolt] = None 
+        self._sphero_bolt_blue: Optional[SpheroBolt] = None
+
+
+
+    def start(self,
                 path_frame: Optional[cv.typing.MatLike]  = None,
                 finishline_frame: Optional[cv.typing.MatLike] = None, 
                 background_img: Optional[cv.typing.MatLike] = None, 
-                is_started: bool = False, 
-                is_stopped: bool = False, 
                 debug_red: bool = False, 
                 debug_yellow: bool = False, 
                 debug_blue: bool = False, 
                 debug_green: bool = False
-                ):
+                ) -> bool:
 
-
-
+        if self._is_started:
+            return False
+            
 
         self._path_frame = path_frame.copy() if path_frame is not None else None
         self._finishline_frame = finishline_frame.copy() if finishline_frame is not None else None
         self._background_img = background_img.copy() if background_img is not None else None        
         self._id = f"{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}_{uuid.uuid4().hex}"
-        self._is_started = is_started
-        self._is_stopped = is_stopped
+        self._is_started = True
+        self._is_stopped = False
         self._debug_red = debug_red
         self._debug_yellow = debug_yellow
         self._debug_blue = debug_blue
@@ -87,6 +110,8 @@ class Lap:
             is_lap_stopped=self._is_stopped, 
             debug=self._debug_green
             )
+        
+        return True
 
         
     
@@ -125,6 +150,8 @@ class Lap:
 
     @property
     def id(self) -> str:
+        if self._id is None:
+            raise RuntimeError("Lap is not started")
         return self._id
     
     @property 
@@ -245,6 +272,8 @@ class Lap:
             contours_chain_approx_simple: bool = True
             ) -> Optional[cv.typing.MatLike]:
 
+        if not self._is_started:
+            raise RuntimeError("Lap not started yet")
 
         yellow = self._sphero_bolt_yellow.get_processed_path_frame(
             hsv_ranges=hsv_ranges, 
@@ -365,6 +394,10 @@ class Lap:
             morph_iterator: int = 1,
             contours_chain_approx_simple: bool = True
             ) -> Optional[cv.typing.MatLike]:
+
+        
+        if not self._is_started:
+            raise RuntimeError("Lap not started yet")
 
         yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(
             hsv_ranges=hsv_ranges, 

@@ -365,7 +365,8 @@ class Detector:
                                 sphero_bolt.total_lap_time = (sphero_bolt.finish_time - sphero_bolt.start_time).total_seconds()
                                 print(f"{sphero_bolt.color.value} finished, Finish Time: {sphero_bolt.finish_time.strftime('%H:%M:%S')} sec")
                                 print(f"{sphero_bolt.color.value} Lap Time: {sphero_bolt.total_lap_time} sec")
-                                sphero_bolt.save_path_img()
+                                if sphero_bolt.path_frame is not None:
+                                    sphero_bolt.save_path_img()
 
 
             

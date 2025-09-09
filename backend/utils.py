@@ -30,7 +30,10 @@ def set_camera_perspective(frame: cv.typing.MatLike,
                            bottom_left: Tuple[int, int], 
                            bottom_right: Tuple[int, int], 
                            width: Optional[int] = None, 
-                           height: Optional[int] = None) -> cv.typing.MatLike:
+                           height: Optional[int] = None, 
+                           start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
+                           finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None,
+                           ) -> cv.typing.MatLike:
     
     
     tl_x, tl_y = top_left
@@ -58,4 +61,10 @@ def set_camera_perspective(frame: cv.typing.MatLike,
 
     matrix = cv.getPerspectiveTransform(pts_src, pts_dst)
 
-    return cv.warpPerspective(frame, matrix, (width, height))
+    processed_frame = cv.warpPerspective(frame, matrix, (width, height))
+
+    if start_line is not None and finish_line is not None:
+        cv.line(processed_frame, start_line[0], start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+        cv.line(processed_frame, finish_line[0], finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+
+    return processed_frame

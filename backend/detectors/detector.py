@@ -156,8 +156,8 @@ class Detector:
                     cv.circle(processed_path_frame, sphero_bolt.path_center, sphero_bolt.path_radius, 
                               COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                     
-                    cv.line(processed_path_frame, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
-                            COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
+                    #cv.line(processed_path_frame, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
+                    #        COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
             
                     if sphero_bolt.canvas is not None:
                         cv.line(sphero_bolt.canvas, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
@@ -341,7 +341,7 @@ class Detector:
             
 
             if start_line is not None:
-                cv.line(processed_finishline_frame, start_line[0], start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+                #cv.line(processed_finishline_frame, start_line[0], start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
 
                 if sphero_bolt.finishline_center is not None: 
                     if start_line[0][1] > sphero_bolt.finishline_center[1] and start_line[1][0] > sphero_bolt.finishline_center[0]:
@@ -354,7 +354,7 @@ class Detector:
 
 
             if finish_line is not None:
-                cv.line(processed_finishline_frame, finish_line[0], finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+                #cv.line(processed_finishline_frame, finish_line[0], finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
 
                 if sphero_bolt.finishline_center is not None:
                     if finish_line[0][1] > sphero_bolt.finishline_center[1] and sphero_bolt.finishline_center[0] > finish_line[0][0]:
@@ -365,7 +365,7 @@ class Detector:
                                 sphero_bolt.total_lap_time = (sphero_bolt.finish_time - sphero_bolt.start_time).total_seconds()
                                 print(f"{sphero_bolt.color.value} finished, Finish Time: {sphero_bolt.finish_time.strftime('%H:%M:%S')} sec")
                                 print(f"{sphero_bolt.color.value} Lap Time: {sphero_bolt.total_lap_time} sec")
-                                if sphero_bolt.path_frame is not None:
+                                if sphero_bolt.canvas is not None and sphero_bolt.total_lap_time is not None:
                                     sphero_bolt.save_path_img()
 
 

@@ -1,5 +1,6 @@
 import uuid
 import time
+import os
 import numpy as np
 import cv2 as cv
 from datetime import datetime
@@ -354,7 +355,7 @@ class SpheroBolt():
 
 
 
-    def save_path_img(self):
+    def save_path_img(self) -> None:
         try:
             temp = cv.bitwise_or(self._canvas, self._background)
             self._path_img = np.zeros((temp.shape[0]+50, temp.shape[1], 3), np.uint8)
@@ -384,3 +385,31 @@ class SpheroBolt():
 
 
 
+
+    def reset(self) -> None:
+        try:
+            self._is_started = False
+            self._is_finished = False
+            self._canvas = np.zeros_like(self._canvas, dtype=np.uint8)
+            self._start_time = None
+            self._finish_time = None
+            self._total_lap_time = None
+
+            self._path_center = None
+            self._path_previous_center = None
+            self._path_radius = None
+
+            self._finishline_center = None
+            self._finishline_previous_center = None
+            self._finishline_radius = None
+            
+            if os.path.exists(f"paths/{self._id}.png"):
+                os.remove(f"paths/{self._id}.png")
+                print(f"{self._id}.png deleted")
+
+            self._path_img = None
+            
+            print(f"{self._username} resetted")
+        except Exception as e:
+            print(f"{self._username} could not be resetted")
+            print(e)

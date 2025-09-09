@@ -356,12 +356,17 @@ class SpheroBolt():
 
 
     def save_path_img(self) -> bool:
+        if self._canvas is None or self._total_lap_time is None:
+            return False
+
         try:
-            self._path_img = np.zeros((self._background.shape[0]+50, self._background.shape[1], 3), np.uint8)
+            self._path_img = np.zeros((self._canvas.shape[0]+50, self._canvas.shape[1], 3), np.uint8)
 
             if self._background is not None:
                 temp = cv.bitwise_or(self._canvas, self._background)
                 self._path_img[50:, :] = temp[:, :]
+            else:
+                self._path_img[50:, :] = self._canvas[:, :]
 
             cv.rectangle(img=self._path_img, 
                          pt1=(0, 0), pt2=(self.path_img.shape[1]-1, 47), 
@@ -379,11 +384,12 @@ class SpheroBolt():
                        org=(10, 40), fontFace=cv.FONT_HERSHEY_COMPLEX_SMALL, fontScale=0.5, 
                        color=(255, 255, 255), thickness=1, lineType=cv.LINE_AA)
             
+            os.makedirs("paths", exist_ok=True)
             cv.imwrite(filename=f"paths/{self._id}.png", img=self._path_img)
-            print(f"{self._id}.png saved")
+            print(f"{self.id}.png saved")
             return True
         except Exception as e:
-            print(f"{self._id}.png could not be saved")
+            print(f"{self.id}.png could not be saved")
             print(e)
             return False
 
@@ -391,6 +397,10 @@ class SpheroBolt():
 
 
     def reset(self) -> bool:
+        
+        if self.is_finished:
+            return False
+
         try:
             self._is_started = False
             self._is_finished = False

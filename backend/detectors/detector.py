@@ -338,13 +338,23 @@ class Detector:
                     if debug:
                         print(f"Finishline, area: {best_area}, x: {b_x}, y: {b_y}, radius: {b_radius}, total contours: {total_contours}, best contour index: {best_contour_index}")
 
+            #def is_crossed(line_point1: Optional[Tuple[int, int]], line_point2: Optional[Tuple[int, int]], point: Optional[Tuple[int, int]]) -> int:
+            #    return ((line_point2[0] - line_point1[0]) * (point[1] - line_point1[1])) - ((line_point2[1] - line_point1[1]) * (point[0] - line_point1[0]))
             
 
             if start_line is not None:
                 #cv.line(processed_finishline_frame, start_line[0], start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
 
                 if sphero_bolt.finishline_center is not None: 
+
+                    #start_line_prev = is_crossed(start_line[0], start_line[1], sphero_bolt.finishline_previous_center)
+                    #start_line_curr = is_crossed(start_line[0], start_line[1], sphero_bolt.finishline_center)
+                    #start_line_crossed = (start_line_prev == 0) or (start_line_curr == 0) or (start_line_prev < 0 and start_line_curr > 0) or (start_line_prev > 0 and start_line_curr < 0)
+                    
+                    #if start_line_crossed:
+                    
                     if start_line[0][1] > sphero_bolt.finishline_center[1] and start_line[1][0] > sphero_bolt.finishline_center[0]:
+                    
                         #if start_line[0][1] <= sphero_bolt.finishline_previous_center[1] and start_line[1][0] > sphero_bolt.finishline_previous_center[0]:
                             if not sphero_bolt.is_started and sphero_bolt.is_lap_started:
                                 sphero_bolt.is_started = True
@@ -356,8 +366,17 @@ class Detector:
             if finish_line is not None:
                 #cv.line(processed_finishline_frame, finish_line[0], finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
 
+
                 if sphero_bolt.finishline_center is not None:
+                    
+                    #finish_line_prev = is_crossed(finish_line[0], finish_line[1], sphero_bolt.finishline_previous_center)
+                    #finish_line_curr = is_crossed(finish_line[0], finish_line[1], sphero_bolt.finishline_center)
+                    #finish_line_crossed = (finish_line_prev == 0) or (finish_line_curr == 0) or (finish_line_prev < 0 and finish_line_curr > 0) or (finish_line_prev > 0 and finish_line_curr < 0)
+                    
+                    #if finish_line_crossed:
+
                     if finish_line[0][1] > sphero_bolt.finishline_center[1] and sphero_bolt.finishline_center[0] > finish_line[0][0]:
+                    
                         #if finish_line[0][1] <= sphero_bolt.finishline_previous_center[1] and sphero_bolt.finishline_previous_center[0] > finish_line[0][0]:
                             if not sphero_bolt.is_finished and sphero_bolt.is_started:
                                 sphero_bolt.is_finished = True

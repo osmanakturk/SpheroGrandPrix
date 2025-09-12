@@ -1,0 +1,360 @@
+import cv2 as cv
+import numpy as np
+from typing import Optional, Tuple
+from enum import Enum
+from backend.constants import COLORS_BGR
+
+
+
+class CaptureApi(Enum):
+    Windows = cv.CAP_DSHOW
+    Linux = cv.CAP_V4L2
+    Mac = cv.CAP_AVFOUNDATION
+
+
+
+
+class Camera:
+    def __init__(self,
+                 cap_api: CaptureApi,  
+                 cap_index: Optional[int] = None, 
+                 cap_source: Optional[str] = None, 
+                 cap_width: Optional[int] = 640, 
+                 cap_height: Optional[int] = 480, 
+                 cap_fps: Optional[int] = 30,  
+                 start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
+                 finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None,
+                 perspective_top_left: Optional[Tuple[int, int]] = None, 
+                 perspective_top_right: Optional[Tuple[int, int]] = None, 
+                 perspective_bottom_left: Optional[Tuple[int, int]] = None, 
+                 perspective_bottom_right: Optional[Tuple[int, int]] = None, 
+                 perspective_width: Optional[int] = None, 
+                 perspective_height: Optional[int] = None 
+                 ):
+        
+        self._cap_index = cap_index
+        self._cap_source = cap_source
+        self._cap_api = cap_api.value
+        self._cap_width = cap_width or 640
+        self._cap_height = cap_height or 480
+        self._cap_fps = cap_fps or 30
+        self._start_line = start_line
+        self._finish_line = finish_line
+        self._perspective_top_left = perspective_top_left
+        self._perspective_top_right = perspective_top_right
+        self._perspective_bottom_left = perspective_bottom_left
+        self._perspective_bottom_right = perspective_bottom_right
+        self._perspective_width = perspective_width
+        self._perspective_height = perspective_height
+        self._cap: Optional[cv.VideoCapture] = None
+        self._frame: Optional[cv.typing.MatLike] = None
+        self._perspective_frame: Optional[cv.typing.MatLike] = None
+        self._perspective_matrix: Optional[cv.typing.MatLike] = None
+
+
+
+
+    @property
+    def cap(self) -> Optional[cv.VideoCapture]:
+        return self._cap
+
+    @cap.setter
+    def cap(self, cap: cv.VideoCapture) -> None:
+        self._cap = cap
+
+
+    @property
+    def frame(self) -> Optional[cv.typing.MatLike]:
+        return self._frame
+    
+    @frame.setter
+    def frame(self, frame: cv.typing.MatLike) -> None:
+        self._frame = frame
+
+
+    @property
+    def cap_index(self) -> Optional[int]:
+        return self._cap_index
+    
+
+    @cap_index.setter
+    def cap_index(self, cap_index: int) -> None:
+        self._cap_index = cap_index
+
+
+    @property
+    def cap_source(self) -> Optional[str]:
+        return self._cap_source
+    
+    @cap_source.setter
+    def cap_source(self, cap_source: str) ->  None:
+        self._cap_source = cap_source
+
+    
+    @property
+    def cap_api(self) -> int:
+        return self._cap_api
+    
+    @cap_api.setter
+    def cap_api(self, cap_api:CaptureApi) -> None:
+        self._cap_api = cap_api.value
+
+    @property
+    def cap_width(self) -> int:
+        return self._cap_width
+    
+    @cap_width.setter
+    def cap_width(self, cap_width: int) -> None:
+        self._cap_width = cap_width
+
+    
+    @property
+    def cap_height(self) -> int:
+        return self._cap_height
+    
+    @cap_height.setter
+    def cap_height(self, cap_height: int) -> None:
+        self._cap_height = cap_height
+
+
+    @property
+    def cap_fps(self) -> int:
+        return self._cap_fps
+    
+    @cap_fps.setter
+    def cap_fps(self, cap_fps:int) -> None:
+        self._cap_fps = cap_fps
+
+    
+    @property
+    def start_line(self) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
+        return self._start_line
+    
+    @start_line.setter
+    def start_line(self, start_line:Tuple[Tuple[int, int], Tuple[int, int]]) -> None:
+        self._start_line = start_line
+
+    
+    @property
+    def finish_line(self) -> Optional[Tuple[Tuple[int, int], Tuple[int, int]]]:
+        return self._finish_line
+    
+    @finish_line.setter
+    def finish_line(self, finish_line:Tuple[Tuple[int, int], Tuple[int, int]]) -> None:
+        self._finish_line = finish_line
+
+    
+    @property
+    def perspective_top_left(self) -> Optional[Tuple[int, int]]:
+        return self._perspective_top_left
+    
+    @perspective_top_left.setter
+    def perspective_top_left(self, perspective_top_left: Tuple[int, int]) -> None:
+        self._perspective_top_left = perspective_top_left
+
+
+    @property
+    def perspective_top_right(self) -> Optional[Tuple[int, int]]:
+        return self._perspective_top_right
+    
+    @perspective_top_right.setter
+    def perspective_top_right(self, perspective_top_right: Tuple[int, int]) -> None:
+        self._perspective_top_right = perspective_top_right
+
+
+
+    @property
+    def perspective_bottom_left(self) -> Optional[Tuple[int, int]]:
+        return self._perspective_bottom_left
+    
+    @perspective_bottom_left.setter
+    def perspective_bottom_left(self, perspective_bottom_left: Tuple[int, int]) -> None:
+        self._perspective_bottom_left = perspective_bottom_left
+
+
+
+    @property
+    def perspective_bottom_right(self) -> Optional[Tuple[int, int]]:
+        return self._perspective_bottom_right
+    
+    @perspective_bottom_right.setter
+    def perspective_bottom_right(self, perspective_bottom_right: Tuple[int, int]) -> None:
+        self._perspective_bottom_right = perspective_bottom_right
+
+
+    @property
+    def perspective_width(self) -> Optional[int]:
+        return self._perspective_width
+    
+    @perspective_width.setter
+    def perspective_width(self, perspective_width: int) -> None:
+        self._perspective_width = perspective_width
+
+    @property
+    def perspective_height(self) -> Optional[int]:
+        return self._perspective_height
+    
+    @perspective_height.setter
+    def perspective_height(self, perspective_height: int) -> None:
+        self._perspective_height = perspective_height
+
+    @property
+    def perspective_frame(self) -> Optional[cv.typing.MatLike]:
+        return self._perspective_frame
+
+    @property
+    def perspective_matrix(self) -> Optional[cv.typing.MatLike]:
+        return self._perspective_matrix
+
+
+
+    def open(self) -> bool:
+
+        if self._cap is not None and self._cap.isOpened():
+            return True
+        
+        if self._cap_index is not None:
+            self._cap = cv.VideoCapture(self._cap_index, self._cap_api)
+
+        elif self._cap_source is not None:
+            self._cap = cv.VideoCapture(self._cap_source)
+
+        else:
+            print(f"Camera{self._cap_index}: Either cap_index or cap_source must be provided.")
+            return False
+
+        if not self._cap or not self._cap.isOpened():
+            print(f"Camera{self._cap_index}: Failed to open capture.")
+            return False
+
+
+        
+        #if self._cap_width:
+        #    self._cap.set(cv.CAP_PROP_FRAME_WIDTH, self._cap_width)
+        #if self._cap_height:
+        #    self._cap.set(cv.CAP_PROP_FRAME_HEIGHT, self._cap_height)
+        #if self._cap_fps:
+        #    self._cap.set(cv.CAP_PROP_FPS, self._cap_fps)
+
+        for _ in range(10):
+            self._cap.read()
+        
+        return True
+
+
+
+    def read(self) -> bool:
+        
+        if self._cap is None or not self._cap.isOpened():
+            if not self.open():
+                blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
+                cv.putText(blank, f"Camera{self._cap_index} is not open.", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+                self._frame = blank
+                return False
+
+
+
+        ret, frame = self._cap.read()
+        
+        if not ret or frame is None:
+            blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
+            cv.putText(blank, f"Camera{self._cap_index}. No Frame", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+            self._frame = blank
+            return False
+        
+
+        self._frame = frame
+
+        return True
+      
+        
+     
+       
+
+        
+        
+    def get_frame(self) -> Optional[cv.typing.MatLike]:
+        self.read()
+        return self._frame
+
+
+
+    def release(self) -> None:
+
+        if self._cap is not None:
+            self._cap.release()
+            self._cap = None
+
+
+    def set_perspective_frame(self) -> bool:
+
+        if self._frame is None:
+            return False
+        
+        if not (self._perspective_top_left and self._perspective_top_right and
+                self._perspective_bottom_left and self._perspective_bottom_right):
+            return False
+        
+
+        
+        tl_x, tl_y = self._perspective_top_left
+        tr_x, tr_y = self._perspective_top_right
+        bl_x, bl_y = self._perspective_bottom_left
+        br_x, br_y = self._perspective_bottom_right
+
+        
+
+        if self._perspective_width is None or self._perspective_height is None:
+            x_max = max(abs(tl_x - tr_x), abs(bl_x - br_x))
+            y_max = max(abs(tl_y - bl_y), abs(tr_y - br_y))
+
+            self._perspective_width = x_max
+            self._perspective_height = y_max
+
+
+
+        if self._perspective_matrix is None:
+        
+
+            pts_src = np.array([[tl_x, tl_y], 
+                                [tr_x, tr_y], 
+                                [br_x, br_y],
+                                [bl_x, bl_y]], dtype=np.float32)
+
+            pts_dst = np.array([[0, 0], 
+                                [self._perspective_width, 0], 
+                                [self._perspective_width, self._perspective_height], 
+                                [0, self._perspective_height]], dtype=np.float32)
+
+
+            self._perspective_matrix = cv.getPerspectiveTransform(pts_src, pts_dst)
+
+
+        warped = cv.warpPerspective(self._frame, self._perspective_matrix, (self._perspective_width, self._perspective_height))
+
+        if self._start_line is not None and self._finish_line is not None and warped is not None:
+            cv.line(warped, self._start_line[0], self._start_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+            cv.line(warped, self._finish_line[0], self._finish_line[1], COLORS_BGR["Red"], 2, cv.LINE_AA)
+
+        self._perspective_frame = warped
+
+        return True
+
+
+
+
+
+    def get_perspective_frame(self) -> Optional[cv.typing.MatLike]:
+
+        if self._frame is None:
+            print(f"Camera{self._cap_index}: No Frame")
+            return None
+        
+        if not (self._perspective_top_left and self._perspective_top_right and
+                self._perspective_bottom_left and self._perspective_bottom_right):
+            print(f"Camera{self._cap_index}: no perspective values")
+            return None
+        
+        self.set_perspective_frame()
+
+        return self._perspective_frame

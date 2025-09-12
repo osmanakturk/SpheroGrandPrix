@@ -32,9 +32,16 @@ def set_camera_perspective(frame: cv.typing.MatLike,
                            width: Optional[int] = None, 
                            height: Optional[int] = None, 
                            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-                           finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None,
+                           finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None
                            ) -> cv.typing.MatLike:
     
+    if frame is None:
+        print("Frame is None")
+        return
+    
+    if not (top_left and top_right and bottom_left and bottom_right):
+        print("Perspective corners must all be provided")
+        return
     
     tl_x, tl_y = top_left
     tr_x, tr_y = top_right

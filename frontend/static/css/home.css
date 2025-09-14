@@ -1,0 +1,21 @@
+html, body{
+    background-color: #e0e1dd;
+
+
+}
+
+header{
+
+    background-color: #18acf2;
+    height: 8vh;
+ 
+
+
+}
+
+
+
+.font-size-manual{
+    font-size: min(16px, max(0.7vh, 0.7vw));
+    
+}

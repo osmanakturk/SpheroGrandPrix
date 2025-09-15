@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import time, glob, os, math, logging
-from backend.constants import COLOR_RANGES_STRICT, COLOR_RANGES, COLORS_HSV, COLORS_BGR
+from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
 
 
 
@@ -76,7 +76,7 @@ while True:
 
 
 
-    mask_yellow = cv.inRange(hsv, COLOR_RANGES["Yellow"]["Lower"], COLOR_RANGES["Yellow"]["Upper"])
+    mask_yellow = cv.inRange(hsv, HSV_RANGES_WIDE["Yellow"]["Lower"], HSV_RANGES_WIDE["Yellow"]["Upper"])
     mask_yellow = cv.bitwise_and(frame, frame, mask=mask_yellow)
     yellow_ball = cv.min(mask_yellow, ball_thr)
     cv.imshow("yellow_ball", yellow_ball)
@@ -117,23 +117,23 @@ while True:
     cv.imshow("yellow_ball_gray_circled", thresh_yellow)
 
 
-    mask_blue = cv.inRange(hsv, COLOR_RANGES["Blue"]["Lower"], COLOR_RANGES["Blue"]["Upper"])
+    mask_blue = cv.inRange(hsv, HSV_RANGES_WIDE["Blue"]["Lower"], HSV_RANGES_WIDE["Blue"]["Upper"])
     mask_blue = cv.bitwise_and(frame, frame, mask=mask_blue)
     #cv.imshow("mask_blue", mask_blue)
 
 
-    mask_green = cv.inRange(hsv, COLOR_RANGES["Green"]["Lower"], COLOR_RANGES["Green"]["Upper"])
+    mask_green = cv.inRange(hsv, HSV_RANGES_WIDE["Green"]["Lower"], HSV_RANGES_WIDE["Green"]["Upper"])
     mask_green = cv.bitwise_and(frame, frame, mask=mask_green)
     #cv.imshow("mask_green", mask_green)
 
 
-    mask_purple = cv.inRange(hsv, COLOR_RANGES["Purple"]["Lower"], COLOR_RANGES["Purple"]["Upper"])
+    mask_purple = cv.inRange(hsv, HSV_RANGES_WIDE["Purple"]["Lower"], HSV_RANGES_WIDE["Purple"]["Upper"])
     mask_purple = cv.bitwise_and(frame, frame, mask=mask_purple)
     #cv.imshow("mask_purple", mask_purple)
 
 
-    mask_red1 = cv.inRange(hsv, COLOR_RANGES["Red1"]["Lower"], COLOR_RANGES["Red1"]["Upper"])
-    mask_red2 = cv.inRange(hsv, COLOR_RANGES["Red2"]["Lower"], COLOR_RANGES["Red2"]["Upper"])
+    mask_red1 = cv.inRange(hsv, HSV_RANGES_WIDE["Red1"]["Lower"], HSV_RANGES_WIDE["Red1"]["Upper"])
+    mask_red2 = cv.inRange(hsv, HSV_RANGES_WIDE["Red2"]["Lower"], HSV_RANGES_WIDE["Red2"]["Upper"])
     mask_red = cv.bitwise_or(mask_red1, mask_red2)
     mask_red = cv.bitwise_and(frame, frame, mask=mask_red)
     #cv.imshow("mask_red", mask_red)   

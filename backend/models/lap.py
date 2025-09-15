@@ -8,7 +8,8 @@ from backend.utils import HsvColorsRange, SpheroColor
 from typing import Optional, Tuple
 
 
-class Lap:
+
+class Lap():
 
     def __init__(self):
         

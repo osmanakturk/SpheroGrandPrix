@@ -14,7 +14,7 @@ class CaptureApi(Enum):
 
 
 
-class Camera:
+class Camera():
     def __init__(self,
                  cap_api: CaptureApi,  
                  cap_index: Optional[int] = None, 

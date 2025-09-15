@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="../static/css/bootstrap.css">
-    <link rel="stylesheet" href="../static/css/home.css">
+    <title>Sphero Grand Prix</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css')}}">
 </head>
 
 <body class="d-flex flex-column">
@@ -14,16 +14,16 @@
     <header class="d-flex flex-row align-items-center justify-content-around">
 
         <div class="col-1 h-100">
-            <img class="img-fluid h-100" src="../assets/ilsc_logo.svg" alt="">
+            <img class="img-fluid h-100" src="{{ url_for('static', filename='assets/ilsc_logo.svg' )}}" alt="ilsc_logo">
         </div>
 
         <div class="col-1">
-            <img class="img-fluid" src="../assets/ehb_logo.png" alt="">
+            <img class="img-fluid" src="{{ url_for('static', filename='assets/ehb_logo.png' )}}" alt="ehb_logo">
         </div>
 
 
         <div class="col-1">
-            <img class="img-fluid" src="../assets/sphero_logo.webp" alt="">
+            <img class="img-fluid" src="{{ url_for('static', filename='assets/sphero_logo.webp' )}}" alt="sphero_logo">
         </div>
 
 
@@ -35,12 +35,15 @@
 
         <div class="main-first-row d-flex justify-content-evenly align-items-center p-2">
 
+            <form action="" method="post">
+                <button class="btn btn-outline-success d-flex flex-column" type="button">
 
-            <button class="btn btn-outline-success d-flex flex-column" type="button">
+                    <img class="rounded-5" src="{{ url_for('static', filename='assets/sphero_bolt_empty_run.png' )}}"
+                        alt="sphero_bolt_empty_run">
+                    <span class="m-1">START RACE</span>
+                </button>
+            </form>
 
-                <img class="rounded-5" src="../assets/sphero_bolt_empty_run.png" alt="">
-                <span class="m-1">START RACE</span>
-            </button>
 
 
             <div class="rounded bg-info p-3 d-flex flex-row w-50 justify-content-evenly align-items-center">
@@ -53,7 +56,8 @@
                     </div>
 
                     <div class="input-group my-1">
-                        <label class="input-group-text font-size-manual" for="totao_spheros">Total Sphero Bolts: </label>
+                        <label class="input-group-text font-size-manual" for="totao_spheros">Total Sphero Bolts:
+                        </label>
                         <span class="form-control font-size-manual" id="total_spheros">18</span>
                     </div>
 
@@ -96,12 +100,17 @@
 
 
 
-            <button class="btn btn-outline-danger d-flex flex-column" type="button" data-bs-toggle="modal"
-                data-bs-target="#game_score">
 
-                <img class="rounded-5" src="../assets/sphero_bolt_empty_stop.png" alt="">
-                <span class="m-1">STOP RACE</span>
-            </button>
+            <form action="" method="post">
+                <button class="btn btn-outline-danger d-flex flex-column" type="button" data-bs-toggle="modal"
+                    data-bs-target="#game_score">
+
+                    <img class="rounded-5" src="{{ url_for('static', filename='assets/sphero_bolt_empty_stop.png' )}}"
+                        alt="sphero_bolt_empty_stop">
+                    <span class="m-1">STOP RACE</span>
+                </button>
+            </form>
+
 
 
             <div class="modal fade" id="game_score" tabindex="-1" aria-hidden="true" aria-labelledby="modal-label">
@@ -150,32 +159,26 @@
                                     class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
 
                                     <span class="my-2 fs-1 fw-bolder text-info">1</span>
-                                    <img class="img-fluid my-auto"
-                                        src="../../paths/12_09_2025_23_50_38_a7a5e186d44343cea0f61a9ed0d63fbe_Blue.png"
-                                        alt="1">
+                                    <img class="img-fluid my-auto" src="" alt="1">
                                 </div>
 
                                 <div
                                     class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
                                     <span class="my-2 fs-1 fw-bolder text-info">2</span>
-                                    <img class="img-fluid my-auto" src="../assets/main.webp" alt="2">
+                                    <img class="img-fluid my-auto" src="" alt="2">
 
                                 </div>
 
                                 <div
                                     class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
                                     <span class="my-2 fs-1 fw-bolder text-info">3</span>
-                                    <img class="img-fluid my-auto"
-                                        src="../../paths/12_09_2025_23_50_38_a7a5e186d44343cea0f61a9ed0d63fbe_Blue.png"
-                                        alt="3">
+                                    <img class="img-fluid my-auto" src="" alt="3">
                                 </div>
 
                                 <div
                                     class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
                                     <span class="my-2 fs-1 fw-bolder text-info">4</span>
-                                    <img class="img-fluid my-auto"
-                                        src="../../paths/12_09_2025_23_50_38_a7a5e186d44343cea0f61a9ed0d63fbe_Blue.png"
-                                        alt="4">
+                                    <img class="img-fluid my-auto" src="" alt="4">
                                 </div>
                             </div>
 
@@ -211,17 +214,16 @@
         <div class="main-second-row row p-2">
 
             <div class="col-7 d-flex">
-                <div class="row">
 
-                    <div class="camera1-container col-7 bg-danger p-3 d-flex align-items-center justify-content-center">
-                        <img class="camera1 img-fluid rounded" src="../assets/main.webp" alt="camera1">
-                    </div>
 
-                    <div
-                        class="camera2-container col-5 bg-success p-3 d-flex align-items-center justify-content-center">
-                        <img class="camera2 img-fluid rounded" src="../assets/main.webp" alt="camera2">
-                    </div>
+                <div class="camera1-container col-7 mx-1 p-3 border border-black border-3 rounded-5 bg-info d-flex align-items-center justify-content-center">
+                    <img class="camera1 img-fluid rounded" src="/video_feed/path" alt="camera1">
                 </div>
+
+                <div class="camera2-container col-4 mx-1 p-3 border border-black border-3 rounded-5 bg-info d-flex align-items-center justify-content-center">
+                    <img class="camera2 img-fluid rounded" src="/video_feed/finishline" alt="camera2">
+                </div>
+
 
             </div>
 
@@ -232,8 +234,8 @@
                         <div class="card border-2 p-1 m-1">
                             <div class="row">
                                 <div class="col-6 d-flex align-items-center">
-                                    <img src="../assets/sphero_bolt_red.png" class="img-fluid rounded"
-                                        alt="sphero_bolt_red">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_red.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_red">
                                 </div>
                                 <div class="col-6">
 
@@ -241,7 +243,8 @@
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual" for="red">@</label>
-                                            <input class="form-control font-size-manual" type="text" placeholder="Red"
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_red.username or 'Enter username' }}"
                                                 id="red">
                                             <input type="button" value="Change"
                                                 class="btn btn-success font-size-manual">
@@ -250,19 +253,22 @@
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="start_time">Start:</label>
-                                            <span class="form-control font-size-manual" id="start_time">None</span>
+                                            <span class="form-control font-size-manual" id="start_time">{{
+                                                lap.sphero_bolt_red.start_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="finish_time">Finish:</label>
-                                            <span class="form-control font-size-manual" id="finish_time">None</span>
+                                            <span class="form-control font-size-manual" id="finish_time">{{
+                                                lap.sphero_bolt_red.finish_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="lap_time">Total:</label>
-                                            <span class="form-control font-size-manual" id="lap_time">None</span>
+                                            <span class="form-control font-size-manual" id="lap_time">{{
+                                                lap.sphero_bolt_red.total_lap_time }}</span>
                                         </div>
 
                                         <div class="btn-group d-flex">
@@ -279,8 +285,8 @@
                         <div class="card border-2 p-1 m-1">
                             <div class="row">
                                 <div class="col-6 d-flex align-items-center">
-                                    <img src="../assets/sphero_bolt_yellow.png" class="img-fluid rounded"
-                                        alt="sphero_bolt_yellow">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_yellow.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_yellow">
                                 </div>
                                 <div class="col-6">
 
@@ -289,7 +295,8 @@
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual" for="yellow">@</label>
                                             <input class="form-control font-size-manual" type="text"
-                                                placeholder="Yellow" id="yellow">
+                                                placeholder="{{ lap.sphero_bolt_yellow.username or 'Enter username' }}"
+                                                id="yellow">
                                             <input type="button" value="Change"
                                                 class="btn btn-success font-size-manual">
                                         </div>
@@ -297,19 +304,22 @@
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="start_time">Start:</label>
-                                            <span class="form-control font-size-manual" id="start_time">None</span>
+                                            <span class="form-control font-size-manual" id="start_time">{{
+                                                lap.sphero_bolt_yellow.start_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="finish_time">Finish:</label>
-                                            <span class="form-control font-size-manual" id="finish_time">None</span>
+                                            <span class="form-control font-size-manual" id="finish_time">{{
+                                                lap.sphero_bolt_yellow.finish_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="lap_time">Total:</label>
-                                            <span class="form-control font-size-manual" id="lap_time">None</span>
+                                            <span class="form-control font-size-manual" id="lap_time">{{
+                                                lap.sphero_bolt_yellow.total_lap_time }}</span>
                                         </div>
 
                                         <div class="btn-group d-flex">
@@ -326,8 +336,8 @@
                         <div class="card border-2 p-1 m-1">
                             <div class="row">
                                 <div class="col-6 d-flex align-items-center">
-                                    <img src="../assets/sphero_bolt_blue.png" class="img-fluid rounded"
-                                        alt="sphero_bolt_blue">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_blue.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_blue">
                                 </div>
                                 <div class="col-6">
 
@@ -335,7 +345,8 @@
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual" for="blue">@</label>
-                                            <input class="form-control font-size-manual" type="text" placeholder="Blue"
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_blue.username or 'Enter username' }}"
                                                 id="blue">
                                             <input type="button" value="Change"
                                                 class="btn btn-success font-size-manual">
@@ -344,19 +355,22 @@
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="start_time">Start:</label>
-                                            <span class="form-control font-size-manual" id="start_time">None</span>
+                                            <span class="form-control font-size-manual" id="start_time">{{
+                                                lap.sphero_bolt_blue.start_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="finish_time">Finish:</label>
-                                            <span class="form-control font-size-manual" id="finish_time">None</span>
+                                            <span class="form-control font-size-manual" id="finish_time">{{
+                                                lap.sphero_bolt_blue.finish_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="lap_time">Total:</label>
-                                            <span class="form-control font-size-manual" id="lap_time">None</span>
+                                            <span class="form-control font-size-manual" id="lap_time">{{
+                                                lap.sphero_bolt_blue.total_lap_time }}</span>
                                         </div>
 
                                         <div class="btn-group d-flex">
@@ -373,8 +387,8 @@
                         <div class="card border-2 p-1 m-1">
                             <div class="row">
                                 <div class="col-6 d-flex align-items-center">
-                                    <img src="../assets/sphero_bolt_green.png" class="img-fluid rounded"
-                                        alt="sphero_bolt_green">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_green.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_green">
                                 </div>
                                 <div class="col-6">
 
@@ -382,7 +396,8 @@
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual" for="green">@</label>
-                                            <input class="form-control font-size-manual" type="text" placeholder="Green"
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_green.username or 'Enter username' }}"
                                                 id="green">
                                             <input type="button" value="Change"
                                                 class="btn btn-success font-size-manual">
@@ -391,19 +406,22 @@
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="start_time">Start:</label>
-                                            <span class="form-control font-size-manual" id="start_time">None</span>
+                                            <span class="form-control font-size-manual" id="start_time">{{
+                                                lap.sphero_bolt_green.start_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="finish_time">Finish:</label>
-                                            <span class="form-control font-size-manual" id="finish_time">None</span>
+                                            <span class="form-control font-size-manual" id="finish_time">{{
+                                                lap.sphero_bolt_green.finish_time }}</span>
                                         </div>
 
                                         <div class="input-group my-1">
                                             <label class="input-group-text font-size-manual"
                                                 for="lap_time">Total:</label>
-                                            <span class="form-control font-size-manual" id="lap_time">None</span>
+                                            <span class="form-control font-size-manual" id="lap_time">{{
+                                                lap.sphero_bolt_green.total_lap_time }}</span>
                                         </div>
 
                                         <div class="btn-group d-flex">
@@ -444,8 +462,8 @@
     </main>
 
 
-    <script src="../static/js/bootstrap.js"></script>
-    <script src="../static/js/home.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/home.js')}}"></script>
 </body>
 
 </html>

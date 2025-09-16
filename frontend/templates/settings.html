@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
-    <title>Home</title>
+    <title>Settings</title>
 </head>
 
-<body class="d-flex flex-column">
+<body>
+
 
     <header class="d-flex flex-row align-items-center justify-content-around" style="background-color: #18acf2; height: 8vh;">
 
@@ -29,26 +30,7 @@
 
 
     </header>
-
-
-    <main class="d-flex flex-column justify-content-center p-3 container-fluid">
-
-        <div class="row m-5">
-            <div class="col-12 text-center text-info p-5 my-5 border border-5 rounded-5">
-                <h5 class="fs-1">WELCOME SPHERO GRAND PRIX</h5>
-            </div>
-
-            <div class="col-12 d-flex align-items-center justify-content-around p-5 my-5 border border-5 rounded-5">
-
-                <a href="/game" target="_blank" class="btn btn-info px-5">GAME</a>
-                <a href="/settings" target="_blank" class="btn btn-info px-5">SETTINGS</a>
-            </div>
-
-        </div>
-
-    </main>
-
-
+    
 
     <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
 </body>

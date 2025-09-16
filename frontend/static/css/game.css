@@ -8,8 +8,6 @@ header{
 
     background-color: #18acf2;
     height: 8vh;
- 
-
 
 }
 
@@ -19,3 +17,4 @@ header{
     font-size: min(16px, max(0.7vh, 0.7vw));
     
 }
+

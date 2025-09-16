@@ -290,8 +290,22 @@ def get_tracker(debug: bool = False) -> Optional[Tuple[bytes, bytes, Lap]]:
             #cv.imshow("Background", background)
     
     
-    path_result = cv.bitwise_or(perspectived_path_frame, returned_path_frame) if returned_path_frame is not None else perspectived_path_frame
-    finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) if returner_finishline_frame is not None else perspectived_finishline_frame
+    
+    if returned_path_frame is not None: 
+        path_result = cv.bitwise_or(perspectived_path_frame, returned_path_frame) 
+    else:
+        cv.putText(perspectived_path_frame, "START", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        path_result = perspectived_path_frame
+
+    
+
+
+    
+    if returner_finishline_frame is not None:
+        finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) 
+    else: 
+        cv.putText(perspectived_finishline_frame, "START", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        finishline_result = perspectived_finishline_frame
     
 
    
@@ -338,7 +352,7 @@ if __name__=="__main__":
 
         cv.setTrackbarPos("start_lap", trackbar, 0)
 
-    def reset_red(val):
+    def trackbar_reset_red(val):
         if val != 1:
             return
         
@@ -358,7 +372,7 @@ if __name__=="__main__":
 
 
 
-    def reset_yellow(val):
+    def trackbar_reset_yellow(val):
         if val != 1:
             return
         
@@ -377,7 +391,7 @@ if __name__=="__main__":
         cv.setTrackbarPos("reset_yellow", trackbar, 0)
     
     
-    def reset_blue(val):
+    def trackbar_reset_blue(val):
         if val != 1:
             return
         
@@ -396,7 +410,7 @@ if __name__=="__main__":
         cv.setTrackbarPos("reset_blue", trackbar, 0)
     
     
-    def reset_green(val):
+    def trackbar_reset_green(val):
         if val != 1:
             return
         
@@ -418,10 +432,10 @@ if __name__=="__main__":
     cv.namedWindow(trackbar, cv.WINDOW_NORMAL)
     cv.createTrackbar("start_lap", trackbar, 0, 1, trackbar_lap_start)
     cv.createTrackbar("stop_lap", trackbar, 0, 1, trackbar_lap_stop)
-    cv.createTrackbar("reset_red", trackbar, 0, 1, reset_red)
-    cv.createTrackbar("reset_yellow", trackbar, 0, 1, reset_yellow)
-    cv.createTrackbar("reset_blue", trackbar, 0, 1, reset_blue)
-    cv.createTrackbar("reset_green", trackbar, 0, 1, reset_green)
+    cv.createTrackbar("reset_red", trackbar, 0, 1, trackbar_reset_red)
+    cv.createTrackbar("reset_yellow", trackbar, 0, 1, trackbar_reset_yellow)
+    cv.createTrackbar("reset_blue", trackbar, 0, 1, trackbar_reset_blue)
+    cv.createTrackbar("reset_green", trackbar, 0, 1, trackbar_reset_green)
 
 
     start_tracker()

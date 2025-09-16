@@ -1,5 +1,4 @@
 from flask import Flask, render_template, url_for, send_from_directory, request, redirect, Response, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from backend.models.sphero_bolt import SpheroBolt
 from typing import Generator, Optional, Tuple, Literal
 from backend.models.lap import Lap
@@ -26,7 +25,6 @@ app = Flask(__name__,
             template_folder="frontend/templates")
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.sqlite'
 
 LOCK = threading.Lock()
 
@@ -140,11 +138,7 @@ def game():
         total["yellow"] = len(spheros[spheros[:, 2] == "Yellow"])
         total["blue"] = len(spheros[spheros[:, 2] == "Blue"])
         total["green"] = len(spheros[spheros[:, 2] == "Green"])
-        
-
-
-
-
+    
 
     return render_template("game.html", lap=lap, total=total)
 
@@ -238,10 +232,7 @@ def reset_api(color):
 
 
 @app.route("/username_change/<string:color>/<string:username>", methods=["POST"])
-
 def username_change_api(color, username):
-
-
     if color == "red":
         change_username_red(username)
     elif color == "yellow":

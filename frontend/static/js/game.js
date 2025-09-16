@@ -1,24 +1,79 @@
+let chart_sphero = null
+
 async function startLap() {
+
     const res = await fetch("/lap/start", { method: "POST" });
     //const data = await res.json();
 
 }
 
 
-async function stopLap() {
-    const res = await fetch("/lap/stop", { method: "POST" });
-    //const data = await res.json();
-    let total_games = document.getElementById("total_games");
-    let total_spheros = document.getElementById("total_spheros");
+async function drawPlot() {
+    let canvas_sphero = document.getElementById("canvas_sphero")
     let total_red = document.getElementById("total_red");
     let total_yellow = document.getElementById("total_yellow");
     let total_blue = document.getElementById("total_blue");
     let total_green = document.getElementById("total_green");
+
+    let red = parseInt(total_red.innerText.trim())
+    let yellow = parseInt(total_yellow.innerText.trim())
+    let blue = parseInt(total_blue.innerText.trim())
+    let green = parseInt(total_green.innerText.trim())
+
+    red = Number.isFinite(red) ? red : 0
+    yellow = Number.isFinite(yellow) ? yellow : 0
+    blue = Number.isFinite(blue) ? blue : 0
+    green = Number.isFinite(green) ? green : 0
+
+
+    let xValues = ["Red", "Yellow", "Blue", "Green"]
+    let yValues = [red, yellow, blue, green]
+    let barColors = ["#fc0303", "#e8fc03", "#0313fc", "#1ead19ff"]
+
+    const chart_exixt = Chart.getChart(canvas_sphero);
+
+    if (chart_exixt){
+        chart_exixt.destroy();
+    }
+
+     chart_sphero = new Chart(canvas_sphero, {
+        type: "doughnut",
+        //type: "pie",
+        data: {
+            labels: xValues,
+            datasets: [{
+                backgroundColor: barColors,
+                data: yValues
+            }]
+        },
+
+        options: {
+            plugins: {
+                legend: { display: true },
+                title: { display: false }
+            }
+        }
+    });
+
+}
+
+
+
+drawPlot()
+
+
+
+async function stopLap() {
+    const res = await fetch("/lap/stop", { method: "POST" });
+    //const data = await res.json();
+
     let best_score = document.getElementById("best_score");
     let mean_score = document.getElementById("mean_score");
     let last_score = document.getElementById("last_score");
-    
+
+
 }
+
 
 async function reset(color) {
     const res = await fetch(`/reset/${color}`, { method: "POST" });
@@ -27,9 +82,9 @@ async function reset(color) {
 
 
 async function changeUsername(color) {
-    let element = document.getElementById(`username_${color}`);
+    let element = document.getElementById(`${color}_username`);
     let username = (element?.value ?? "").trim();
-    const res = await fetch(`/username_change/${encodeURIComponent(color)}/${encodeURIComponent(username)}`, { method:"POST" });
+    const res = await fetch(`/username_change/${encodeURIComponent(color)}/${encodeURIComponent(username)}`, { method: "POST" });
     //const data = await res.json();
 }
 
@@ -58,7 +113,7 @@ async function lapStatus() {
 
     try {
         const res = await fetch("/lap/state", { method: "POST" });
-        const data = await res.json();  
+        const data = await res.json();
 
 
         //red_username.textContent = data.red.username
@@ -82,11 +137,36 @@ async function lapStatus() {
         green_finish_time.textContent = data.green.finish_time
         green_lap_time.textContent = data.green.total_lap_time + " sec"
 
+
+
+        if (chart_sphero) {
+            let total_red = document.getElementById("total_red");
+            let total_yellow = document.getElementById("total_yellow");
+            let total_blue = document.getElementById("total_blue");
+            let total_green = document.getElementById("total_green");
+
+            let red = parseInt(total_red.innerText.trim())
+            let yellow = parseInt(total_yellow.innerText.trim())
+            let blue = parseInt(total_blue.innerText.trim())
+            let green = parseInt(total_green.innerText.trim())
+
+            red = Number.isFinite(red) ? red : 0
+            yellow = Number.isFinite(yellow) ? yellow : 0
+            blue = Number.isFinite(blue) ? blue : 0
+            green = Number.isFinite(green) ? green : 0
+
+            chart_sphero.data.datasets[0].data = [red, yellow, blue, green];
+            chart_sphero.update();
+        }
+
+
+
+
     } catch (error) {
 
         console.error(error)
     }
-    
+
 }
 
 

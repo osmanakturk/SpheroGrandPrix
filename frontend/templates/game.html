@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sphero Grand Prix</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css')}}">
+</head>
+
+<body class="d-flex flex-column">
+
+    <header class="d-flex flex-row align-items-center justify-content-around">
+
+        <div class="col-1 h-100">
+            <img class="img-fluid h-100" src="{{ url_for('static', filename='assets/ilsc_logo.svg' )}}" alt="ilsc_logo">
+        </div>
+
+        <div class="col-1">
+            <img class="img-fluid" src="{{ url_for('static', filename='assets/ehb_logo.png' )}}" alt="ehb_logo">
+        </div>
+
+
+        <div class="col-1">
+            <img class="img-fluid" src="{{ url_for('static', filename='assets/sphero_logo.webp' )}}" alt="sphero_logo">
+        </div>
+
+
+
+
+    </header>
+
+    <main class="d-flex flex-column p-3 container-fluid">
+
+        <div class="main-first-row d-flex justify-content-evenly align-items-center p-2">
+
+
+            <button class="btn btn-outline-success d-flex flex-column" type="button" onclick="startLap()">
+
+                <img class="rounded-5" src="{{ url_for('static', filename='assets/sphero_bolt_empty_run.png' )}}"
+                    alt="sphero_bolt_empty_run">
+                <span class="m-1">START RACE</span>
+            </button>
+
+
+
+            <div class="rounded bg-info p-3 d-flex flex-row w-50 justify-content-evenly align-items-center">
+
+                <div class="container">
+
+                    <div class="input-group my-1 ">
+                        <label class="input-group-text font-size-manual" for="total_games">Total Games: </label>
+                        <span class="form-control font-size-manual" id="total_games">{{ total['games'] }}</span>
+                    </div>
+
+                    <div class="input-group my-1">
+                        <label class="input-group-text font-size-manual" for="totao_spheros">Total Sphero Bolts:
+                        </label>
+                        <span class="form-control font-size-manual" id="total_spheros">{{ total['spheros'] }}</span>
+                    </div>
+
+                </div>
+
+                <div class="container">
+                    <canvas id="canvas_sphero"></canvas>
+                </div>
+
+                <div class="container">
+
+                    <div class="input-group my-1">
+                        <label class="input-group-text font-size-manual" for="total_red">Total Red: </label>
+                        <span class="form-control font-size-manual" id="total_red">{{ total['red'] }}</span>
+                    </div>
+
+                    <div class="input-group my-1">
+                        <label class="input-group-text font-size-manual" for="total_yellow">Total Yellow: </label>
+                        <span class="form-control font-size-manual" id="total_yellow">{{ total['yellow'] }}</span>
+                    </div>
+
+                    <div class="input-group my-1">
+                        <label class="input-group-text font-size-manual" for="total_blue">Total Blue: </label>
+                        <span class="form-control font-size-manual" id="total_blue">{{ total['blue'] }}</span>
+                    </div>
+
+                    <div class="input-group my-1">
+                        <label class="input-group-text font-size-manual" for="total_green">Total Green: </label>
+                        <span class="form-control font-size-manual" id="total_green">{{ total['green'] }}</span>
+                    </div>
+
+
+                </div>
+
+
+
+
+            </div>
+
+
+
+
+
+
+            <button class="btn btn-outline-danger d-flex flex-column" type="button" onclick="stopLap()"
+                data-bs-toggle="modal" data-bs-target="#game_score">
+
+                <img class="rounded-5" src="{{ url_for('static', filename='assets/sphero_bolt_empty_stop.png' )}}"
+                    alt="sphero_bolt_empty_stop">
+                <span class="m-1">STOP RACE</span>
+            </button>
+
+
+
+
+            <div class="modal fade" id="game_score" tabindex="-1" aria-hidden="true" aria-labelledby="modal-label"
+                data-bs-backdrop="static" data-bs-keyboard="false">
+                <div class="modal-dialog p-5 modal-fullscreen">
+                    <div class="modal-content p-2">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modal-label">SCORES</h5>
+                            <button class="btn btn-danger btn-close" type="button" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+
+                        <div class="modal-body p-2 d-flex flex-column align-items-center">
+
+
+                            <div class="col-12 d-flex justify-content-center">
+
+
+                                <div class="rounded bg-info p-5 w-50 m-5">
+                                    <div class="input-group my-1">
+                                        <label class="input-group-text font-size-manual" for="best_score">Best Score:
+                                        </label>
+                                        <span class="form-control font-size-manual" id="best_score">None</span>
+                                    </div>
+
+                                    <div class="input-group my-1">
+                                        <label class="input-group-text font-size-manual" for="mean_score">Mean Score:
+                                        </label>
+                                        <span class="form-control font-size-manual" id="mean_score">None</span>
+                                    </div>
+
+                                    <div class="input-group my-1">
+                                        <label class="input-group-text font-size-manual" for="last_score">Last Score:
+                                        </label>
+                                        <span class="form-control font-size-manual" id="last_score">None</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <div class="col-12 p-5 d-flex justify-content-around align-self-stretch">
+
+                                <div
+                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
+
+                                    <span class="my-2 fs-1 fw-bolder text-info">1</span>
+                                    <img class="img-fluid my-auto" src="" alt="1">
+                                </div>
+
+                                <div
+                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
+                                    <span class="my-2 fs-1 fw-bolder text-info">2</span>
+                                    <img class="img-fluid my-auto" src="" alt="2">
+
+                                </div>
+
+                                <div
+                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
+                                    <span class="my-2 fs-1 fw-bolder text-info">3</span>
+                                    <img class="img-fluid my-auto" src="" alt="3">
+                                </div>
+
+                                <div
+                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
+                                    <span class="my-2 fs-1 fw-bolder text-info">4</span>
+                                    <img class="img-fluid my-auto" src="" alt="4">
+                                </div>
+                            </div>
+
+
+
+
+
+
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button class="btn btn-danger m-auto" data-bs-dismiss="modal" type="button">Close</button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+
+
+
+
+
+
+
+
+        </div>
+
+
+        <div class="main-second-row  row p-2">
+
+            <div class="col-7  bg-light d-flex justify-content-evenly">
+
+
+                <div
+                    class="camera1-container  col-7 object-fit-contain mx-1 p-3 border border-black border-3 rounded-5 bg-info d-flex align-items-center justify-content-center">
+                    <img class="camera1 img-fluid h-100 object-fit-contain rounded" src="/video_feed/path"
+                        alt="camera1">
+                </div>
+
+                <div
+                    class="camera2-container col-4 mx-1 p-3 border border-black border-3 rounded-5 bg-info d-flex align-items-center justify-content-center">
+                    <img class="camera2 img-fluid h-100 object-fit-contain rounded" src="/video_feed/finishline"
+                        alt="camera2">
+                </div>
+
+
+            </div>
+
+            <div class="col-5">
+                <div class="row">
+                    <div class="settings col-7 bg-light p-1 d-flex flex-column">
+
+                        <div class="card border-2 p-1 m-1">
+                            <div class="row">
+                                <div class="col-6 d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_red.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_red">
+                                </div>
+                                <div class="col-6">
+
+                                    <div class="card-body">
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual" for="red_username">@</label>
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_red.username or 'Enter username' }}"
+                                                id="red_username">
+                                            <input type="button" value="Change"
+                                                class="btn btn-success font-size-manual" onclick="changeUsername('red')">
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="red_start_time">Start:</label>
+
+                                            <span class="form-control font-size-manual" id="red_start_time"></span>
+
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="red_finish_time">Finish:</label>
+                                            <span class="form-control font-size-manual" id="red_finish_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="red_lap_time">Total:</label>
+                                            <span class="form-control font-size-manual" id="red_lap_time"></span>
+                                        </div>
+
+                                        <div class="btn-group d-flex">
+                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('red')">Reset</button>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-2 p-1 m-1">
+                            <div class="row">
+                                <div class="col-6 d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_yellow.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_yellow">
+                                </div>
+                                <div class="col-6">
+
+                                    <div class="card-body">
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual" for="yellow_username">@</label>
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_yellow.username or 'Enter username' }}"
+                                                id="yellow_username">
+                                            <input type="button" value="Change"
+                                                class="btn btn-success font-size-manual" onclick="changeUsername('yellow')">
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="yellow_start_time">Start:</label>
+                                            <span class="form-control font-size-manual" id="yellow_start_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="yellow_finish_time">Finish:</label>
+                                            <span class="form-control font-size-manual" id="yellow_finish_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="yellow_lap_time">Total:</label>
+                                            <span class="form-control font-size-manual" id="yellow_lap_time"></span>
+                                        </div>
+
+                                        <div class="btn-group d-flex">
+                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('yellow')">Reset</button>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-2 p-1 m-1">
+                            <div class="row">
+                                <div class="col-6 d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_blue.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_blue">
+                                </div>
+                                <div class="col-6">
+
+                                    <div class="card-body">
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual" for="blue_username">@</label>
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_blue.username or 'Enter username' }}"
+                                                id="blue_username">
+                                            <input type="button" value="Change"
+                                                class="btn btn-success font-size-manual" onclick="changeUsername('blue')">
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="blue_start_time">Start:</label>
+                                            <span class="form-control font-size-manual" id="blue_start_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="blue_finish_time">Finish:</label>
+                                            <span class="form-control font-size-manual" id="blue_finish_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="blue_lap_time">Total:</label>
+                                            <span class="form-control font-size-manual" id="blue_lap_time"></span>
+                                        </div>
+
+                                        <div class="btn-group d-flex">
+                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('blue')">Reset</button>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card border-2 p-1 m-1">
+                            <div class="row">
+                                <div class="col-6 d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename='assets/sphero_bolt_green.png' )}}"
+                                        class="img-fluid rounded" alt="sphero_bolt_green">
+                                </div>
+                                <div class="col-6">
+
+                                    <div class="card-body">
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual" for="green_username">@</label>
+                                            <input class="form-control font-size-manual" type="text"
+                                                placeholder="{{ lap.sphero_bolt_green.username or 'Enter username' }}"
+                                                id="green_username">
+                                            <input type="button" value="Change"
+                                                class="btn btn-success font-size-manual" onclick="changeUsername('green')">
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="green_start_time">Start:</label>
+                                            <span class="form-control font-size-manual" id="green_start_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="green_finish_time">Finish:</label>
+                                            <span class="form-control font-size-manual" id="green_finish_time"></span>
+                                        </div>
+
+                                        <div class="input-group my-1">
+                                            <label class="input-group-text font-size-manual"
+                                                for="green_lap_time">Total:</label>
+                                            <span class="form-control font-size-manual" id="green_lap_time"></span>
+                                        </div>
+
+                                        <div class="btn-group d-flex">
+                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('green')">Reset</button>
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+
+                    </div>
+
+                    <div class="dashboard col-5 bg-info p-3">
+                        dashboard
+                    </div>
+                </div>
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+
+    </main>
+
+
+    <script src="{{ url_for('static', filename='js/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/game.js')}}"></script>
+</body>
+
+</html>

@@ -2,8 +2,9 @@ from flask import Flask, render_template, url_for, send_from_directory, request,
 from backend.models.sphero_bolt import SpheroBolt
 from typing import Generator, Optional, Tuple, Literal
 from backend.models.lap import Lap
-import threading, time, json, sqlite3, sys, os
+import threading, atexit, time, json, sqlite3, sys, os
 import numpy as np
+from backend.utils import CaptureApi
 from backend.trackers.camera_tracker import (start_tracker,  
                                              get_tracker, 
                                              lap_start, 
@@ -40,7 +41,23 @@ def ensure_tracker_started() -> bool:
 
     with LOCK:
         if not is_tracker_started:
-            is_tracker_started = start_tracker()
+            is_tracker_started = start_tracker(
+                finishline_cap_api=CaptureApi.Windows, 
+                finishline_cap_index=1, 
+                finishline_cap_perspective_top_left=(200, 0), 
+                finishline_cap_perspective_top_right=(490, 0), 
+                finishline_cap_perspective_bottom_left=(200, 480), 
+                finishline_cap_perspective_bottom_right=(490, 480), 
+                finishline_cap_start_line=((0, 240), (131, 240)), 
+                finishline_cap_finish_line=((160, 240), (290, 240)), 
+                path_cap_api=CaptureApi.Windows, 
+                path_cap_index=2, 
+                path_cap_perspective_top_left=(200, 0), 
+                path_cap_perspective_top_right=(370, 0), 
+                path_cap_perspective_bottom_left=(200, 480), 
+                path_cap_perspective_bottom_right=(370, 480)
+                )
+
     return is_tracker_started
 
 
@@ -92,10 +109,6 @@ def stream_finishline() -> Generator[bytes, None, None]:
 
 
 
-
-
-
-
 @app.route("/")
 def home():
     return render_template("home.html")
@@ -108,39 +121,7 @@ def settings():
 @app.route("/game")
 def game():
     lap = get_lap()
-
-    total = {}
-    total["games"] = 0
-    total["spheros"] = 0
-    total["red"] = 0
-    total["yellow"] = 0
-    total["blue"] = 0
-    total["green"] = 0
-
-
-    if os.path.exists("database.sqlite"):
-        db = sqlite3.connect("database.sqlite")
-
-        cursor = db.cursor()
-
-        cursor.execute("SELECT * FROM sphero_bolt")
-
-        data = cursor.fetchall()
-
-        data = np.array(data)
-
-        total["games"] = len(data) // 4
-
-        spheros = data[data[:, 7] != None]
-
-        total["spheros"] = len(spheros)
-        total["red"] = len(spheros[spheros[:, 2] == "Red"])
-        total["yellow"] = len(spheros[spheros[:, 2] == "Yellow"])
-        total["blue"] = len(spheros[spheros[:, 2] == "Blue"])
-        total["green"] = len(spheros[spheros[:, 2] == "Green"])
-    
-
-    return render_template("game.html", lap=lap, total=total)
+    return render_template("game.html", lap=lap)
 
 
 
@@ -157,18 +138,17 @@ def video_feed_finishline():
 
 @app.route("/lap/start", methods=["POST"])
 def start_lap_api():
-    lap_start()
-    return redirect("/game"), 200
+    ok = lap_start()
+    return jsonify({"ok": bool(ok)}), 200
 
 
 @app.route("/lap/stop", methods=["POST"])
 def stop_lap_api():
-    lap_stop()
-    
-    return redirect("/game"), 200
+    ok = lap_stop()
+    return jsonify({"ok": bool(ok)}), 200
 
 
-@app.route("/lap/state", methods=["POST"])
+@app.route("/lap/state")
 def lap_state():
     lap = get_lap()
     
@@ -205,28 +185,63 @@ def lap_state():
             "total_lap_time": lap.sphero_bolt_green.total_lap_time if lap.sphero_bolt_green is not None and lap.sphero_bolt_green.total_lap_time is not None else ''
             }}
     
-
-    return jsonify(data), 200
+    resp = jsonify(data)
+    resp.headers["Cache-Control"] = "no-store, max-age=0"
+    return resp, 200
  
 
 
+@app.route('/stats')
+def stats():
 
- 
+    totals = {
+        "games": 0, 
+        "spheros": 0, 
+        "red": 0, 
+        "yellow": 0, 
+        "blue": 0, 
+        "green": 0
+    }
+
+
+    if os.path.exists("database.sqlite"):
+        with sqlite3.connect("database.sqlite") as db:
+            cursor = db.cursor()
+            cursor.execute("SELECT * FROM sphero_bolt")
+
+            data = cursor.fetchall()
+            data = np.array(data)
+
+            totals["games"] = len(data) // 4
+
+            spheros = data[data[:, 7] != None]
+
+            totals["spheros"] = len(spheros)
+            totals["red"] = len(spheros[spheros[:, 2] == "Red"])
+            totals["yellow"] = len(spheros[spheros[:, 2] == "Yellow"])
+            totals["blue"] = len(spheros[spheros[:, 2] == "Blue"])
+            totals["green"] = len(spheros[spheros[:, 2] == "Green"])
+
+    resp = jsonify(totals)
+    resp.headers["Cache-Control"] = "no-store, max-age=0"
+    return resp, 200
+
 
 @app.route("/reset/<string:color>", methods=["POST"])
 def reset_api(color):
 
     if color == "red":
-        reset_red()
+        ok = reset_red()
     elif color == "yellow":
-        reset_yellow()
+        ok = reset_yellow()
     elif color == "blue":
-        reset_blue()
+        ok = reset_blue()
     elif color == "green":
-        reset_green()
+        ok = reset_green()
+    else:
+        return jsonify({"ok": False}), 400
 
-
-    return redirect("/game"), 200
+    return jsonify({"ok": bool(ok)}), 200
 
 
 
@@ -234,17 +249,17 @@ def reset_api(color):
 @app.route("/username_change/<string:color>/<string:username>", methods=["POST"])
 def username_change_api(color, username):
     if color == "red":
-        change_username_red(username)
+        ok = change_username_red(username)
     elif color == "yellow":
-        change_username_yellow(username)
+        ok = change_username_yellow(username)
     elif color == "blue":
-        change_username_blue(username)
+        ok = change_username_blue(username)
     elif color == "green":
-        change_username_green(username)
+        ok = change_username_green(username)
+    else:
+        return jsonify({"ok": False}), 400
 
-    return redirect("/game"), 200
-
-
+    return jsonify({"ok": bool(ok)}), 200
 
 
 

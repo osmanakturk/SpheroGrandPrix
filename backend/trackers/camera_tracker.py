@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import time, os, sys
-from backend.utils import HsvColorsRange
+from backend.utils import HsvColorsRange, CameraConfig
 from backend.models.lap import Lap
 from backend.models.camera import CaptureApi, Camera
 from typing import Optional, Tuple
@@ -22,20 +22,8 @@ FINISHLINE_CAP: Optional[Camera] = None
 
 
 
-def start_tracker(finishline_cap_api:CaptureApi , 
-                  finishline_cap_index:int , 
-                  finishline_cap_perspective_top_left:tuple , 
-                  finishline_cap_perspective_top_right:tuple , 
-                  finishline_cap_perspective_bottom_left:tuple , 
-                  finishline_cap_perspective_bottom_right:tuple , 
-                  finishline_cap_start_line:tuple , 
-                  finishline_cap_finish_line:tuple , 
-                  path_cap_api:CaptureApi , 
-                  path_cap_index:int , 
-                  path_cap_perspective_top_left:tuple , 
-                  path_cap_perspective_top_right:tuple , 
-                  path_cap_perspective_bottom_left:tuple , 
-                  path_cap_perspective_bottom_right:tuple 
+def start_tracker(path_cap_config:CameraConfig, 
+                  finishline_cap_config:CameraConfig
                   ) -> bool:
 
     global BACKGROUND, PATH_CAP, FINISHLINE_CAP
@@ -43,13 +31,8 @@ def start_tracker(finishline_cap_api:CaptureApi ,
     BACKGROUND = cv.imread("paths/background.png", cv.IMREAD_COLOR)
     
     
-    PATH_CAP = Camera(cap_api=path_cap_api, 
-                      cap_index=path_cap_index, 
-                      perspective_top_left=path_cap_perspective_top_left, 
-                      perspective_top_right=path_cap_perspective_top_right, 
-                      perspective_bottom_left=path_cap_perspective_bottom_left, 
-                      perspective_bottom_right=path_cap_perspective_bottom_right
-                      )
+    PATH_CAP = Camera(config=path_cap_config)
+
     
     path_ret =  PATH_CAP.open()
     
@@ -59,16 +42,8 @@ def start_tracker(finishline_cap_api:CaptureApi ,
         path_ret = PATH_CAP.open()
         
     
-    FINISHLINE_CAP = Camera(cap_api=finishline_cap_api, 
-                            cap_index=finishline_cap_index, 
-                            perspective_top_left=finishline_cap_perspective_top_left, 
-                            perspective_top_right=finishline_cap_perspective_top_right, 
-                            perspective_bottom_left=finishline_cap_perspective_bottom_left, 
-                            perspective_bottom_right=finishline_cap_perspective_bottom_right, 
-                            start_line=finishline_cap_start_line, 
-                            finish_line=finishline_cap_finish_line
-                            )
-    
+    FINISHLINE_CAP = Camera(config=finishline_cap_config)
+
     
     
     finishline_ret = FINISHLINE_CAP.open()

@@ -2,44 +2,32 @@ import cv2 as cv
 import numpy as np
 from typing import Optional, Tuple
 from backend.constants import COLORS_BGR
-from backend.utils import CaptureApi
+from backend.utils import CaptureApi, CameraConfig
 
 
 
 
 
 class Camera():
-    def __init__(self,
-                 cap_api: CaptureApi,  
-                 cap_index: Optional[int] = None, 
-                 cap_source: Optional[str] = None, 
-                 cap_width: Optional[int] = 640, 
-                 cap_height: Optional[int] = 480, 
-                 cap_fps: Optional[int] = 30,  
-                 start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-                 finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None,
-                 perspective_top_left: Optional[Tuple[int, int]] = None, 
-                 perspective_top_right: Optional[Tuple[int, int]] = None, 
-                 perspective_bottom_left: Optional[Tuple[int, int]] = None, 
-                 perspective_bottom_right: Optional[Tuple[int, int]] = None, 
-                 perspective_width: Optional[int] = None, 
-                 perspective_height: Optional[int] = None 
-                 ):
+    
+    def __init__(self, config: CameraConfig):
+
         
-        self._cap_index = cap_index
-        self._cap_source = cap_source
-        self._cap_api = cap_api.value
-        self._cap_width = cap_width or 640
-        self._cap_height = cap_height or 480
-        self._cap_fps = cap_fps or 30
-        self._start_line = start_line
-        self._finish_line = finish_line
-        self._perspective_top_left = perspective_top_left
-        self._perspective_top_right = perspective_top_right
-        self._perspective_bottom_left = perspective_bottom_left
-        self._perspective_bottom_right = perspective_bottom_right
-        self._perspective_width = perspective_width
-        self._perspective_height = perspective_height
+        self._cap_index = config.cap_api
+        self._cap_index = config.cap_index
+        self._cap_source = config.cap_source
+        self._cap_api = config.cap_api.value
+        self._cap_width = config.cap_width or 640
+        self._cap_height = config.cap_height or 480
+        self._cap_fps = config.cap_fps or 30
+        self._start_line = config.start_line
+        self._finish_line = config.finish_line
+        self._perspective_top_left = config.perspective_top_left
+        self._perspective_top_right = config.perspective_top_right
+        self._perspective_bottom_left = config.perspective_bottom_left
+        self._perspective_bottom_right = config.perspective_bottom_right
+        self._perspective_width = config.perspective_width
+        self._perspective_height = config.perspective_height
         self._cap: Optional[cv.VideoCapture] = None
         self._frame: Optional[cv.typing.MatLike] = None
         self._perspective_frame: Optional[cv.typing.MatLike] = None

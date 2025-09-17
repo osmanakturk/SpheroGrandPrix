@@ -2,7 +2,10 @@ import cv2 as cv
 import numpy as np
 from typing import Tuple, Optional
 from enum import Enum
+from dataclasses import dataclass
 from backend.constants import HSV_RANGES_MANUAL, HSV_RANGES_NORMAL, HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_BGR, COLORS_HSV
+
+
 
 
 
@@ -29,6 +32,25 @@ class SpheroColor(Enum):
     GREEN = "Green"
     YELLOW = "Yellow"
 
+
+
+
+@dataclass
+class CameraConfig:
+    cap_api: CaptureApi 
+    cap_index: Optional[int] = None 
+    cap_source: Optional[str] = None 
+    cap_width: Optional[int] = 640 
+    cap_height: Optional[int] = 480 
+    cap_fps: Optional[int] = 30  
+    perspective_top_left: Optional[Tuple[int, int]] = None 
+    perspective_top_right: Optional[Tuple[int, int]] = None 
+    perspective_bottom_left: Optional[Tuple[int, int]] = None 
+    perspective_bottom_right: Optional[Tuple[int, int]] = None 
+    perspective_width: Optional[int] = None 
+    perspective_height: Optional[int] = None 
+    start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None 
+    finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None
 
 
 

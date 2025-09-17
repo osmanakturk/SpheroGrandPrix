@@ -4,7 +4,7 @@ from typing import Generator, Optional, Tuple, Literal
 from backend.models.lap import Lap
 import threading, atexit, time, json, sqlite3, sys, os
 import numpy as np
-from backend.utils import CaptureApi
+from backend.utils import CaptureApi, CameraConfig
 from backend.trackers.camera_tracker import (start_tracker,  
                                              get_tracker, 
                                              lap_start, 
@@ -42,22 +42,29 @@ def ensure_tracker_started() -> bool:
     with LOCK:
         if not is_tracker_started:
             is_tracker_started = start_tracker(
-                finishline_cap_api=CaptureApi.Windows, 
-                finishline_cap_index=1, 
-                finishline_cap_perspective_top_left=(200, 0), 
-                finishline_cap_perspective_top_right=(490, 0), 
-                finishline_cap_perspective_bottom_left=(200, 480), 
-                finishline_cap_perspective_bottom_right=(490, 480), 
-                finishline_cap_start_line=((0, 240), (131, 240)), 
-                finishline_cap_finish_line=((160, 240), (290, 240)), 
-                path_cap_api=CaptureApi.Windows, 
-                path_cap_index=2, 
-                path_cap_perspective_top_left=(200, 0), 
-                path_cap_perspective_top_right=(370, 0), 
-                path_cap_perspective_bottom_left=(200, 480), 
-                path_cap_perspective_bottom_right=(370, 480)
-                )
+                
+                finishline_cap_config=CameraConfig(
+                    cap_api=CaptureApi.Windows, 
+                    cap_index=1, 
+                    perspective_top_left=(200, 0), 
+                    perspective_top_right=(490, 0), 
+                    perspective_bottom_left=(200, 480), 
+                    perspective_bottom_right=(490, 480), 
+                    start_line=((0, 240), (131, 240)), 
+                    finish_line=((160, 240), (290, 240))
+                    ), 
 
+                path_cap_config=CameraConfig(
+                    cap_api=CaptureApi.Windows, 
+                    cap_index=2, 
+                    perspective_top_left=(200, 0), 
+                    perspective_top_right=(490, 0), 
+                    perspective_bottom_left=(200, 480), 
+                    perspective_bottom_right=(490, 480)
+                    )
+
+                )
+            
     return is_tracker_started
 
 
@@ -227,6 +234,8 @@ def stats():
     return resp, 200
 
 
+
+
 @app.route("/reset/<string:color>", methods=["POST"])
 def reset_api(color):
 
@@ -262,6 +271,11 @@ def username_change_api(color, username):
     return jsonify({"ok": bool(ok)}), 200
 
 
+
+@app.route("/game_score")
+def game_score():
+    lap = get_lap()
+    pass
 
 
 

@@ -3,7 +3,7 @@ import numpy as np
 import cv2 as cv
 from datetime import datetime
 from backend.models.sphero_bolt import SpheroBolt
-from backend.constants import PATH, HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
+from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
 from backend.utils import HsvColorsRange, SpheroColor
 from typing import Optional, Tuple
 
@@ -44,8 +44,8 @@ class Lap():
         for sphero in self._sphero_bolts():
             sphero.path_frame = self._path_frame
 
-            if sphero.canvas is None:
-                sphero.canvas = self.path_frame
+            if sphero.path_canvas is None:
+                sphero.path_canvas = self.path_frame
 
 
     @property
@@ -297,69 +297,82 @@ class Lap():
         if not self._is_started:
             print("Lap not started yet")
             return None
-
-        yellow = self._sphero_bolt_yellow.get_processed_path_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
-
-
-        red = self._sphero_bolt_red.get_processed_path_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
-
-
-        green = self.sphero_bolt_green.get_processed_path_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
         
-        blue = self.sphero_bolt_blue.get_processed_path_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
-        
+        if self._sphero_bolt_yellow is not None:
+
+            yellow = self._sphero_bolt_yellow.get_processed_path_frame(
+                hsv_ranges=hsv_ranges, 
+                min_radius=min_radius, 
+                max_radius=max_radius, 
+                bilateral_diameter=bilateral_diameter,
+                bilateral_sigma_color=bilateral_sigma_color,
+                bilateral_sigma_space=bilateral_sigma_space,
+                median_kernel_size=median_kernel_size,
+                clahe_clip_limit=clahe_clip_limit,
+                clahe_tile_grid_size=clahe_tile_grid_size,
+                morph_kernel_size=morph_kernel_size,
+                morph_iterator=morph_iterator,
+                contours_chain_approx_simple=contours_chain_approx_simple
+                )
+        else:
+            yellow = None
+
+
+        if self._sphero_bolt_red is not None:
+            red = self._sphero_bolt_red.get_processed_path_frame(
+                hsv_ranges=hsv_ranges, 
+                min_radius=min_radius, 
+                max_radius=max_radius, 
+                bilateral_diameter=bilateral_diameter,
+                bilateral_sigma_color=bilateral_sigma_color,
+                bilateral_sigma_space=bilateral_sigma_space,
+                median_kernel_size=median_kernel_size,
+                clahe_clip_limit=clahe_clip_limit,
+                clahe_tile_grid_size=clahe_tile_grid_size,
+                morph_kernel_size=morph_kernel_size,
+                morph_iterator=morph_iterator,
+                contours_chain_approx_simple=contours_chain_approx_simple
+                )
+        else:
+            red = None
+
+
+        if self._sphero_bolt_green is not None:
+            green = self._sphero_bolt_green.get_processed_path_frame(
+                hsv_ranges=hsv_ranges, 
+                min_radius=min_radius, 
+                max_radius=max_radius, 
+                bilateral_diameter=bilateral_diameter,
+                bilateral_sigma_color=bilateral_sigma_color,
+                bilateral_sigma_space=bilateral_sigma_space,
+                median_kernel_size=median_kernel_size,
+                clahe_clip_limit=clahe_clip_limit,
+                clahe_tile_grid_size=clahe_tile_grid_size,
+                morph_kernel_size=morph_kernel_size,
+                morph_iterator=morph_iterator,
+                contours_chain_approx_simple=contours_chain_approx_simple
+                )
+        else:
+            green = None
+
+
+        if self._sphero_bolt_blue is not None:
+            blue = self._sphero_bolt_blue.get_processed_path_frame(
+                hsv_ranges=hsv_ranges, 
+                min_radius=min_radius, 
+                max_radius=max_radius, 
+                bilateral_diameter=bilateral_diameter,
+                bilateral_sigma_color=bilateral_sigma_color,
+                bilateral_sigma_space=bilateral_sigma_space,
+                median_kernel_size=median_kernel_size,
+                clahe_clip_limit=clahe_clip_limit,
+                clahe_tile_grid_size=clahe_tile_grid_size,
+                morph_kernel_size=morph_kernel_size,
+                morph_iterator=morph_iterator,
+                contours_chain_approx_simple=contours_chain_approx_simple
+                )
+        else:
+            blue = None
 
         if yellow is not None or red is not None:
             if red is not None and yellow is not None:
@@ -459,7 +472,7 @@ class Lap():
             )
 
 
-        green = self.sphero_bolt_green.get_processed_finishline_frame(
+        green = self._sphero_bolt_green.get_processed_finishline_frame(
             hsv_ranges=hsv_ranges, 
             min_radius=min_radius, 
             max_radius=max_radius,
@@ -477,7 +490,7 @@ class Lap():
             )
         
 
-        blue = self.sphero_bolt_blue.get_processed_finishline_frame(
+        blue = self._sphero_bolt_blue.get_processed_finishline_frame(
             hsv_ranges=hsv_ranges, 
             min_radius=min_radius, 
             max_radius=max_radius,

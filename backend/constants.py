@@ -1,13 +1,3 @@
-import cv2 as cv
-import numpy as np
-from pathlib import Path
-from dataclasses import dataclass
-from typing import Tuple
-from enum import Enum
-
-PATH = Path(__file__).resolve()
-
-
 
 
 HSV_RANGES_STRICT = {

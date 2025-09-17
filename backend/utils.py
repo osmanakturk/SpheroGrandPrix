@@ -2,7 +2,16 @@ import cv2 as cv
 import numpy as np
 from typing import Tuple, Optional
 from enum import Enum
-from .constants import HSV_RANGES_MANUAL, HSV_RANGES_NORMAL, HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_BGR, COLORS_HSV
+from backend.constants import HSV_RANGES_MANUAL, HSV_RANGES_NORMAL, HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_BGR, COLORS_HSV
+
+
+
+
+class CaptureApi(Enum):
+    Windows = cv.CAP_DSHOW
+    Linux = cv.CAP_V4L2
+    Mac = cv.CAP_AVFOUNDATION
+
 
 
 class HsvColorsRange(Enum):

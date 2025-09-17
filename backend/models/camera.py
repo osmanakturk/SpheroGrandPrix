@@ -1,15 +1,9 @@
 import cv2 as cv
 import numpy as np
 from typing import Optional, Tuple
-from enum import Enum
 from backend.constants import COLORS_BGR
+from backend.utils import CaptureApi
 
-
-
-class CaptureApi(Enum):
-    Windows = cv.CAP_DSHOW
-    Linux = cv.CAP_V4L2
-    Mac = cv.CAP_AVFOUNDATION
 
 
 

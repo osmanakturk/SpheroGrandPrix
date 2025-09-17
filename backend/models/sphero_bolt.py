@@ -1,10 +1,8 @@
-import uuid
-import time
 import os
 import numpy as np
 import cv2 as cv
 from datetime import datetime
-from backend.constants import PATH, HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
+from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
 from typing import Optional, Tuple
 from backend.utils import HsvColorsRange, SpheroColor
 
@@ -57,7 +55,8 @@ class SpheroBolt():
         self._finishline_radius = finishline_radius
         self._path_frame = path_frame.copy() if path_frame is not None else None
         self._finishline_frame = finishline_frame.copy() if finishline_frame is not None else None
-        self._canvas = np.zeros_like(self._path_frame, np.uint8) if self._path_frame is not None else None
+        self._path_canvas = np.zeros_like(self._path_frame, np.uint8) if self._path_frame is not None else None
+        self._finishline_canvas = np.zeros_like(self._finishline_frame, np.uint8) if self._finishline_frame is not None else None
         self._path_img = None
         self._debug = debug
   
@@ -89,8 +88,8 @@ class SpheroBolt():
     def path_frame(self, path_frame: Optional[cv.typing.MatLike]) -> None:
         self._path_frame = path_frame.copy() if path_frame is not None else None
         
-        if self._canvas is None:
-            self._canvas = np.zeros_like(path_frame, np.uint8) if path_frame is not None else None
+        if self._path_canvas is None:
+            self._path_canvas = np.zeros_like(path_frame, np.uint8) if path_frame is not None else None
 
 
     @property
@@ -102,6 +101,8 @@ class SpheroBolt():
     def finishline_frame(self, finishline_frame: Optional[cv.typing.MatLike]) -> None:
         self._finishline_frame = finishline_frame.copy() if finishline_frame is not None else None
 
+        if self._finishline_canvas is None:
+            self._finishline_canvas = np.zeros_like(finishline_frame, np.uint8) if finishline_frame is not None else None
 
     @property
     def color(self) -> SpheroColor:
@@ -258,12 +259,21 @@ class SpheroBolt():
 
 
     @property
-    def canvas(self) -> Optional[cv.typing.MatLike]:
-        return self._canvas
+    def path_canvas(self) -> Optional[cv.typing.MatLike]:
+        return self._path_canvas
 
-    @canvas.setter
-    def canvas(self, frame: Optional[cv.typing.MatLike]) -> None:
-        self._canvas = np.zeros_like(frame, np.uint8) if frame is not None else None
+    @path_canvas.setter
+    def path_canvas(self, frame: Optional[cv.typing.MatLike]) -> None:
+        self._path_canvas = np.zeros_like(frame, np.uint8) if frame is not None else None
+
+
+    @property
+    def finishline_canvas(self) -> Optional[cv.typing.MatLike]:
+        return self._finishline_canvas
+
+    @finishline_canvas.setter
+    def finishline_canvas(self, frame: Optional[cv.typing.MatLike]) -> None:
+        self._finishline_canvas = np.zeros_like(frame, np.uint8) if frame is not None else None
 
     
     @property
@@ -356,17 +366,17 @@ class SpheroBolt():
 
 
     def save_path_img(self) -> bool:
-        if self._canvas is None or self._total_lap_time is None:
+        if self._path_canvas is None or self._total_lap_time is None:
             return False
 
         try:
-            self._path_img = np.zeros((self._canvas.shape[0]+50, self._canvas.shape[1], 3), np.uint8)
+            self._path_img = np.zeros((self._path_canvas.shape[0]+50, self._path_canvas.shape[1], 3), np.uint8)
 
             if self._background is not None:
-                temp = cv.bitwise_or(self._canvas, self._background)
+                temp = cv.bitwise_or(self._path_canvas, self._background)
                 self._path_img[50:, :] = temp[:, :]
             else:
-                self._path_img[50:, :] = self._canvas[:, :]
+                self._path_img[50:, :] = self._path_canvas[:, :]
 
             cv.rectangle(img=self._path_img, 
                          pt1=(0, 0), pt2=(self.path_img.shape[1]-1, 47), 
@@ -412,7 +422,7 @@ class SpheroBolt():
             self._finish_time = None
             self._total_lap_time = None
             
-            self._canvas = np.zeros_like(self._canvas, dtype=np.uint8) if self._canvas is not None else None
+            self._path_canvas = np.zeros_like(self._path_canvas, dtype=np.uint8) if self._path_canvas is not None else None
 
             self._path_center = None
             self._path_previous_center = None

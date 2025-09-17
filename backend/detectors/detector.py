@@ -1,7 +1,4 @@
-import uuid
-import time
 import numpy as np
-import math
 import cv2 as cv
 from typing import Optional, Tuple
 from datetime import datetime
@@ -52,7 +49,8 @@ class Detector:
             
             path_frame = sphero_bolt.path_frame.copy()
 
-            processed_path_frame = path_frame.copy()
+            #processed_path_frame = path_frame.copy()
+            empty_path_frame = np.zeros_like(path_frame, np.uint8)
 
             path_bilateral = cv.bilateralFilter(path_frame, bilateral_diameter, bilateral_sigma_color, bilateral_sigma_space)
 
@@ -153,30 +151,38 @@ class Detector:
 
                         sphero_bolt.path_previous_center = (b_x, b_y)
 
-                    cv.circle(processed_path_frame, sphero_bolt.path_center, sphero_bolt.path_radius, 
+                    #cv.circle(processed_path_frame, sphero_bolt.path_center, sphero_bolt.path_radius, 
+                    #         COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
+                    
+                    cv.circle(empty_path_frame, sphero_bolt.path_center, sphero_bolt.path_radius, 
                               COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                     
                     #cv.line(processed_path_frame, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
                     #        COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
             
-                    if sphero_bolt.canvas is not None:
-                        cv.line(sphero_bolt.canvas, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
+                    if sphero_bolt.path_canvas is not None:
+                        cv.line(sphero_bolt.path_canvas, sphero_bolt.path_previous_center, sphero_bolt.path_center, 
                                 COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
                         #processed_path_frame = cv.bitwise_or(processed_path_frame, sphero_bolt.canvas)
                     
                     sphero_bolt.path_previous_center = (b_x, b_y)
 
-                    cv.putText(processed_path_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.path_radius), 
+                    #cv.putText(processed_path_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.path_radius), 
+                    #        cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
+                    
+                    cv.putText(empty_path_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.path_radius), 
                             cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                         
                     if debug:
                         print(f"Path, area: {best_area}, x: {b_x}, y: {b_y}, radius: {b_radius}, total contours: {total_contours}, best contour index: {best_contour_index}")
 
-            if sphero_bolt.canvas is not None:
-                processed_path_frame = cv.bitwise_or(processed_path_frame, sphero_bolt.canvas)
+            if sphero_bolt.path_canvas is not None:
+                #processed_path_frame = cv.bitwise_or(processed_path_frame, sphero_bolt.canvas)
+                empty_path_frame = cv.bitwise_or(empty_path_frame, sphero_bolt.path_canvas)
 
     
-            return processed_path_frame
+            #return processed_path_frame
+            return empty_path_frame
         
 
 
@@ -222,7 +228,8 @@ class Detector:
             finishline_frame = sphero_bolt.finishline_frame.copy()
         
 
-            processed_finishline_frame = finishline_frame.copy()
+            #processed_finishline_frame = finishline_frame.copy()
+            empty_finishline_frame = np.zeros_like(finishline_frame, np.uint8)
 
             finishline_bilateral = cv.bilateralFilter(finishline_frame, bilateral_diameter, bilateral_sigma_color, bilateral_sigma_space)
 
@@ -327,13 +334,23 @@ class Detector:
                         sphero_bolt.finishline_previous_center = (b_x, b_y)
 
 
-                    cv.circle(processed_finishline_frame, sphero_bolt.finishline_center, sphero_bolt.finishline_radius, 
+                    #cv.circle(processed_finishline_frame, sphero_bolt.finishline_center, sphero_bolt.finishline_radius, 
+                    #          COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
+                    
+                    cv.circle(empty_finishline_frame, sphero_bolt.finishline_center, sphero_bolt.finishline_radius, 
                               COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
                     
-                    cv.putText(processed_finishline_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.finishline_radius), 
+                    #cv.putText(processed_finishline_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.finishline_radius), 
+                    #        cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
+                    
+                    cv.putText(empty_finishline_frame, sphero_bolt.username, (b_x, b_y-2*sphero_bolt.finishline_radius), 
                             cv.FONT_HERSHEY_COMPLEX_SMALL, 1, COLORS_BGR[sphero_bolt.color.value], 2, cv.LINE_AA)
-                        
-
+                    
+                    
+                    if sphero_bolt.finishline_canvas is not None:
+                        cv.line(sphero_bolt.finishline_canvas, sphero_bolt.finishline_previous_center, sphero_bolt.finishline_center, 
+                                COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
+                        #processed_finishline_frame = cv.bitwise_or(processed_finishline_frame, sphero_bolt.finishline_canvas)
 
                     if debug:
                         print(f"Finishline, area: {best_area}, x: {b_x}, y: {b_y}, radius: {b_radius}, total contours: {total_contours}, best contour index: {best_contour_index}")
@@ -384,14 +401,18 @@ class Detector:
                                 sphero_bolt.total_lap_time = (sphero_bolt.finish_time - sphero_bolt.start_time).total_seconds()
                                 print(f"{sphero_bolt.color.value} finished, Finish Time: {sphero_bolt.finish_time.strftime('%H:%M:%S')} sec")
                                 print(f"{sphero_bolt.color.value} Lap Time: {sphero_bolt.total_lap_time} sec")
-                                if sphero_bolt.canvas is not None and sphero_bolt.total_lap_time is not None:
+                                if sphero_bolt.path_canvas is not None and sphero_bolt.total_lap_time is not None:
                                     sphero_bolt.save_path_img()
 
 
             
             sphero_bolt.finishline_previous_center = sphero_bolt.finishline_center
 
-            return processed_finishline_frame
+            if sphero_bolt.finishline_canvas is not None:
+                empty_finishline_frame = cv.bitwise_or(empty_finishline_frame, sphero_bolt.finishline_canvas)
+
+            #return processed_finishline_frame
+            return empty_finishline_frame
     
 
 

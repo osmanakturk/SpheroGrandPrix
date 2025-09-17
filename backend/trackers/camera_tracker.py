@@ -15,11 +15,6 @@ GLOBAL_USERNAME_GREEN = "Green"
 
 
 
-
-
-
-
-
 BACKGROUND = None
 PATH_CAP: Optional[Camera] = None
 FINISHLINE_CAP: Optional[Camera] = None
@@ -27,19 +22,33 @@ FINISHLINE_CAP: Optional[Camera] = None
 
 
 
-def start_tracker() -> bool:
+def start_tracker(finishline_cap_api:CaptureApi , 
+                  finishline_cap_index:int , 
+                  finishline_cap_perspective_top_left:tuple , 
+                  finishline_cap_perspective_top_right:tuple , 
+                  finishline_cap_perspective_bottom_left:tuple , 
+                  finishline_cap_perspective_bottom_right:tuple , 
+                  finishline_cap_start_line:tuple , 
+                  finishline_cap_finish_line:tuple , 
+                  path_cap_api:CaptureApi , 
+                  path_cap_index:int , 
+                  path_cap_perspective_top_left:tuple , 
+                  path_cap_perspective_top_right:tuple , 
+                  path_cap_perspective_bottom_left:tuple , 
+                  path_cap_perspective_bottom_right:tuple 
+                  ) -> bool:
 
     global BACKGROUND, PATH_CAP, FINISHLINE_CAP
 
     BACKGROUND = cv.imread("paths/background.png", cv.IMREAD_COLOR)
     
     
-    PATH_CAP = Camera(cap_api=CaptureApi.Windows, 
-                      cap_index=2, 
-                      perspective_top_left=(200, 0), 
-                      perspective_top_right=(370, 0), 
-                      perspective_bottom_left=(200, 480), 
-                      perspective_bottom_right=(370, 480)
+    PATH_CAP = Camera(cap_api=path_cap_api, 
+                      cap_index=path_cap_index, 
+                      perspective_top_left=path_cap_perspective_top_left, 
+                      perspective_top_right=path_cap_perspective_top_right, 
+                      perspective_bottom_left=path_cap_perspective_bottom_left, 
+                      perspective_bottom_right=path_cap_perspective_bottom_right
                       )
     
     path_ret =  PATH_CAP.open()
@@ -50,14 +59,14 @@ def start_tracker() -> bool:
         path_ret = PATH_CAP.open()
         
     
-    FINISHLINE_CAP = Camera(cap_api=CaptureApi.Windows, 
-                            cap_index=1, 
-                            perspective_top_left=(200, 0), 
-                            perspective_top_right=(490, 0), 
-                            perspective_bottom_left=(200, 480), 
-                            perspective_bottom_right=(490, 480), 
-                            start_line=((0, 240), (131, 240)), 
-                            finish_line=((160, 240), (290, 240))
+    FINISHLINE_CAP = Camera(cap_api=finishline_cap_api, 
+                            cap_index=finishline_cap_index, 
+                            perspective_top_left=finishline_cap_perspective_top_left, 
+                            perspective_top_right=finishline_cap_perspective_top_right, 
+                            perspective_bottom_left=finishline_cap_perspective_bottom_left, 
+                            perspective_bottom_right=finishline_cap_perspective_bottom_right, 
+                            start_line=finishline_cap_start_line, 
+                            finish_line=finishline_cap_finish_line
                             )
     
     
@@ -154,7 +163,7 @@ def reset_green() -> bool:
 
 
 
-def change_username_red(username: str):
+def change_username_red(username: str) -> bool:
     global GLOBAL_LAB, GLOBAL_USERNAME_RED
 
     GLOBAL_USERNAME_RED = username
@@ -162,17 +171,20 @@ def change_username_red(username: str):
     if GLOBAL_LAB.is_started:
         GLOBAL_LAB.sphero_bolt_red.username = GLOBAL_USERNAME_RED
 
+    return True
 
-def change_username_yellow(username: str):
+
+def change_username_yellow(username: str) -> bool:
     global GLOBAL_LAB, GLOBAL_USERNAME_YELLOW
 
     GLOBAL_USERNAME_YELLOW = username
 
     if GLOBAL_LAB.is_started:
         GLOBAL_LAB.sphero_bolt_yellow.username = GLOBAL_USERNAME_YELLOW
+    
+    return True
 
-
-def change_username_blue(username: str):
+def change_username_blue(username: str) -> bool:
     global GLOBAL_LAB, GLOBAL_USERNAME_BLUE
 
     GLOBAL_USERNAME_BLUE = username
@@ -180,14 +192,19 @@ def change_username_blue(username: str):
     if GLOBAL_LAB.is_started:
         GLOBAL_LAB.sphero_bolt_blue.username = GLOBAL_USERNAME_BLUE
 
+    return True
 
-def change_username_green(username: str):
+
+
+def change_username_green(username: str) -> bool:
     global GLOBAL_LAB, GLOBAL_USERNAME_GREEN
 
     GLOBAL_USERNAME_GREEN = username
 
     if GLOBAL_LAB.is_started:
         GLOBAL_LAB.sphero_bolt_green.username = GLOBAL_USERNAME_GREEN
+
+    return True
 
 
 
@@ -283,10 +300,10 @@ def get_tracker(debug: bool = False) -> Optional[Tuple[bytes, bytes, Lap]]:
         if debug:
             cv.imshow("Returned Path Frame", returned_path_frame)
             cv.imshow("Returner Finishline Frame", returner_finishline_frame)
-            cv.imshow("Canvas Red", lap.sphero_bolt_red.canvas)
-            cv.imshow("Canvas Yellow", lap.sphero_bolt_yellow.canvas)
-            cv.imshow("Canvas Blue", lap.sphero_bolt_blue.canvas)
-            cv.imshow("Canvas Green", lap.sphero_bolt_green.canvas)
+            cv.imshow("Canvas Red", lap.sphero_bolt_red.path_canvas)
+            cv.imshow("Canvas Yellow", lap.sphero_bolt_yellow.path_canvas)
+            cv.imshow("Canvas Blue", lap.sphero_bolt_blue.path_canvas)
+            cv.imshow("Canvas Green", lap.sphero_bolt_green.path_canvas)
             #cv.imshow("Background", background)
     
     
@@ -330,9 +347,14 @@ def get_tracker(debug: bool = False) -> Optional[Tuple[bytes, bytes, Lap]]:
 
 
 def release_all():
-    PATH_CAP.release()
-    FINISHLINE_CAP.release()
-    cv.destroyAllWindows()
+    global PATH_CAP, FINISHLINE_CAP
+
+    try:
+        PATH_CAP.release()
+        FINISHLINE_CAP.release()
+        cv.destroyAllWindows()
+    except Exception as e:
+        print(f"Release All Failed: {e}")
 
 
 if __name__=="__main__":

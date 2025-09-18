@@ -2,7 +2,8 @@ import cv2 as cv
 import numpy as np
 from typing import Optional, Tuple
 from backend.constants import COLORS_BGR
-from backend.utils import CaptureApi, CameraConfig
+from backend.enums import CaptureApi
+from backend.configs import CameraConfig
 
 
 

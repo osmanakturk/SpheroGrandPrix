@@ -1,9 +1,10 @@
 import cv2 as cv
 import numpy as np
 import time, os, sys
-from backend.utils import HsvColorsRange, CameraConfig
+from backend.enums import HsvColorsRange
+from backend.configs import CameraConfig, DetectorConfig
 from backend.models.lap import Lap
-from backend.models.camera import CaptureApi, Camera
+from backend.models.camera import Camera
 from typing import Optional, Tuple
 
 GLOBAL_LAB = Lap()
@@ -184,7 +185,11 @@ def change_username_green(username: str) -> bool:
 
 
 
-def get_tracker(debug: bool = False) -> Optional[Tuple[bytes, bytes, Lap]]:
+def get_tracker(
+        path_detector_config: DetectorConfig, 
+        finishline_detector_config: DetectorConfig, 
+        debug: bool = False, 
+        ) -> Optional[Tuple[bytes, bytes, Lap]]:
         
 
     global GLOBAL_LAB, PATH_CAP, FINISHLINE_CAP
@@ -241,37 +246,14 @@ def get_tracker(debug: bool = False) -> Optional[Tuple[bytes, bytes, Lap]]:
         lap.finishline_frame = FINISHLINE_CAP.perspective_frame
         lap.background_img = BACKGROUND
         returned_path_frame = lap.get_processed_path_frame(
-            hsv_ranges=HsvColorsRange.NORMAL, 
-            min_radius=15, 
-            max_radius=35, 
-            bilateral_diameter=9, 
-            bilateral_sigma_color=75, 
-            bilateral_sigma_space=75, 
-            median_kernel_size=9, 
-            clahe_clip_limit=4, 
-            clahe_tile_grid_size=9, 
-            morph_kernel_size=5, 
-            morph_iterator=1, 
-            contours_chain_approx_simple=True
+            path_detector_config
             )
-        
+
+
         returner_finishline_frame = lap.get_processed_finishline_frame(
-            hsv_ranges=HsvColorsRange.NORMAL, 
-            min_radius=15, 
-            max_radius=35, 
-            start_line=((0, 240), (131, 240)), 
-            finish_line=((160, 240), (290, 240)), 
-            bilateral_diameter=9,
-            bilateral_sigma_color=75,
-            bilateral_sigma_space=75,
-            median_kernel_size=9,
-            clahe_clip_limit=4,
-            clahe_tile_grid_size=9,
-            morph_kernel_size=5,
-            morph_iterator=1,
-            contours_chain_approx_simple=True
-            )
-        
+            finishline_detector_config
+        )
+
         if debug:
             cv.imshow("Returned Path Frame", returned_path_frame)
             cv.imshow("Returner Finishline Frame", returner_finishline_frame)

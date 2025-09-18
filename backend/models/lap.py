@@ -4,7 +4,8 @@ import cv2 as cv
 from datetime import datetime
 from backend.models.sphero_bolt import SpheroBolt
 from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
-from backend.utils import HsvColorsRange, SpheroColor
+from backend.enums import HsvColorsRange, SpheroColor
+from backend.configs import DetectorConfig, SpheroConfig
 from typing import Optional, Tuple
 
 
@@ -45,7 +46,7 @@ class Lap():
             sphero.path_frame = self._path_frame
 
             if sphero.path_canvas is None:
-                sphero.path_canvas = self.path_frame
+                sphero.path_canvas = self._path_frame
 
 
     @property
@@ -109,7 +110,7 @@ class Lap():
     @debug_red.setter
     def debug_red(self, debug_red: bool) -> None:
         self._debug_red = debug_red
-        self.sphero_bolt_red.debug = debug_red
+        self._sphero_bolt_red.debug = debug_red
 
 
     @property
@@ -119,7 +120,7 @@ class Lap():
     @debug_yellow.setter
     def debug_yellow(self, debug_yellow: bool) -> None:
         self._debug_yellow = debug_yellow
-        self.sphero_bolt_yellow.debug = debug_yellow
+        self._sphero_bolt_yellow.debug = debug_yellow
 
 
 
@@ -130,7 +131,7 @@ class Lap():
     @debug_blue.setter
     def debug_blue(self, debug_blue: bool) -> None:
         self._debug_blue = debug_blue
-        self.sphero_bolt_blue.debug = debug_blue
+        self._sphero_bolt_blue.debug = debug_blue
 
 
     @property
@@ -140,7 +141,7 @@ class Lap():
     @debug_green.setter
     def debug_green(self, debug_green: bool) -> None:
         self._debug_green = debug_green
-        self.sphero_bolt_green.debug = debug_green
+        self._sphero_bolt_green.debug = debug_green
 
 
     @property
@@ -191,55 +192,62 @@ class Lap():
 
 
         self._sphero_bolt_red = SpheroBolt(
-            lap_id=self._id, 
-            color=SpheroColor.RED, 
-            path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
-            finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None, 
-            background=self._background_img.copy() if self._background_img is not None else None, 
-            is_lap_started=self._is_started, 
-            is_lap_stopped=self._is_stopped, 
-            debug=self._debug_red
+            SpheroConfig(
+                lap_id=self._id, 
+                color=SpheroColor.RED, 
+                path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
+                finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None, 
+                background=self._background_img.copy() if self._background_img is not None else None, 
+                is_lap_started=self._is_started, 
+                is_lap_stopped=self._is_stopped, 
+                debug=self._debug_red
+                )
             )
 
 
 
         self._sphero_bolt_yellow = SpheroBolt(
-            lap_id=self._id, 
-            color=SpheroColor.YELLOW, 
-            path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
-            finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None, 
-            background=self._background_img.copy() if self._background_img is not None else None, 
-            is_lap_started=self._is_started, 
-            is_lap_stopped=self._is_stopped, 
-            debug=self._debug_yellow
+            SpheroConfig(
+                lap_id=self._id, 
+                color=SpheroColor.YELLOW, 
+                path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
+                finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None, 
+                background=self._background_img.copy() if self._background_img is not None else None, 
+                is_lap_started=self._is_started, 
+                is_lap_stopped=self._is_stopped, 
+                debug=self._debug_yellow
             )
+        )
 
 
 
         self._sphero_bolt_blue = SpheroBolt(
-            lap_id=self._id, 
-            color=SpheroColor.BLUE, 
-            path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
-            finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None, 
-            background=self._background_img.copy() if self._background_img is not None else None, 
-            is_lap_started=self._is_started, 
-            is_lap_stopped=self._is_stopped, 
-            debug=self._debug_blue
+            SpheroConfig(
+                lap_id=self._id, 
+                color=SpheroColor.BLUE, 
+                path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
+                finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None, 
+                background=self._background_img.copy() if self._background_img is not None else None, 
+                is_lap_started=self._is_started, 
+                is_lap_stopped=self._is_stopped, 
+                debug=self._debug_blue
             )
-
+        )
 
 
 
         self._sphero_bolt_green = SpheroBolt(
-            lap_id=self._id, 
-            color=SpheroColor.GREEN, 
-            path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
-            finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None,  
-            background=self._background_img.copy() if self._background_img is not None else None, 
-            is_lap_started=self._is_started, 
-            is_lap_stopped=self._is_stopped, 
-            debug=self._debug_green
+            SpheroConfig(
+                lap_id=self._id, 
+                color=SpheroColor.GREEN, 
+                path_frame=self._path_frame.copy() if self._path_frame is not None else None, 
+                finishline_frame=self._finishline_frame.copy() if self._finishline_frame is not None else None,  
+                background=self._background_img.copy() if self._background_img is not None else None, 
+                is_lap_started=self._is_started, 
+                is_lap_stopped=self._is_stopped, 
+                debug=self._debug_green
             )
+        )
         
         return True
 
@@ -280,18 +288,7 @@ class Lap():
 
     def get_processed_path_frame(
             self, 
-            hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
-            min_radius: Optional[int] = None, 
-            max_radius: Optional[int] = None, 
-            bilateral_diameter: int = 9,
-            bilateral_sigma_color: int = 75,
-            bilateral_sigma_space: int = 75,
-            median_kernel_size: int = 9,
-            clahe_clip_limit : float = 4.0,
-            clahe_tile_grid_size : int = 9,
-            morph_kernel_size: int = 5,
-            morph_iterator: int = 1,
-            contours_chain_approx_simple: bool = True
+            config: DetectorConfig
             ) -> Optional[cv.typing.MatLike]:
 
         if not self._is_started:
@@ -300,77 +297,25 @@ class Lap():
         
         if self._sphero_bolt_yellow is not None:
 
-            yellow = self._sphero_bolt_yellow.get_processed_path_frame(
-                hsv_ranges=hsv_ranges, 
-                min_radius=min_radius, 
-                max_radius=max_radius, 
-                bilateral_diameter=bilateral_diameter,
-                bilateral_sigma_color=bilateral_sigma_color,
-                bilateral_sigma_space=bilateral_sigma_space,
-                median_kernel_size=median_kernel_size,
-                clahe_clip_limit=clahe_clip_limit,
-                clahe_tile_grid_size=clahe_tile_grid_size,
-                morph_kernel_size=morph_kernel_size,
-                morph_iterator=morph_iterator,
-                contours_chain_approx_simple=contours_chain_approx_simple
-                )
+            yellow = self._sphero_bolt_yellow.get_processed_path_frame(config=config)
         else:
             yellow = None
 
 
         if self._sphero_bolt_red is not None:
-            red = self._sphero_bolt_red.get_processed_path_frame(
-                hsv_ranges=hsv_ranges, 
-                min_radius=min_radius, 
-                max_radius=max_radius, 
-                bilateral_diameter=bilateral_diameter,
-                bilateral_sigma_color=bilateral_sigma_color,
-                bilateral_sigma_space=bilateral_sigma_space,
-                median_kernel_size=median_kernel_size,
-                clahe_clip_limit=clahe_clip_limit,
-                clahe_tile_grid_size=clahe_tile_grid_size,
-                morph_kernel_size=morph_kernel_size,
-                morph_iterator=morph_iterator,
-                contours_chain_approx_simple=contours_chain_approx_simple
-                )
+            red = self._sphero_bolt_red.get_processed_path_frame(config=config)
         else:
             red = None
 
 
         if self._sphero_bolt_green is not None:
-            green = self._sphero_bolt_green.get_processed_path_frame(
-                hsv_ranges=hsv_ranges, 
-                min_radius=min_radius, 
-                max_radius=max_radius, 
-                bilateral_diameter=bilateral_diameter,
-                bilateral_sigma_color=bilateral_sigma_color,
-                bilateral_sigma_space=bilateral_sigma_space,
-                median_kernel_size=median_kernel_size,
-                clahe_clip_limit=clahe_clip_limit,
-                clahe_tile_grid_size=clahe_tile_grid_size,
-                morph_kernel_size=morph_kernel_size,
-                morph_iterator=morph_iterator,
-                contours_chain_approx_simple=contours_chain_approx_simple
-                )
+            green = self._sphero_bolt_green.get_processed_path_frame(config=config)
         else:
             green = None
 
 
         if self._sphero_bolt_blue is not None:
-            blue = self._sphero_bolt_blue.get_processed_path_frame(
-                hsv_ranges=hsv_ranges, 
-                min_radius=min_radius, 
-                max_radius=max_radius, 
-                bilateral_diameter=bilateral_diameter,
-                bilateral_sigma_color=bilateral_sigma_color,
-                bilateral_sigma_space=bilateral_sigma_space,
-                median_kernel_size=median_kernel_size,
-                clahe_clip_limit=clahe_clip_limit,
-                clahe_tile_grid_size=clahe_tile_grid_size,
-                morph_kernel_size=morph_kernel_size,
-                morph_iterator=morph_iterator,
-                contours_chain_approx_simple=contours_chain_approx_simple
-                )
+            blue = self._sphero_bolt_blue.get_processed_path_frame(config=config)
         else:
             blue = None
 
@@ -414,7 +359,7 @@ class Lap():
 
 
     def get_processed_finishline_frame(
-            self, 
+            self, config: DetectorConfig,
             hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
             min_radius: Optional[int] = None, 
             max_radius: Optional[int] = None,
@@ -436,77 +381,29 @@ class Lap():
             print("Lap not started yet")
             return None
 
-        yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius,
-            start_line=start_line, 
-            finish_line=finish_line, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
-        
-
-        red = self._sphero_bolt_red.get_processed_finishline_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius,
-            start_line=start_line, 
-            finish_line=finish_line, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
+        if self._sphero_bolt_yellow is not None:
+            yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(config=config)
+        else:
+            yellow = None
 
 
-        green = self._sphero_bolt_green.get_processed_finishline_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius,
-            start_line=start_line, 
-            finish_line=finish_line, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
-        
+        if self._sphero_bolt_red is not None:
+            red = self._sphero_bolt_red.get_processed_finishline_frame(config=config)
 
-        blue = self._sphero_bolt_blue.get_processed_finishline_frame(
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius,
-            start_line=start_line, 
-            finish_line=finish_line, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple
-            )
-        
+        else:
+            red = None
+
+
+        if self._sphero_bolt_green is not None:
+            green = self._sphero_bolt_green.get_processed_finishline_frame(config=config)
+        else:
+            green = None
+
+
+        if self._sphero_bolt_blue is not None:
+            blue = self._sphero_bolt_blue.get_processed_finishline_frame(config=config)
+        else:
+            blue = None
 
         if yellow is not None or red is not None:
             if red is not None and yellow is not None:
@@ -532,16 +429,16 @@ class Lap():
 
         if yellow_red is not None or blue_green is not None:
             if yellow_red is not None and blue_green is not None:
-                frame = cv.bitwise_or(yellow_red, blue_green)
+                result = cv.bitwise_or(yellow_red, blue_green)
             elif yellow_red is not None:
-                frame = yellow_red
+                result = yellow_red
             elif blue_green is not None:
-                frame = blue_green
+                result = blue_green
         else:
-            frame = None
+            result = None
 
 
-        return frame
+        return result
 
 
     def _save(self) -> bool:

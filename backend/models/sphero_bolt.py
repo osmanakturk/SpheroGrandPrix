@@ -2,63 +2,44 @@ import os
 import numpy as np
 import cv2 as cv
 from datetime import datetime
-from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, COLORS_HSV, COLORS_BGR
 from typing import Optional, Tuple
-from backend.utils import HsvColorsRange, SpheroColor
+from backend.enums import SpheroColor
+from backend.detectors.detector import Detector
+from backend.configs import DetectorConfig, SpheroConfig
+
 
 
 
 
 class SpheroBolt():
 
-    def __init__(self,
-                 lap_id: str,
-                 color:  SpheroColor, 
-                 username: Optional[str] = None,
-                 path_frame: Optional[cv.typing.MatLike] = None, 
-                 finishline_frame: Optional[cv.typing.MatLike] = None,
-                 background: Optional[cv.typing.MatLike] = None, 
-                 start_time: Optional[datetime] = None, 
-                 finish_time: Optional[datetime] = None, 
-                 total_lap_time: Optional[float] = None,
-                 path_previous_center: Optional[Tuple[int, int]] = None, 
-                 path_center: Optional[Tuple[int, int]] = None, 
-                 path_radius: Optional[int] = None,
-                 finishline_center: Optional[Tuple[int, int]] = None,
-                 finishline_previous_center: Optional[Tuple[int, int]] = None,
-                 finishline_radius: Optional[int] = None,
-                 is_started: bool = False,
-                 is_finished: bool = False, 
-                 is_lap_started: bool = False,
-                 is_lap_stopped: bool = False,
-                 debug: bool = False
-                 ):
-        
-
-        self._lap_id = lap_id
-        self._color = color
-        self._id = f"{lap_id}_{self._color.value}"
-        self._username = username if username is not None else self._color.value
-        self._background = background.copy() if background is not None else None
-        self._is_started = is_started
-        self._is_finished = is_finished
-        self._is_lap_started = is_lap_started
-        self._is_lap_stopped = is_lap_stopped
-        self._start_time = start_time
-        self._finish_time = finish_time
-        self._total_lap_time = total_lap_time
-        self._path_previous_center = path_previous_center
-        self._path_center = path_center
-        self._path_radius = path_radius
-        self._finishline_center = finishline_center
-        self._finishline_previous_center = finishline_previous_center
-        self._finishline_radius = finishline_radius
-        self._path_frame = path_frame.copy() if path_frame is not None else None
-        self._finishline_frame = finishline_frame.copy() if finishline_frame is not None else None
+    def __init__(self, config:SpheroConfig):
+    
+        self._lap_id = config.lap_id
+        self._color = config.color
+        self._id = f"{config.lap_id}_{self._color.value}"
+        self._username = self._color.value
+        self._path_frame = config.path_frame.copy() if config.path_frame is not None else None
+        self._finishline_frame = config.finishline_frame.copy() if config.finishline_frame is not None else None
         self._path_canvas = np.zeros_like(self._path_frame, np.uint8) if self._path_frame is not None else None
         self._finishline_canvas = np.zeros_like(self._finishline_frame, np.uint8) if self._finishline_frame is not None else None
+        self._background = config.background.copy() if config.background is not None else None
+        self._is_lap_started = config.is_lap_started
+        self._is_lap_stopped = config.is_lap_stopped
+        self._debug = config.debug
+        self._is_started: bool = False
+        self._is_finished: bool = False
+        self._start_time: Optional[datetime] = None
+        self._finish_time: Optional[datetime] = None
+        self._total_lap_time: Optional[float] = None
+        self._path_previous_center: Optional[Tuple[int, int]] = None
+        self._path_center: Optional[Tuple[int, int]] = None
+        self._path_radius: Optional[int] = None
+        self._finishline_center: Optional[Tuple[int, int]] = None
+        self._finishline_previous_center: Optional[Tuple[int, int]] = None
+        self._finishline_radius: Optional[int] = None
         self._path_img = None
-        self._debug = debug
+        
   
 
 
@@ -287,81 +268,26 @@ class SpheroBolt():
 
     def get_processed_path_frame(
             self, 
-            hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
-            min_radius: Optional[int] = None, 
-            max_radius: Optional[int] = None, 
-            bilateral_diameter: int = 9,
-            bilateral_sigma_color: int = 75,
-            bilateral_sigma_space: int = 75,
-            median_kernel_size: int = 9,
-            clahe_clip_limit : float = 4.0,
-            clahe_tile_grid_size : int = 9,
-            morph_kernel_size: int = 5,
-            morph_iterator: int = 1,
-            contours_chain_approx_simple: bool = True
+            config:DetectorConfig 
             ) -> Optional[cv.typing.MatLike]:
         
-        from backend.detectors.detector import Detector
+        config.sphero_bolt = self
+        config.debug = self._debug
 
-        return Detector.get_detected_path_frame(
-            sphero_bolt=self,
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple, 
-            debug=self._debug
-            )
+        return Detector.get_detected_path_frame(config=config)
 
 
 
 
     def get_processed_finishline_frame(
             self, 
-            hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
-            min_radius: Optional[int] = None, 
-            max_radius: Optional[int] = None,
-            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-            finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-            bilateral_diameter: int = 9,
-            bilateral_sigma_color: int = 75,
-            bilateral_sigma_space: int = 75,
-            median_kernel_size: int = 9,
-            clahe_clip_limit : float = 4.0,
-            clahe_tile_grid_size : int = 9,
-            morph_kernel_size: int = 5,
-            morph_iterator: int = 1,
-            contours_chain_approx_simple: bool = True
+            config:DetectorConfig
             ) -> Optional[cv.typing.MatLike]:
         
-        from backend.detectors.detector import Detector
+        config.sphero_bolt = self
+        config.debug = self._debug
 
-
-        return Detector.get_detected_finishline_frame(
-            sphero_bolt=self, 
-            hsv_ranges=hsv_ranges, 
-            min_radius=min_radius, 
-            max_radius=max_radius,
-            start_line=start_line, 
-            finish_line=finish_line, 
-            bilateral_diameter=bilateral_diameter,
-            bilateral_sigma_color=bilateral_sigma_color,
-            bilateral_sigma_space=bilateral_sigma_space,
-            median_kernel_size=median_kernel_size,
-            clahe_clip_limit=clahe_clip_limit,
-            clahe_tile_grid_size=clahe_tile_grid_size,
-            morph_kernel_size=morph_kernel_size,
-            morph_iterator=morph_iterator,
-            contours_chain_approx_simple=contours_chain_approx_simple,
-            debug=self._debug
-            )
+        return Detector.get_detected_finishline_frame(config=config)
 
 
 
@@ -423,6 +349,7 @@ class SpheroBolt():
             self._total_lap_time = None
             
             self._path_canvas = np.zeros_like(self._path_canvas, dtype=np.uint8) if self._path_canvas is not None else None
+            self._finishline_canvas = np.zeros_like(self._finishline_canvas, dtype=np.uint8) if self._finishline_canvas is not None else None
 
             self._path_center = None
             self._path_previous_center = None

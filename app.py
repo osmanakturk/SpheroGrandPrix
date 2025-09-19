@@ -1,10 +1,10 @@
 from flask import Flask, render_template, url_for, send_from_directory, request, redirect, Response, jsonify
-from backend.models.sphero_bolt import SpheroBolt
 from typing import Generator, Optional, Tuple, Literal
 from backend.models.lap import Lap
 import threading, atexit, time, json, sqlite3, sys, os
 import numpy as np
-from backend.utils import CaptureApi, CameraConfig
+from backend.enums import CaptureApi, HsvColorsRange
+from backend.configs import CameraConfig, DetectorConfig
 from backend.trackers.camera_tracker import (start_tracker,  
                                              get_tracker, 
                                              lap_start, 
@@ -58,9 +58,9 @@ def ensure_tracker_started() -> bool:
                     cap_api=CaptureApi.Windows, 
                     cap_index=2, 
                     perspective_top_left=(200, 0), 
-                    perspective_top_right=(490, 0), 
+                    perspective_top_right=(370, 0), 
                     perspective_bottom_left=(200, 480), 
-                    perspective_bottom_right=(490, 480)
+                    perspective_bottom_right=(370, 480)
                     )
 
                 )
@@ -68,11 +68,52 @@ def ensure_tracker_started() -> bool:
     return is_tracker_started
 
 
+def ensure_get_tracker():
+    path_detector_config = DetectorConfig(
+        hsv_ranges=HsvColorsRange.NORMAL, 
+        min_radius=15, 
+        max_radius=35, 
+        bilateral_diameter=9, 
+        bilateral_sigma_color=75, 
+        bilateral_sigma_space=75, 
+        median_kernel_size=9, 
+        clahe_clip_limit=4, 
+        clahe_tile_grid_size=9, 
+        morph_kernel_size=5, 
+        morph_iterator=1, 
+        contours_chain_approx_simple=True
+    )
+
+
+
+    finishline_detector_config = DetectorConfig(
+        hsv_ranges=HsvColorsRange.NORMAL, 
+            min_radius=15, 
+            max_radius=35, 
+            start_line=((0, 240), (131, 240)), 
+            finish_line=((160, 240), (290, 240)), 
+            bilateral_diameter=9,
+            bilateral_sigma_color=75,
+            bilateral_sigma_space=75,
+            median_kernel_size=9,
+            clahe_clip_limit=4,
+            clahe_tile_grid_size=9,
+            morph_kernel_size=5,
+            morph_iterator=1,
+            contours_chain_approx_simple=True
+    )
+
+
+    return get_tracker(path_detector_config=path_detector_config, 
+                       finishline_detector_config=finishline_detector_config, 
+                       debug=False)
+
+
 
 def get_lap() -> Lap:
     ensure_tracker_started()
 
-    _, _, lap = get_tracker()
+    _, _, lap = ensure_get_tracker()
 
     return lap
 
@@ -83,7 +124,7 @@ def stream_path() -> Generator[bytes, None, None]:
     boundary = b"--frame"
 
     while True:
-        path_jpg, _, _ = get_tracker()
+        path_jpg, _, _ = ensure_get_tracker()
 
         if path_jpg is None:
             continue
@@ -100,7 +141,7 @@ def stream_finishline() -> Generator[bytes, None, None]:
     boundary = b"--frame"
 
     while True:
-        _, finishline_jpg, _ = get_tracker()
+        _, finishline_jpg, _ = ensure_get_tracker()
 
         if finishline_jpg is None:
             continue
@@ -151,8 +192,83 @@ def start_lap_api():
 
 @app.route("/lap/stop", methods=["POST"])
 def stop_lap_api():
-    ok = lap_stop()
-    return jsonify({"ok": bool(ok)}), 200
+
+    lap_resuls = {"sphero": [], "score": {"best_score": 0, "last_score": 0, "mean_score": 0}}
+    
+    
+    try:
+        lap = get_lap()
+    
+   
+        lap_id = lap.id
+        red_username = lap.sphero_bolt_red.username.upper()
+        red_start_time = lap.sphero_bolt_red.start_time
+        red_finish_time = lap.sphero_bolt_red.finish_time
+        red_lap_time = lap.sphero_bolt_red.total_lap_time
+        red_img_path = f"/paths/{lap_id}_Red.png"
+
+        yellow_username = lap.sphero_bolt_yellow.username.upper()
+        yellow_start_time = lap.sphero_bolt_yellow.start_time
+        yellow_finish_time = lap.sphero_bolt_yellow.finish_time
+        yellow_lap_time = lap.sphero_bolt_yellow.total_lap_time
+        yellow_img_path = f"/paths/{lap_id}_Yellow.png"
+
+        blue_username = lap.sphero_bolt_blue.username.upper()
+        blue_start_time = lap.sphero_bolt_blue.start_time
+        blue_finish_time = lap.sphero_bolt_blue.finish_time
+        blue_lap_time = lap.sphero_bolt_blue.total_lap_time
+        blue_img_path = f"/paths/{lap_id}_Blue.png"
+
+        green_username = lap.sphero_bolt_green.username.upper()
+        green_start_time = lap.sphero_bolt_green.start_time
+        green_finish_time = lap.sphero_bolt_green.finish_time
+        green_lap_time = lap.sphero_bolt_green.total_lap_time
+        greenimg_path = f"/paths/{lap_id}_Green.png"
+
+
+        if red_lap_time is not None:
+            lap_resuls["sphero"].append({"username": red_username, "start_time": red_start_time.strftime("%H:%M:%S"), "finish_time": red_finish_time.strftime("%H:%M:%S"), "lap_time": red_lap_time, "img_path": red_img_path})
+        if yellow_lap_time is not None:
+            lap_resuls["sphero"].append({"username": yellow_username, "start_time": yellow_start_time.strftime("%H:%M:%S"), "finish_time": yellow_finish_time.strftime("%H:%M:%S"), "lap_time": yellow_lap_time, "img_path": yellow_img_path})
+        if blue_lap_time is not None:
+            lap_resuls["sphero"].append({"username": blue_username, "start_time": blue_start_time.strftime("%H:%M:%S"), "finish_time": blue_finish_time.strftime("%H:%M:%S"), "lap_time": blue_lap_time, "img_path": blue_img_path})
+        if green_lap_time is not None:
+            lap_resuls["sphero"].append({"username": green_username, "start_time": green_start_time.strftime("%H:%M:%S"), "finish_time": green_finish_time.strftime("%H:%M:%S"), "lap_time": green_lap_time, "img_path": greenimg_path})
+
+  
+
+        
+
+        if len(lap_resuls["sphero"]) > 0:
+
+            lap_resuls["sphero"].sort(key= lambda x: x["lap_time"])
+
+            lap_best = lap_resuls["sphero"][0]["lap_time"]
+            lap_last = lap_resuls["sphero"][-1]["lap_time"]
+
+            total_lap_time = 0.0
+
+            for result in lap_resuls["sphero"]:
+                total_lap_time += result["lap_time"]
+
+            lap_mean = total_lap_time / len(lap_resuls["sphero"])
+
+            lap_resuls["score"] = {"best_score": lap_best, "last_score": lap_last, "mean_score": lap_mean}
+         
+        
+      
+    except Exception as e:
+        
+        print(e)
+    finally:
+        ok = lap_stop()
+      
+
+
+    
+    return jsonify(lap_resuls), 200
+
+
 
 
 @app.route("/lap/state")
@@ -207,7 +323,8 @@ def stats():
         "red": 0, 
         "yellow": 0, 
         "blue": 0, 
-        "green": 0
+        "green": 0,
+        "dashboard": []
     }
 
 
@@ -217,17 +334,32 @@ def stats():
             cursor.execute("SELECT * FROM sphero_bolt")
 
             data = cursor.fetchall()
-            data = np.array(data)
 
-            totals["games"] = len(data) // 4
+            if len(data) > 0:
+                data = np.array(data)
 
-            spheros = data[data[:, 7] != None]
+                totals["games"] = len(data) // 4
 
-            totals["spheros"] = len(spheros)
-            totals["red"] = len(spheros[spheros[:, 2] == "Red"])
-            totals["yellow"] = len(spheros[spheros[:, 2] == "Yellow"])
-            totals["blue"] = len(spheros[spheros[:, 2] == "Blue"])
-            totals["green"] = len(spheros[spheros[:, 2] == "Green"])
+                spheros = data[data[:, 7] != None]
+                totals["spheros"] = len(spheros)
+                totals["red"] = len(spheros[spheros[:, 2] == "Red"])
+                totals["yellow"] = len(spheros[spheros[:, 2] == "Yellow"])
+                totals["blue"] = len(spheros[spheros[:, 2] == "Blue"])
+                totals["green"] = len(spheros[spheros[:, 2] == "Green"])
+
+                dashboard = spheros[spheros[:, 7].astype(float).argsort()]
+
+                for sphero in dashboard:
+                    username = str(sphero[3]).upper()
+                    lap_time = float(sphero[7])
+                    img_path = str(sphero[4])
+                    lap_id = str(sphero[1])
+                    arr = lap_id.split("_")
+                    date = f"{arr[0]}/{arr[1]}/{arr[2]}"
+                    time = f"{arr[3]}:{arr[4]}"
+                    result = f"{username} {lap_time} sec ({date} {time})"
+                    totals["dashboard"].append({"result": result, "img_path": img_path})
+                
 
     resp = jsonify(totals)
     resp.headers["Cache-Control"] = "no-store, max-age=0"
@@ -276,6 +408,11 @@ def username_change_api(color, username):
 def game_score():
     lap = get_lap()
     pass
+
+
+@app.route("/paths/<path:filename>")
+def img_path(filename):
+    return send_from_directory("paths", filename)
 
 
 

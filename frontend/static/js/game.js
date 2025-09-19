@@ -74,6 +74,7 @@ async function updateStats() {
         let total_yellow = document.getElementById("total_yellow");
         let total_blue = document.getElementById("total_blue");
         let total_green = document.getElementById("total_green");
+        let dashboard_list = document.getElementById("dashboard_list")
 
 
         total_games.textContent = totals.games ?? 0
@@ -82,6 +83,41 @@ async function updateStats() {
         total_yellow.textContent = totals.yellow ?? 0
         total_blue.textContent = totals.blue ?? 0
         total_green.textContent = totals.green ?? 0
+
+        totals.dashboard.forEach(element => {
+            let btnNode = document.createElement("button");
+            btnNode.type = "button"
+            btnNode.classList.add("btn", "btn-warning", "text-start", "list-group-item", "my-1", "border", "border-1", "border-black", "rounded-3")
+            btnNode.setAttribute("data-bs-toggle", "modal")
+            btnNode.setAttribute("data-bs-target", `#${element.img_path}`)
+            
+            let textNode = document.createTextNode(element.result);
+            btnNode.appendChild(textNode)
+
+            dashboard_list.appendChild(btnNode)
+            dashboard_list.innerHTML += `<div class="modal fade" id="${element.img_path}" tabindex="-1" aria-labelledby="${element.img_path}"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">${element.result}</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body d-flex justify-content-center">
+                                            <img class="img-fluid" src="/${element.img_path}">
+                                        </div>
+                                        <div class="modal-footer d-flex justify-content-center">
+                                            <button type="button" class="btn btn-danger"
+                                                data-bs-dismiss="modal">Close</button>
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`
+        });
+
+
 
         await drawPlot(totals)
 
@@ -103,15 +139,36 @@ async function stopLap() {
         console.error(res.status)
     }
     const data = await res.json();
-    console.log(`Stop Lap: ${data.ok}`)
+    
+
+    
+
+    let best_score = document.getElementById("best_score")
+    best_score.textContent = data.score.best_score
+
+    let mean_score = document.getElementById("mean_score")
+    mean_score.textContent = data.score.mean_score
+
+    let last_score = document.getElementById("last_score")
+    last_score.textContent = data.score.last_score
+
+    let lap_results = document.getElementById("lap_results")
+    
+
+    data.sphero.forEach((element, index) => {
+        lap_results.innerHTML += `<div class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
+                                    <span class="my-1 fs-1 fw-bolder text-info">Score: ${index+1}</span>
+                                    <span class="my-1 fs-6 fw-bolder text-info">Username: ${element.username}</span>
+                                    <span class="my-1 fs-6 fw-bolder text-info">Start Time: ${element.start_time}</span>
+                                    <span class="my-1 fs-6 fw-bolder text-info">Finish Time: ${element.finish_time}</span>
+                                    <span class="my-1 fs-6 fw-bolder text-info">Lap Time: ${element.lap_time}</span>
+                                    <img class="img-fluid my-auto" src="${element.img_path}" alt="${index+1}">
+                                </div>`
+    });
+
+
 
     await updateStats()
-
-    let best_score = document.getElementById("best_score");
-    let mean_score = document.getElementById("mean_score");
-    let last_score = document.getElementById("last_score");
-
-
 }
 
 
@@ -128,14 +185,18 @@ async function reset(color) {
 
 async function changeUsername(color) {
     let element = document.getElementById(`${color}_username`);
-    if (!res.ok) {
-        console.error(res.status)
-    }
+    
+    
+   
     let username = (element?.value ?? "").trim();
     if (username.length < 1) {
         username = color
     }
     const res = await fetch(`/username_change/${encodeURIComponent(color)}/${encodeURIComponent(username)}`, { method: "POST" });
+     if (!res.ok) {
+        console.error(res.status)
+    }
+    
     const data = await res.json();
     console.log(`Change Username: ${data.ok}, Color: ${color}, Username: ${username}`)
 }

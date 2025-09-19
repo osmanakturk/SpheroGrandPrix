@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="container d-flex align-items-center justify-content-center">
-                    <canvas id="canvas_sphero" ></canvas>
+                    <canvas id="canvas_sphero"></canvas>
                 </div>
 
                 <div class="container">
@@ -132,19 +132,19 @@
                                     <div class="input-group my-1">
                                         <label class="input-group-text font-size-manual" for="best_score">Best Score:
                                         </label>
-                                        <span class="form-control font-size-manual" id="best_score">None</span>
+                                        <span class="form-control font-size-manual" id="best_score"></span>
                                     </div>
 
                                     <div class="input-group my-1">
                                         <label class="input-group-text font-size-manual" for="mean_score">Mean Score:
                                         </label>
-                                        <span class="form-control font-size-manual" id="mean_score">None</span>
+                                        <span class="form-control font-size-manual" id="mean_score"></span>
                                     </div>
 
                                     <div class="input-group my-1">
                                         <label class="input-group-text font-size-manual" for="last_score">Last Score:
                                         </label>
-                                        <span class="form-control font-size-manual" id="last_score">None</span>
+                                        <span class="form-control font-size-manual" id="last_score"></span>
                                     </div>
 
                                 </div>
@@ -153,33 +153,9 @@
 
 
 
-                            <div class="col-12 p-5 d-flex justify-content-around align-self-stretch">
+                            <div id="lap_results" class="col-12 p-5 d-flex justify-content-around align-self-stretch">
 
-                                <div
-                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
-
-                                    <span class="my-2 fs-1 fw-bolder text-info">1</span>
-                                    <img class="img-fluid my-auto" src="" alt="1">
-                                </div>
-
-                                <div
-                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
-                                    <span class="my-2 fs-1 fw-bolder text-info">2</span>
-                                    <img class="img-fluid my-auto" src="" alt="2">
-
-                                </div>
-
-                                <div
-                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
-                                    <span class="my-2 fs-1 fw-bolder text-info">3</span>
-                                    <img class="img-fluid my-auto" src="" alt="3">
-                                </div>
-
-                                <div
-                                    class="col-2 bg-danger rounded-5 border border-5 border-black p-2 d-flex flex-column justify-content-center align-items-center">
-                                    <span class="my-2 fs-1 fw-bolder text-info">4</span>
-                                    <img class="img-fluid my-auto" src="" alt="4">
-                                </div>
+                                
                             </div>
 
 
@@ -213,7 +189,7 @@
 
         <div class="main-second-row  row p-2">
 
-            <div class="col-7  bg-light d-flex justify-content-evenly">
+            <div class="col-7  bg-light d-flex justify-content-evenly align-content-center">
 
 
                 <div
@@ -246,12 +222,13 @@
                                     <div class="card-body">
 
                                         <div class="input-group my-1">
-                                            <label class="input-group-text font-size-manual" for="red_username">@</label>
+                                            <label class="input-group-text font-size-manual"
+                                                for="red_username">@</label>
                                             <input class="form-control font-size-manual" type="text"
                                                 placeholder="{{ lap.sphero_bolt_red.username or 'Enter username' }}"
                                                 id="red_username">
-                                            <input type="button" value="Change"
-                                                class="btn btn-success font-size-manual" onclick="changeUsername('red')">
+                                            <input type="button" value="Change" class="btn btn-success font-size-manual"
+                                                onclick="changeUsername('red')">
                                         </div>
 
                                         <div class="input-group my-1">
@@ -275,7 +252,8 @@
                                         </div>
 
                                         <div class="btn-group d-flex">
-                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('red')">Reset</button>
+                                            <button class="col btn btn-warning font-size-manual" type="button"
+                                                onclick="reset('red')">Reset</button>
                                         </div>
 
 
@@ -296,12 +274,13 @@
                                     <div class="card-body">
 
                                         <div class="input-group my-1">
-                                            <label class="input-group-text font-size-manual" for="yellow_username">@</label>
+                                            <label class="input-group-text font-size-manual"
+                                                for="yellow_username">@</label>
                                             <input class="form-control font-size-manual" type="text"
                                                 placeholder="{{ lap.sphero_bolt_yellow.username or 'Enter username' }}"
                                                 id="yellow_username">
-                                            <input type="button" value="Change"
-                                                class="btn btn-success font-size-manual" onclick="changeUsername('yellow')">
+                                            <input type="button" value="Change" class="btn btn-success font-size-manual"
+                                                onclick="changeUsername('yellow')">
                                         </div>
 
                                         <div class="input-group my-1">
@@ -323,7 +302,8 @@
                                         </div>
 
                                         <div class="btn-group d-flex">
-                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('yellow')">Reset</button>
+                                            <button class="col btn btn-warning font-size-manual" type="button"
+                                                onclick="reset('yellow')">Reset</button>
                                         </div>
 
 
@@ -344,12 +324,13 @@
                                     <div class="card-body">
 
                                         <div class="input-group my-1">
-                                            <label class="input-group-text font-size-manual" for="blue_username">@</label>
+                                            <label class="input-group-text font-size-manual"
+                                                for="blue_username">@</label>
                                             <input class="form-control font-size-manual" type="text"
                                                 placeholder="{{ lap.sphero_bolt_blue.username or 'Enter username' }}"
                                                 id="blue_username">
-                                            <input type="button" value="Change"
-                                                class="btn btn-success font-size-manual" onclick="changeUsername('blue')">
+                                            <input type="button" value="Change" class="btn btn-success font-size-manual"
+                                                onclick="changeUsername('blue')">
                                         </div>
 
                                         <div class="input-group my-1">
@@ -371,7 +352,8 @@
                                         </div>
 
                                         <div class="btn-group d-flex">
-                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('blue')">Reset</button>
+                                            <button class="col btn btn-warning font-size-manual" type="button"
+                                                onclick="reset('blue')">Reset</button>
                                         </div>
 
 
@@ -392,12 +374,13 @@
                                     <div class="card-body">
 
                                         <div class="input-group my-1">
-                                            <label class="input-group-text font-size-manual" for="green_username">@</label>
+                                            <label class="input-group-text font-size-manual"
+                                                for="green_username">@</label>
                                             <input class="form-control font-size-manual" type="text"
                                                 placeholder="{{ lap.sphero_bolt_green.username or 'Enter username' }}"
                                                 id="green_username">
-                                            <input type="button" value="Change"
-                                                class="btn btn-success font-size-manual" onclick="changeUsername('green')">
+                                            <input type="button" value="Change" class="btn btn-success font-size-manual"
+                                                onclick="changeUsername('green')">
                                         </div>
 
                                         <div class="input-group my-1">
@@ -419,7 +402,8 @@
                                         </div>
 
                                         <div class="btn-group d-flex">
-                                            <button class="col btn btn-warning font-size-manual" type="button" onclick="reset('green')">Reset</button>
+                                            <button class="col btn btn-warning font-size-manual" type="button"
+                                                onclick="reset('green')">Reset</button>
                                         </div>
 
 
@@ -438,8 +422,12 @@
 
                     </div>
 
-                    <div class="dashboard col-5 bg-info p-3">
-                        dashboard
+                    <div class="dashboard col-5 bg-info p-1">
+                        <ul id="dashboard_list" class="list-group list-group-numbered overflow-auto"
+                            style="max-height: 100vh;">
+                            
+
+                        </ul>
                     </div>
                 </div>
 

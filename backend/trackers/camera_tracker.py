@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import time, os, sys
-from backend.enums import HsvColorsRange
+from backend.enums import CaptureApi
 from backend.configs import CameraConfig, DetectorConfig
 from backend.models.lap import Lap
 from backend.models.camera import Camera
@@ -417,7 +417,29 @@ if __name__=="__main__":
     cv.createTrackbar("reset_green", trackbar, 0, 1, trackbar_reset_green)
 
 
-    start_tracker()
+
+    start_tracker(
+        finishline_cap_config=CameraConfig(
+            cap_api=CaptureApi.Windows, 
+            cap_index=1, 
+            perspective_top_left=(200, 0), 
+            perspective_top_right=(490, 0), 
+            perspective_bottom_left=(200, 480), 
+            perspective_bottom_right=(490, 480), 
+            start_line=((0, 240), (131, 240)), 
+            finish_line=((160, 240), (290, 240))
+            ), 
+
+        path_cap_config=CameraConfig(
+            cap_api=CaptureApi.Windows, 
+            cap_index=2, 
+            perspective_top_left=(200, 0), 
+            perspective_top_right=(370, 0), 
+            perspective_bottom_left=(200, 480), 
+            perspective_bottom_right=(370, 480)
+            )
+
+    )
 
     while True:
         path_buf, finishline_buf, lap = get_tracker(debug=False)

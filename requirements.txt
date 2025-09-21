@@ -1,7 +1,6 @@
 flask
 opencv-contrib-python #opencv-python
 numpy
-ultralytics
 pygrabber
 spherov2
 bleak

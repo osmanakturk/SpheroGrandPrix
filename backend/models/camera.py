@@ -14,10 +14,9 @@ class Camera():
     def __init__(self, config: CameraConfig):
 
         
-        self._cap_index = config.cap_api
         self._cap_index = config.cap_index
         self._cap_source = config.cap_source
-        self._cap_api = config.cap_api.value
+        self._cap_api = config.cap_api.value if config.cap_api is not None else None
         self._cap_width = config.cap_width or 640
         self._cap_height = config.cap_height or 480
         self._cap_fps = config.cap_fps or 30
@@ -200,14 +199,19 @@ class Camera():
             self._cap = cv.VideoCapture(self._cap_index, self._cap_api)
 
         elif self._cap_source is not None:
-            self._cap = cv.VideoCapture(self._cap_source)
+            self._cap = cv.VideoCapture(self._cap_source, self._cap_api)
 
         else:
-            print(f"Camera{self._cap_index}: Either cap_index or cap_source must be provided.")
+            print(f"Index: {self._cap_index}, Source: {self._cap_source} Camera: Either cap_index or cap_source must be provided.")
             return False
 
-        if not self._cap or not self._cap.isOpened():
-            print(f"Camera{self._cap_index}: Failed to open capture.")
+        if self._cap is None:
+
+            if self._cap_index is not None:
+                print(f"Camera {self._cap_index}: Failed to open capture.")
+            elif self._cap_source is not None:
+                print(f"Camera {self._cap_source}: Failed to open capture.")
+
             return False
 
 
@@ -219,8 +223,8 @@ class Camera():
         #if self._cap_fps:
         #    self._cap.set(cv.CAP_PROP_FPS, self._cap_fps)
 
-        for _ in range(10):
-            self._cap.read()
+        #for _ in range(10):
+        #    self._cap.read()
         
         return True
 

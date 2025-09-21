@@ -8,6 +8,7 @@ class CaptureApi(Enum):
     Windows = cv.CAP_DSHOW
     Linux = cv.CAP_V4L2
     Mac = cv.CAP_AVFOUNDATION
+    FFMPEG = cv.CAP_FFMPEG
 
 
 

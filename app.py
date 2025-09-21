@@ -5,7 +5,7 @@ import threading, atexit, time, json, sqlite3, sys, os
 import numpy as np
 from backend.enums import CaptureApi, HsvColorsRange
 from backend.configs import CameraConfig, DetectorConfig
-from backend.trackers.camera_tracker import (start_tracker,  
+from backend.services.camera_tracker import (start_tracker,  
                                              get_tracker, 
                                              lap_start, 
                                              lap_stop, 
@@ -39,31 +39,30 @@ is_tracker_started = False
 def ensure_tracker_started() -> bool:
     global is_tracker_started
 
-    with LOCK:
-        if not is_tracker_started:
-            is_tracker_started = start_tracker(
-                
-                finishline_cap_config=CameraConfig(
-                    cap_api=CaptureApi.Windows, 
-                    cap_index=1, 
-                    perspective_top_left=(200, 0), 
-                    perspective_top_right=(490, 0), 
-                    perspective_bottom_left=(200, 480), 
-                    perspective_bottom_right=(490, 480), 
-                    start_line=((0, 240), (131, 240)), 
-                    finish_line=((160, 240), (290, 240))
-                    ), 
+   
+    if not is_tracker_started:
+        is_tracker_started = start_tracker(
+            
+            finishline_cap_config=CameraConfig(
+                cap_api=CaptureApi.Windows, 
+                cap_index=1, 
+                perspective_top_left=(200, 0), 
+                perspective_top_right=(490, 0), 
+                perspective_bottom_left=(200, 480), 
+                perspective_bottom_right=(490, 480), 
+                start_line=((0, 240), (131, 240)), 
+                finish_line=((160, 240), (290, 240))
+                ), 
 
-                path_cap_config=CameraConfig(
-                    cap_api=CaptureApi.Windows, 
-                    cap_index=2, 
-                    perspective_top_left=(200, 0), 
-                    perspective_top_right=(370, 0), 
-                    perspective_bottom_left=(200, 480), 
-                    perspective_bottom_right=(370, 480)
-                    )
-
+            path_cap_config=CameraConfig(
+                cap_api=CaptureApi.Windows, 
+                cap_index=2, 
+                perspective_top_left=(200, 0), 
+                perspective_top_right=(370, 0), 
+                perspective_bottom_left=(200, 480), 
+                perspective_bottom_right=(370, 480)
                 )
+            )
             
     return is_tracker_started
 
@@ -130,8 +129,8 @@ def stream_path() -> Generator[bytes, None, None]:
             continue
         
         yield(boundary + b"\r\n" 
-              + b"Content-Type: image/jpeg\r\n"
-              + b"Content-Length: " + str(len(path_jpg)).encode() 
+              + b"Content-Type: image/jpeg"
+              + b"\r\nContent-Length: " + str(len(path_jpg)).encode() 
               +b"\r\n\r\n" + path_jpg + b"\r\n") 
 
 
@@ -147,8 +146,8 @@ def stream_finishline() -> Generator[bytes, None, None]:
             continue
         
         yield(boundary + b"\r\n" 
-              + b"Content-Type: image/jpeg\r\n"
-              + b"Content-Length: " + str(len(finishline_jpg)).encode() 
+              + b"Content-Type: image/jpeg"
+              + b"\r\nContent-Length: " + str(len(finishline_jpg)).encode() 
               +b"\r\n\r\n" + finishline_jpg + b"\r\n") 
 
 

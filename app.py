@@ -45,7 +45,7 @@ def ensure_tracker_started() -> bool:
             
             finishline_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
-                cap_index=1, 
+                cap_index=2, 
                 perspective_top_left=(200, 0), 
                 perspective_top_right=(490, 0), 
                 perspective_bottom_left=(200, 480), 
@@ -56,7 +56,7 @@ def ensure_tracker_started() -> bool:
 
             path_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
-                cap_index=2, 
+                cap_index=1, 
                 perspective_top_left=(200, 0), 
                 perspective_top_right=(370, 0), 
                 perspective_bottom_left=(200, 480), 

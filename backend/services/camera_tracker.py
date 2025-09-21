@@ -273,6 +273,8 @@ def get_tracker(
         path_result = cv.bitwise_or(perspectived_path_frame, returned_path_frame) 
     else:
         cv.putText(perspectived_path_frame, "START", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        cv.putText(perspectived_path_frame, "GAME", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
         path_result = perspectived_path_frame
 
     
@@ -283,6 +285,8 @@ def get_tracker(
         finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) 
     else: 
         cv.putText(perspectived_finishline_frame, "START", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        cv.putText(perspectived_finishline_frame, "GAME", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
         finishline_result = perspectived_finishline_frame
     
 

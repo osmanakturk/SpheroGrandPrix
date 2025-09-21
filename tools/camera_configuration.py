@@ -514,8 +514,8 @@ graph = FilterGraph()
 
 devices = graph.get_input_devices()
 
-for i, name in enumerate(devices):
-    print(f"[{i}] {name}")
+for idx, name in enumerate(devices):
+    print(f"[{idx}] {name}")
 
 
 

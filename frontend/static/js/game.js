@@ -199,6 +199,8 @@ async function changeUsername(color) {
     
     const data = await res.json();
     console.log(`Change Username: ${data.ok}, Color: ${color}, Username: ${username}`)
+
+    element.value = ""
 }
 
 

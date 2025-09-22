@@ -8,6 +8,8 @@ async function startLap() {
     }
     const data = await res.json();
     console.log(`Start Lap: ${data.ok}`)
+    let lap_results = document.getElementById("lap_results")
+    lap_results.innerHTML = ""
 
 }
 

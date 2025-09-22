@@ -151,25 +151,11 @@ def main(test:bool = False):
 
             test_overlay = frame.copy()
 
-            test_points1 = np.array([
-                [295, 64], 
-                [296, 330], 
-                [388, 109]
-                ])
+            test_points1 = np.array(((296, 65), (353, 381), (395, 90)))
             
-            test_points2 = np.array([
-                [295, 64], 
-                [242, 131], 
-                [244, 323],
-                [348, 337], 
-                [346, 137] 
-                ])
+            test_points2 = np.array(((296, 65), (226, 120), (246, 366), (460, 396), (440, 140)))
 
-            test_points3 = np.array([
-                [295, 64], 
-                [232, 480], 
-                [296, 330]
-                ])
+            test_points3 = np.array(((296, 65), (310, 480), (353, 381)))
             
             cv.fillPoly(test_overlay, [test_points1], (255, 0, 0))
             cv.fillPoly(test_overlay, [test_points2], (0, 0, 255))

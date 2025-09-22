@@ -54,13 +54,9 @@ def ensure_tracker_started() -> bool:
                 finish_line=((160, 240), (290, 240))
                 ), 
 
-            path_cap_config=CameraConfig(
+            status_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
-                cap_index=1, 
-                perspective_top_left=(200, 0), 
-                perspective_top_right=(370, 0), 
-                perspective_bottom_left=(200, 480), 
-                perspective_bottom_right=(370, 480)
+                cap_index=1
                 )
             )
             
@@ -68,22 +64,9 @@ def ensure_tracker_started() -> bool:
 
 
 def ensure_get_tracker():
-    path_detector_config = DetectorConfig(
-        hsv_ranges=HsvColorsRange.NORMAL, 
-        min_radius=15, 
-        max_radius=35, 
-        bilateral_diameter=9, 
-        bilateral_sigma_color=75, 
-        bilateral_sigma_space=75, 
-        median_kernel_size=9, 
-        clahe_clip_limit=4, 
-        clahe_tile_grid_size=9, 
-        morph_kernel_size=5, 
-        morph_iterator=1, 
-        contours_chain_approx_simple=True
-    )
-
-
+    back_points=[ [295, 64], [296, 330], [388, 109] ]
+    middle_points=[ [295, 64], [242, 131], [244, 323], [348, 337], [346, 137] ]
+    front_points= [ [295, 64], [232, 480], [296, 330] ]
 
     finishline_detector_config = DetectorConfig(
         hsv_ranges=HsvColorsRange.NORMAL, 
@@ -103,7 +86,9 @@ def ensure_get_tracker():
     )
 
 
-    return get_tracker(path_detector_config=path_detector_config, 
+    return get_tracker(back_points=back_points, 
+                       middle_points=middle_points, 
+                       front_points=front_points, 
                        finishline_detector_config=finishline_detector_config, 
                        debug=False)
 
@@ -117,21 +102,21 @@ def get_lap() -> Lap:
     return lap
 
 
-def stream_path() -> Generator[bytes, None, None]:
+def stream_status() -> Generator[bytes, None, None]:
     ensure_tracker_started()
 
     boundary = b"--frame"
 
     while True:
-        path_jpg, _, _ = ensure_get_tracker()
+        status_jpg, _, _ = ensure_get_tracker()
 
-        if path_jpg is None:
+        if status_jpg is None:
             continue
         
         yield(boundary + b"\r\n" 
               + b"Content-Type: image/jpeg"
-              + b"\r\nContent-Length: " + str(len(path_jpg)).encode() 
-              +b"\r\n\r\n" + path_jpg + b"\r\n") 
+              + b"\r\nContent-Length: " + str(len(status_jpg)).encode() 
+              +b"\r\n\r\n" + status_jpg + b"\r\n") 
 
 
 def stream_finishline() -> Generator[bytes, None, None]:
@@ -172,9 +157,9 @@ def game():
 
 
 
-@app.route("/video_feed/path")
-def video_feed_path():
-    return Response(stream_path(),  mimetype="multipart/x-mixed-replace; boundary=frame")
+@app.route("/video_feed/status")
+def video_feed_status():
+    return Response(stream_status(),  mimetype="multipart/x-mixed-replace; boundary=frame")
 
 
 
@@ -204,35 +189,35 @@ def stop_lap_api():
         red_start_time = lap.sphero_bolt_red.start_time
         red_finish_time = lap.sphero_bolt_red.finish_time
         red_lap_time = lap.sphero_bolt_red.total_lap_time
-        red_img_path = f"/paths/{lap_id}_Red.png"
+        
 
         yellow_username = lap.sphero_bolt_yellow.username.upper()
         yellow_start_time = lap.sphero_bolt_yellow.start_time
         yellow_finish_time = lap.sphero_bolt_yellow.finish_time
         yellow_lap_time = lap.sphero_bolt_yellow.total_lap_time
-        yellow_img_path = f"/paths/{lap_id}_Yellow.png"
+        
 
         blue_username = lap.sphero_bolt_blue.username.upper()
         blue_start_time = lap.sphero_bolt_blue.start_time
         blue_finish_time = lap.sphero_bolt_blue.finish_time
         blue_lap_time = lap.sphero_bolt_blue.total_lap_time
-        blue_img_path = f"/paths/{lap_id}_Blue.png"
+       
 
         green_username = lap.sphero_bolt_green.username.upper()
         green_start_time = lap.sphero_bolt_green.start_time
         green_finish_time = lap.sphero_bolt_green.finish_time
         green_lap_time = lap.sphero_bolt_green.total_lap_time
-        greenimg_path = f"/paths/{lap_id}_Green.png"
+        
 
 
         if red_lap_time is not None:
-            lap_resuls["sphero"].append({"username": red_username, "start_time": red_start_time.strftime("%H:%M:%S"), "finish_time": red_finish_time.strftime("%H:%M:%S"), "lap_time": red_lap_time, "img_path": red_img_path})
+            lap_resuls["sphero"].append({"username": red_username, "start_time": red_start_time.strftime("%H:%M:%S"), "finish_time": red_finish_time.strftime("%H:%M:%S"), "lap_time": red_lap_time,})
         if yellow_lap_time is not None:
-            lap_resuls["sphero"].append({"username": yellow_username, "start_time": yellow_start_time.strftime("%H:%M:%S"), "finish_time": yellow_finish_time.strftime("%H:%M:%S"), "lap_time": yellow_lap_time, "img_path": yellow_img_path})
+            lap_resuls["sphero"].append({"username": yellow_username, "start_time": yellow_start_time.strftime("%H:%M:%S"), "finish_time": yellow_finish_time.strftime("%H:%M:%S"), "lap_time": yellow_lap_time})
         if blue_lap_time is not None:
-            lap_resuls["sphero"].append({"username": blue_username, "start_time": blue_start_time.strftime("%H:%M:%S"), "finish_time": blue_finish_time.strftime("%H:%M:%S"), "lap_time": blue_lap_time, "img_path": blue_img_path})
+            lap_resuls["sphero"].append({"username": blue_username, "start_time": blue_start_time.strftime("%H:%M:%S"), "finish_time": blue_finish_time.strftime("%H:%M:%S"), "lap_time": blue_lap_time})
         if green_lap_time is not None:
-            lap_resuls["sphero"].append({"username": green_username, "start_time": green_start_time.strftime("%H:%M:%S"), "finish_time": green_finish_time.strftime("%H:%M:%S"), "lap_time": green_lap_time, "img_path": greenimg_path})
+            lap_resuls["sphero"].append({"username": green_username, "start_time": green_start_time.strftime("%H:%M:%S"), "finish_time": green_finish_time.strftime("%H:%M:%S"), "lap_time": green_lap_time})
 
   
 
@@ -351,13 +336,13 @@ def stats():
                 for sphero in dashboard:
                     username = str(sphero[3]).upper()
                     lap_time = float(sphero[7])
-                    img_path = str(sphero[4])
+                    
                     lap_id = str(sphero[1])
                     arr = lap_id.split("_")
                     date = f"{arr[0]}/{arr[1]}/{arr[2]}"
                     time = f"{arr[3]}:{arr[4]}"
                     result = f"{username} {lap_time} sec ({date} {time})"
-                    totals["dashboard"].append({"result": result, "img_path": img_path})
+                    totals["dashboard"].append({"result": result})
                 
 
     resp = jsonify(totals)

@@ -13,7 +13,6 @@ class Camera():
     
     def __init__(self, config: CameraConfig):
 
-        
         self._cap_index = config.cap_index
         self._cap_source = config.cap_source
         self._cap_api = config.cap_api.value if config.cap_api is not None else None
@@ -206,12 +205,7 @@ class Camera():
             return False
 
         if self._cap is None:
-
-            if self._cap_index is not None:
-                print(f"Camera {self._cap_index}: Failed to open capture.")
-            elif self._cap_source is not None:
-                print(f"Camera {self._cap_source}: Failed to open capture.")
-
+            print(f"Camera {self._cap_index if self._cap_index is not None else self._cap_source}: Failed to open capture.")
             return False
 
 
@@ -235,7 +229,7 @@ class Camera():
         if self._cap is None or not self._cap.isOpened():
             if not self.open():
                 blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
-                cv.putText(blank, f"Camera{self._cap_index} is not open.", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+                cv.putText(blank, f"Camera{self._cap_index if self._cap_index is not None else self._cap_source} is not open.", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
                 self._frame = blank
                 return False
 
@@ -245,7 +239,7 @@ class Camera():
         
         if not ret or frame is None:
             blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
-            cv.putText(blank, f"Camera{self._cap_index}. No Frame", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+            cv.putText(blank, f"Camera{self._cap_index if self._cap_index is not None else self._cap_source}. No Frame", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
             self._frame = blank
             return False
         
@@ -334,12 +328,12 @@ class Camera():
     def get_perspective_frame(self) -> Optional[cv.typing.MatLike]:
 
         if self._frame is None:
-            print(f"Camera{self._cap_index}: No Frame")
+            print(f"Camera{self._cap_index if self._cap_index is not None else self._cap_source}: No Frame")
             return None
         
         if not (self._perspective_top_left and self._perspective_top_right and
                 self._perspective_bottom_left and self._perspective_bottom_right):
-            print(f"Camera{self._cap_index}: no perspective values")
+            print(f"Camera{self._cap_index if self._cap_index is not None else self._cap_source}: no perspective values")
             return None
         
         self.set_perspective_frame()

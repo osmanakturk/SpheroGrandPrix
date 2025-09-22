@@ -88,33 +88,13 @@ async function updateStats() {
             let btnNode = document.createElement("button");
             btnNode.type = "button"
             btnNode.classList.add("btn", "btn-warning", "text-start", "list-group-item", "my-1", "border", "border-1", "border-black", "rounded-3")
-            btnNode.setAttribute("data-bs-toggle", "modal")
-            btnNode.setAttribute("data-bs-target", `#${element.img_path}`)
+            
             
             let textNode = document.createTextNode(element.result);
             btnNode.appendChild(textNode)
 
             dashboard_list.appendChild(btnNode)
-            dashboard_list.innerHTML += `<div class="modal fade" id="${element.img_path}" tabindex="-1" aria-labelledby="${element.img_path}"
-                                aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">${element.result}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body d-flex justify-content-center">
-                                            <img class="img-fluid" src="/${element.img_path}">
-                                        </div>
-                                        <div class="modal-footer d-flex justify-content-center">
-                                            <button type="button" class="btn btn-danger"
-                                                data-bs-dismiss="modal">Close</button>
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>`
+            
         });
 
 
@@ -162,7 +142,6 @@ async function stopLap() {
                                     <span class="my-1 fs-6 fw-bolder text-info">Start Time: ${element.start_time}</span>
                                     <span class="my-1 fs-6 fw-bolder text-info">Finish Time: ${element.finish_time}</span>
                                     <span class="my-1 fs-6 fw-bolder text-info">Lap Time: ${element.lap_time}</span>
-                                    <img class="img-fluid my-auto" src="${element.img_path}" alt="${index+1}">
                                 </div>`
     });
 

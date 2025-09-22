@@ -359,21 +359,8 @@ class Lap():
 
 
     def get_processed_finishline_frame(
-            self, config: DetectorConfig,
-            hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
-            min_radius: Optional[int] = None, 
-            max_radius: Optional[int] = None,
-            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-            finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-            bilateral_diameter: int = 9,
-            bilateral_sigma_color: int = 75,
-            bilateral_sigma_space: int = 75,
-            median_kernel_size: int = 9,
-            clahe_clip_limit : float = 4.0,
-            clahe_tile_grid_size : int = 9,
-            morph_kernel_size: int = 5,
-            morph_iterator: int = 1,
-            contours_chain_approx_simple: bool = True
+            self, 
+            config: DetectorConfig
             ) -> Optional[cv.typing.MatLike]:
 
         

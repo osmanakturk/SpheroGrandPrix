@@ -1,7 +1,7 @@
 import cv2 as cv
 import numpy as np
 import time, os, sys
-from backend.enums import CaptureApi
+from backend.enums import CaptureApi, HsvColorsRange
 from backend.configs import CameraConfig, DetectorConfig
 from backend.models.lap import Lap
 from backend.models.camera import Camera
@@ -20,30 +20,30 @@ GLOBAL_USERNAME_GREEN = "Green"
 
 
 BACKGROUND = None
-PATH_CAP: Optional[Camera] = None
+STATUS_CAP: Optional[Camera] = None
 FINISHLINE_CAP: Optional[Camera] = None
 
 
 
 
-def start_tracker(path_cap_config:CameraConfig, 
+def start_tracker(status_cap_config:CameraConfig, 
                   finishline_cap_config:CameraConfig
                   ) -> bool:
 
-    global BACKGROUND, PATH_CAP, FINISHLINE_CAP
+    global BACKGROUND, STATUS_CAP, FINISHLINE_CAP
 
     BACKGROUND = cv.imread("paths/background.png", cv.IMREAD_COLOR)
     
     with LOCK:
-        PATH_CAP = Camera(config=path_cap_config)
+        STATUS_CAP = Camera(config=status_cap_config)
 
 
-        path_ret =  PATH_CAP.open()
+        status_ret =  STATUS_CAP.open()
 
-        while not path_ret:
-            PATH_CAP.release()
+        while not status_ret:
+            STATUS_CAP.release()
 
-            path_ret = PATH_CAP.open()
+            status_ret = STATUS_CAP.open()
 
 
         FINISHLINE_CAP = Camera(config=finishline_cap_config)
@@ -189,26 +189,28 @@ def change_username_green(username: str) -> bool:
 
 
 def get_tracker(
-        path_detector_config: DetectorConfig, 
+        back_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]], 
+        middle_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]], 
+        front_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]], 
         finishline_detector_config: DetectorConfig, 
         debug: bool = False, 
         ) -> Optional[Tuple[bytes, bytes, Lap]]:
         
 
-    global GLOBAL_LAB, PATH_CAP, FINISHLINE_CAP
+    global GLOBAL_LAB, STATUS_CAP, FINISHLINE_CAP
     lap = GLOBAL_LAB
     
     with LOCK:
 
-        ok_path = PATH_CAP.read()
+        ok_status = STATUS_CAP.read()
         
     
-        while not ok_path:
-            print(f"Path r: {ok_path}")
-            PATH_CAP.release()
+        while not ok_status:
+            print(f"Path r: {ok_status}")
+            STATUS_CAP.release()
             time.sleep(0.2)
-            PATH_CAP.open()
-            ok_path = PATH_CAP.read()
+            STATUS_CAP.open()
+            ok_status = STATUS_CAP.read()
     
         
         ok_fin = FINISHLINE_CAP.read()
@@ -223,18 +225,18 @@ def get_tracker(
 
 
     if debug:
-        cv.imshow("Original Path Frame", PATH_CAP.frame)
+        cv.imshow("Original Status Frame", STATUS_CAP.frame)
         cv.imshow("Original Finishline Frame", FINISHLINE_CAP.frame)
 
 
-    PATH_CAP.set_perspective_frame()
+    
     FINISHLINE_CAP.set_perspective_frame()
-    perspectived_path_frame = PATH_CAP.perspective_frame.copy()
+    
+    status_frame = STATUS_CAP.frame.copy()
     perspectived_finishline_frame = FINISHLINE_CAP.perspective_frame.copy()
 
 
     if debug:
-        cv.imshow("Perspectived Path Frame", perspectived_path_frame)
         cv.imshow("Perspectived Finishline Frame", perspectived_finishline_frame)
     
     #_, processed_path_frame_jpg_encode = cv.imencode(".jpg", processed_path_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
@@ -242,42 +244,43 @@ def get_tracker(
     #processed_path_frame_decode = cv.imdecode(processed_path_frame_jpg_encode, cv.IMREAD_COLOR)
     #processed_finishline_frame_decode = cv.imdecode(processed_finishline_frame_jpg_encode, cv.IMREAD_COLOR)
     
-    returned_path_frame = None
+    
     returner_finishline_frame = None
     
     if lap.is_started:
-        lap.path_frame = PATH_CAP.perspective_frame
+        
         lap.finishline_frame = FINISHLINE_CAP.perspective_frame
         lap.background_img = BACKGROUND
-        returned_path_frame = lap.get_processed_path_frame(
-            path_detector_config
-            )
-
-
+        
         returner_finishline_frame = lap.get_processed_finishline_frame(
             finishline_detector_config
         )
 
         if debug:
-            cv.imshow("Returned Path Frame", returned_path_frame)
+            
             cv.imshow("Returner Finishline Frame", returner_finishline_frame)
-            cv.imshow("Canvas Red", lap.sphero_bolt_red.path_canvas)
-            cv.imshow("Canvas Yellow", lap.sphero_bolt_yellow.path_canvas)
-            cv.imshow("Canvas Blue", lap.sphero_bolt_blue.path_canvas)
-            cv.imshow("Canvas Green", lap.sphero_bolt_green.path_canvas)
             #cv.imshow("Background", background)
     
+
+   
+    back_points = np.array(back_points)
+    middle_points = np.array(middle_points)
+    front_points = np.array(front_points)
+    overlay = status_frame.copy()
     
-    
-    if returned_path_frame is not None: 
-        path_result = cv.bitwise_or(perspectived_path_frame, returned_path_frame) 
+    if lap.is_started: 
+        cv.fillPoly(overlay, [back_points], (255, 0, 0))
+        cv.fillPoly(overlay, [middle_points], (0, 255, 0))
+        cv.fillPoly(overlay, [front_points], (255, 0, 0))
+        
     else:
-        cv.putText(perspectived_path_frame, "START", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-        cv.putText(perspectived_path_frame, "GAME", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        cv.fillPoly(overlay, [back_points], (255, 0, 0))
+        cv.fillPoly(overlay, [middle_points], (0, 0, 255))
+        cv.fillPoly(overlay, [front_points], (255, 0, 0))
+        
 
-        path_result = perspectived_path_frame
-
-    
+    status_result = cv.addWeighted(status_frame, 0.5, overlay, 0.5, 0)
+    cv.polylines(status_result, [back_points, middle_points, front_points], True, (0,0,0), 1, cv.LINE_AA)
 
 
     
@@ -293,17 +296,17 @@ def get_tracker(
    
 
     if debug:
-        cv.imshow("Path Result", path_result)
+        cv.imshow("Path Result", status_result)
         cv.imshow("Finishline Result", finishline_result)
 
-    path_ok, path_jpg = cv.imencode(".jpg", path_result, [cv.IMWRITE_JPEG_QUALITY, 100])
+    status_ok, status_jpg = cv.imencode(".jpg", status_result, [cv.IMWRITE_JPEG_QUALITY, 100])
     finishline_ok, finishline_jpg = cv.imencode(".jpg", finishline_result, [cv.IMWRITE_JPEG_QUALITY, 100])
 
     result1 = None
     result2 = None
 
-    if path_ok:
-        result1 = path_jpg.tobytes()
+    if status_ok:
+        result1 = status_jpg.tobytes()
 
     if finishline_ok:
         result2 = finishline_jpg.tobytes()
@@ -312,10 +315,10 @@ def get_tracker(
 
 
 def release_all():
-    global PATH_CAP, FINISHLINE_CAP
+    global STATUS_CAP, FINISHLINE_CAP
 
     try:
-        PATH_CAP.release()
+        STATUS_CAP.release()
         FINISHLINE_CAP.release()
         cv.destroyAllWindows()
     except Exception as e:
@@ -429,7 +432,7 @@ if __name__=="__main__":
     start_tracker(
         finishline_cap_config=CameraConfig(
             cap_api=CaptureApi.Windows, 
-            cap_index=1, 
+            cap_index=2, 
             perspective_top_left=(200, 0), 
             perspective_top_right=(490, 0), 
             perspective_bottom_left=(200, 480), 
@@ -438,26 +441,42 @@ if __name__=="__main__":
             finish_line=((160, 240), (290, 240))
             ), 
 
-        path_cap_config=CameraConfig(
+        status_cap_config=CameraConfig(
             cap_api=CaptureApi.Windows, 
-            cap_index=2, 
-            perspective_top_left=(200, 0), 
-            perspective_top_right=(370, 0), 
-            perspective_bottom_left=(200, 480), 
-            perspective_bottom_right=(370, 480)
+            cap_index=1
             )
 
     )
 
     while True:
-        path_buf, finishline_buf, lap = get_tracker(debug=False)
+        status_buf, finishline_buf, lap = get_tracker(
+            back_points=[ [295, 64], [296, 330], [388, 109] ], 
+            middle_points=[ [295, 64], [242, 131], [244, 323], [348, 337], [346, 137] ], 
+            front_points= [ [295, 64], [232, 480], [296, 330] ], 
+            finishline_detector_config= DetectorConfig(
+                hsv_ranges=HsvColorsRange.NORMAL, 
+                min_radius=15, 
+                max_radius=35, 
+                start_line=((0, 240), (131, 240)), 
+                finish_line=((160, 240), (290, 240)), 
+                bilateral_diameter=9,
+                bilateral_sigma_color=75,
+                bilateral_sigma_space=75,
+                median_kernel_size=9,
+                clahe_clip_limit=4,
+                clahe_tile_grid_size=9,
+                morph_kernel_size=5,
+                morph_iterator=1,
+                contours_chain_approx_simple=True
+                ),
+            debug=False)
 
-        if path_buf is not None:
-            path_arr = np.frombuffer(path_buf, np.uint8)
-            path_img = cv.imdecode(path_arr, cv.IMREAD_COLOR)
+        if status_buf is not None:
+            status_arr = np.frombuffer(status_buf, np.uint8)
+            status_img = cv.imdecode(status_arr, cv.IMREAD_COLOR)
 
-            if path_img is not None:
-                cv.imshow("Path", path_img)
+            if status_img is not None:
+                cv.imshow("Status", status_img)
 
         if finishline_buf is not None:
             finishline_arr = np.frombuffer(finishline_buf, np.uint8)

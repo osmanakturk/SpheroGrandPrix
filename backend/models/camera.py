@@ -22,10 +22,7 @@ class Camera():
         self._cap_fps = config.cap_fps or 30
         self._start_line = config.start_line
         self._finish_line = config.finish_line
-        self._perspective_top_left = config.perspective_top_left
-        self._perspective_top_right = config.perspective_top_right
-        self._perspective_bottom_left = config.perspective_bottom_left
-        self._perspective_bottom_right = config.perspective_bottom_right
+        self._perspective_points = config.perspective_points
         self._perspective_width = config.perspective_width
         self._perspective_height = config.perspective_height
         self._cap: Optional[cv.VideoCapture] = None
@@ -126,42 +123,14 @@ class Camera():
         self._finish_line = finish_line
 
     
-    @property
-    def perspective_top_left(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_top_left
-    
-    @perspective_top_left.setter
-    def perspective_top_left(self, perspective_top_left: Tuple[int, int]) -> None:
-        self._perspective_top_left = perspective_top_left
-
 
     @property
-    def perspective_top_right(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_top_right
+    def perspective_points(self) -> Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]]:
+        return self._perspective_points
     
-    @perspective_top_right.setter
-    def perspective_top_right(self, perspective_top_right: Tuple[int, int]) -> None:
-        self._perspective_top_right = perspective_top_right
-
-
-
-    @property
-    def perspective_bottom_left(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_bottom_left
-    
-    @perspective_bottom_left.setter
-    def perspective_bottom_left(self, perspective_bottom_left: Tuple[int, int]) -> None:
-        self._perspective_bottom_left = perspective_bottom_left
-
-
-
-    @property
-    def perspective_bottom_right(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_bottom_right
-    
-    @perspective_bottom_right.setter
-    def perspective_bottom_right(self, perspective_bottom_right: Tuple[int, int]) -> None:
-        self._perspective_bottom_right = perspective_bottom_right
+    @perspective_points.setter
+    def perspective_points(self, perspective_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]) -> None:
+        self._perspective_pointst = perspective_points
 
 
     @property
@@ -206,12 +175,7 @@ class Camera():
             return False
 
         if self._cap is None:
-
-            if self._cap_index is not None:
-                print(f"Camera {self._cap_index}: Failed to open capture.")
-            elif self._cap_source is not None:
-                print(f"Camera {self._cap_source}: Failed to open capture.")
-
+            print(f"Camera {self._cap_index if self._cap_index is not None else self._cap_source}: Failed to open capture.")
             return False
 
 
@@ -235,7 +199,7 @@ class Camera():
         if self._cap is None or not self._cap.isOpened():
             if not self.open():
                 blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
-                cv.putText(blank, f"Camera{self._cap_index} is not open.", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+                cv.putText(blank, f"Camera{self._cap_index if self._cap_index is not None else self._cap_source} is not open.", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
                 self._frame = blank
                 return False
 
@@ -245,7 +209,7 @@ class Camera():
         
         if not ret or frame is None:
             blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
-            cv.putText(blank, f"Camera{self._cap_index}. No Frame", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
+            cv.putText(blank, f"Camera{self._cap_index if self._cap_index is not None else self._cap_source}. No Frame", (240, 320), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 0), 2, cv.LINE_AA)
             self._frame = blank
             return False
         
@@ -278,18 +242,13 @@ class Camera():
         if self._frame is None:
             return False
         
-        if not (self._perspective_top_left and self._perspective_top_right and
-                self._perspective_bottom_left and self._perspective_bottom_right):
+        if not self._perspective_points:
             return False
         
-
+        ((tl_x, tl_y), (tr_x, tr_y), (bl_x, bl_y), (br_x, br_y)) = self._perspective_points
         
-        tl_x, tl_y = self._perspective_top_left
-        tr_x, tr_y = self._perspective_top_right
-        bl_x, bl_y = self._perspective_bottom_left
-        br_x, br_y = self._perspective_bottom_right
 
-        
+
 
         if self._perspective_width is None or self._perspective_height is None:
             x_max = max(abs(tl_x - tr_x), abs(bl_x - br_x))
@@ -334,12 +293,12 @@ class Camera():
     def get_perspective_frame(self) -> Optional[cv.typing.MatLike]:
 
         if self._frame is None:
-            print(f"Camera{self._cap_index}: No Frame")
+            print(f"Camera{self._cap_index if self._cap_index is not None else self._cap_source}: No Frame")
             return None
         
         if not (self._perspective_top_left and self._perspective_top_right and
                 self._perspective_bottom_left and self._perspective_bottom_right):
-            print(f"Camera{self._cap_index}: no perspective values")
+            print(f"Camera{self._cap_index if self._cap_index is not None else self._cap_source}: no perspective values")
             return None
         
         self.set_perspective_frame()

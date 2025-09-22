@@ -281,13 +281,19 @@ class SpheroBolt():
 
     def get_processed_finishline_frame(
             self, 
-            config:DetectorConfig
+            config:DetectorConfig, 
+            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]],
+            finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]]
             ) -> Optional[cv.typing.MatLike]:
         
         config.sphero_bolt = self
         config.debug = self._debug
 
-        return Detector.get_detected_finishline_frame(config=config)
+        return Detector.get_detected_finishline_frame(
+            config=config, 
+            start_line=start_line, 
+            finish_line=finish_line
+            )
 
 
 

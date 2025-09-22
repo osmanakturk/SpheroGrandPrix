@@ -204,7 +204,7 @@ def get_tracker(
         
     
         while not ok_path:
-            print(f"Path r: {ok_path}")
+            print(f"Path Cap Read: {ok_path}")
             PATH_CAP.release()
             time.sleep(0.2)
             PATH_CAP.open()
@@ -215,7 +215,7 @@ def get_tracker(
         
     
         while not ok_fin:
-            print(f"Finishline r: {ok_fin}")
+            print(f"Finishline Cap Read: {ok_fin}")
             FINISHLINE_CAP.release()
             time.sleep(0.2)
             FINISHLINE_CAP.open()
@@ -250,12 +250,14 @@ def get_tracker(
         lap.finishline_frame = FINISHLINE_CAP.perspective_frame
         lap.background_img = BACKGROUND
         returned_path_frame = lap.get_processed_path_frame(
-            path_detector_config
+            config=path_detector_config
             )
 
 
         returner_finishline_frame = lap.get_processed_finishline_frame(
-            finishline_detector_config
+            config=finishline_detector_config, 
+            start_line=FINISHLINE_CAP.start_line,
+            finish_line=FINISHLINE_CAP.finish_line
         )
 
         if debug:

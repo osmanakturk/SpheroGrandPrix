@@ -171,14 +171,17 @@ class Detector:
 
 
     @staticmethod
-    def get_detected_finishline_frame(config:DetectorConfig) -> Optional[cv.typing.MatLike]:
+    def get_detected_finishline_frame(
+        config:DetectorConfig, 
+        start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]],
+        finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]]
+        ) -> Optional[cv.typing.MatLike]:
             
             sphero_bolt = config.sphero_bolt
             HSV_RANGES = config.hsv_ranges.value
             min_radius = config.min_radius
             max_radius = config.max_radius
-            start_line = config.start_line
-            finish_line = config.finish_line
+            
 
 
             if sphero_bolt.finishline_frame is None:

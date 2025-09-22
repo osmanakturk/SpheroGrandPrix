@@ -359,21 +359,10 @@ class Lap():
 
 
     def get_processed_finishline_frame(
-            self, config: DetectorConfig,
-            hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL, 
-            min_radius: Optional[int] = None, 
-            max_radius: Optional[int] = None,
-            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-            finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None, 
-            bilateral_diameter: int = 9,
-            bilateral_sigma_color: int = 75,
-            bilateral_sigma_space: int = 75,
-            median_kernel_size: int = 9,
-            clahe_clip_limit : float = 4.0,
-            clahe_tile_grid_size : int = 9,
-            morph_kernel_size: int = 5,
-            morph_iterator: int = 1,
-            contours_chain_approx_simple: bool = True
+            self, 
+            config: DetectorConfig, 
+            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]],
+            finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] 
             ) -> Optional[cv.typing.MatLike]:
 
         
@@ -382,26 +371,42 @@ class Lap():
             return None
 
         if self._sphero_bolt_yellow is not None:
-            yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(config=config)
+            yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
         else:
             yellow = None
 
 
         if self._sphero_bolt_red is not None:
-            red = self._sphero_bolt_red.get_processed_finishline_frame(config=config)
+            red = self._sphero_bolt_red.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
 
         else:
             red = None
 
 
         if self._sphero_bolt_green is not None:
-            green = self._sphero_bolt_green.get_processed_finishline_frame(config=config)
+            green = self._sphero_bolt_green.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
         else:
             green = None
 
 
         if self._sphero_bolt_blue is not None:
-            blue = self._sphero_bolt_blue.get_processed_finishline_frame(config=config)
+            blue = self._sphero_bolt_blue.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
         else:
             blue = None
 

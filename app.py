@@ -46,10 +46,7 @@ def ensure_tracker_started() -> bool:
             finishline_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
                 cap_index=2, 
-                perspective_top_left=(200, 0), 
-                perspective_top_right=(490, 0), 
-                perspective_bottom_left=(200, 480), 
-                perspective_bottom_right=(490, 480), 
+                perspective_points=((200, 0), (490, 0), (200, 480), (490, 480)), 
                 start_line=((0, 240), (131, 240)), 
                 finish_line=((160, 240), (290, 240))
                 ), 
@@ -57,10 +54,7 @@ def ensure_tracker_started() -> bool:
             path_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
                 cap_index=1, 
-                perspective_top_left=(200, 0), 
-                perspective_top_right=(370, 0), 
-                perspective_bottom_left=(200, 480), 
-                perspective_bottom_right=(370, 480)
+                perspective_points=((200, 0), (370, 0), (200, 480), (370, 480))
                 )
             )
             
@@ -89,8 +83,6 @@ def ensure_get_tracker():
         hsv_ranges=HsvColorsRange.NORMAL, 
             min_radius=15, 
             max_radius=35, 
-            start_line=((0, 240), (131, 240)), 
-            finish_line=((160, 240), (290, 240)), 
             bilateral_diameter=9,
             bilateral_sigma_color=75,
             bilateral_sigma_space=75,

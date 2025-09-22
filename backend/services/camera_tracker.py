@@ -189,10 +189,10 @@ def change_username_green(username: str) -> bool:
 
 
 def get_tracker(
-        back_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]], 
-        middle_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]], 
-        front_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]], 
         finishline_detector_config: DetectorConfig, 
+        back_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
+        middle_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
+        front_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
         debug: bool = False, 
         ) -> Optional[Tuple[bytes, bytes, Lap]]:
         
@@ -206,7 +206,7 @@ def get_tracker(
         
     
         while not ok_status:
-            print(f"Path r: {ok_status}")
+            print(f"Status Cap Read: {ok_status}")
             STATUS_CAP.release()
             time.sleep(0.2)
             STATUS_CAP.open()
@@ -217,7 +217,7 @@ def get_tracker(
         
     
         while not ok_fin:
-            print(f"Finishline r: {ok_fin}")
+            print(f"Finishline Cap Read: {ok_fin}")
             FINISHLINE_CAP.release()
             time.sleep(0.2)
             FINISHLINE_CAP.open()
@@ -268,14 +268,19 @@ def get_tracker(
     front_points = np.array(front_points)
     overlay = status_frame.copy()
     
-    if lap.is_started: 
+
+    if back_points is not None:
         cv.fillPoly(overlay, [back_points], (255, 0, 0))
-        cv.fillPoly(overlay, [middle_points], (0, 255, 0))
-        cv.fillPoly(overlay, [front_points], (255, 0, 0))
+
+
+    if middle_points is not None:
+        if lap.is_started: 
+            cv.fillPoly(overlay, [middle_points], (0, 255, 0))
+        else:
+            cv.fillPoly(overlay, [middle_points], (0, 0, 255))
         
-    else:
-        cv.fillPoly(overlay, [back_points], (255, 0, 0))
-        cv.fillPoly(overlay, [middle_points], (0, 0, 255))
+
+    if front_points is not None:
         cv.fillPoly(overlay, [front_points], (255, 0, 0))
         
 
@@ -296,7 +301,7 @@ def get_tracker(
    
 
     if debug:
-        cv.imshow("Path Result", status_result)
+        cv.imshow("Status Result", status_result)
         cv.imshow("Finishline Result", finishline_result)
 
     status_ok, status_jpg = cv.imencode(".jpg", status_result, [cv.IMWRITE_JPEG_QUALITY, 100])
@@ -450,9 +455,9 @@ if __name__=="__main__":
 
     while True:
         status_buf, finishline_buf, lap = get_tracker(
-            back_points=[ [295, 64], [296, 330], [388, 109] ], 
-            middle_points=[ [295, 64], [242, 131], [244, 323], [348, 337], [346, 137] ], 
-            front_points= [ [295, 64], [232, 480], [296, 330] ], 
+            back_points=((296, 65), (353, 381), (395, 90)), 
+            middle_points=((296, 65), (226, 120), (246, 366), (460, 396), (440, 140)), 
+            front_points= ((296, 65), (310, 480), (353, 381)), 
             finishline_detector_config= DetectorConfig(
                 hsv_ranges=HsvColorsRange.NORMAL, 
                 min_radius=15, 

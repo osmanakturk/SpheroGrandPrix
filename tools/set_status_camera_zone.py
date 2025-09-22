@@ -52,7 +52,7 @@ def main(test:bool = False):
     while True:
         ok, frame = cap.read()
 
-        overlay = frame.copy()
+        
         
 
 
@@ -114,14 +114,15 @@ def main(test:bool = False):
         
 
         if all([a_x, a_y, bl_x, bl_y, br_x, br_y, cl_x, cl_y, cr_x, cr_y, dl_x, dl_y, cm_x, cm_y]):
+            overlay = frame.copy()
 
-            points1 = np.array([
+            back_points = np.array([
                 [a_x, a_y], 
                 [cm_x, cm_y], 
                 [dr_x, dr_y]
             ])
 
-            points2 = np.array([
+            middle_points = np.array([
                 [a_x, a_y], 
                 [bl_x, bl_y], 
                 [cl_x, cl_y], 
@@ -129,18 +130,20 @@ def main(test:bool = False):
                 [br_x, br_y] 
                 ])
             
-            points3 = np.array([
+            front_points = np.array([
                 [a_x, a_y], 
                 [dl_x, dl_y], 
                 [cm_x, cm_y]     
             ])
 
 
-            cv.fillPoly(overlay, [points1], (0, 0, 255))
-            cv.fillPoly(overlay, [points2], (0, 255, 0))
-            cv.fillPoly(overlay, [points3], (255, 0, 0))
-            frame = cv.addWeighted(frame, 0.5, overlay, 0.5, 0)
+            cv.fillPoly(overlay, [back_points], (0, 0, 255))
+            cv.fillPoly(overlay, [middle_points], (0, 255, 0))
+            cv.fillPoly(overlay, [front_points], (255, 0, 0))
+            cv.polylines(overlay, [back_points, middle_points, front_points], True, (0,0,0), 1, cv.LINE_AA)
             cv.imshow("overlay", overlay)
+            frame = cv.addWeighted(frame, 0.5, overlay, 0.5, 0)
+            
 
 
 
@@ -151,10 +154,9 @@ def main(test:bool = False):
             test_points1 = np.array([
                 [295, 64], 
                 [296, 330], 
-                [359, 137]
+                [388, 109]
                 ])
-
-
+            
             test_points2 = np.array([
                 [295, 64], 
                 [242, 131], 
@@ -168,19 +170,14 @@ def main(test:bool = False):
                 [232, 480], 
                 [296, 330]
                 ])
-
-
-
-            cv.fillPoly(test_overlay, [test_points1], (0, 0, 255))
-            cv.fillPoly(test_overlay, [test_points2], (0, 255, 0))
+            
+            cv.fillPoly(test_overlay, [test_points1], (255, 0, 0))
+            cv.fillPoly(test_overlay, [test_points2], (0, 0, 255))
             cv.fillPoly(test_overlay, [test_points3], (255, 0, 0))
-
-
-
+            cv.polylines(test_overlay, [test_points1, test_points2, test_points3], True, (0,0,0), 1, cv.LINE_AA)
             cv.imshow("Test Overlay", test_overlay)
-
             frame = cv.addWeighted(frame, 0.5, test_overlay, 0.5, 0)
-
+            
 
 
         cv.imshow(camera, frame)
@@ -193,16 +190,9 @@ def main(test:bool = False):
 
         elif key == ord("c"):
             print("*"*20)
-            #print(f"A : {a_x, a_y}")
-            #print(f"B_L : {bl_x, bl_y}")
-            #print(f"B_R : {br_x, br_y}")
-            #print(f"C_L : {cl_x, cl_y}")
-            #print(f"C_R : {cr_x, cr_y}")
-            #print(f"D_L : {dl_x, dl_y}")
-            #print(f"D_R : {dr_x, dr_y}")
-            print(f"Front Triangle : [{[a_x, a_y]}, {[cm_x, cm_y]}, {[dr_x, dr_y]}]")
-            print(f"Middle Rectangle : [{[a_x, a_y]}, {[bl_x, bl_y]}, {[cl_x, cl_y]}, {[cr_x, cr_y]}, {[br_x, br_y]}]")
-            print(f"Front Triangle : [{[a_x, a_y]}, {[dl_x, dl_y]}, {[cm_x, cm_y]}]")
+            print(f"Back Points : ({a_x, a_y}, {cm_x, cm_y}, {dr_x, dr_y})")
+            print(f"Middle Points : ({a_x, a_y}, {bl_x, bl_y}, {cl_x, cl_y}, {cr_x, cr_y}, {br_x, br_y})")
+            print(f"Front Points : ({a_x, a_y}, {dl_x, dl_y}, {cm_x, cm_y})")
             print("*"*20)
 
     cap.release()

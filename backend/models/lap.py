@@ -360,7 +360,9 @@ class Lap():
 
     def get_processed_finishline_frame(
             self, 
-            config: DetectorConfig
+            config: DetectorConfig, 
+            start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]],
+            finish_line:Optional[Tuple[Tuple[int, int], Tuple[int, int]]]
             ) -> Optional[cv.typing.MatLike]:
 
         
@@ -369,26 +371,42 @@ class Lap():
             return None
 
         if self._sphero_bolt_yellow is not None:
-            yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(config=config)
+            yellow = self._sphero_bolt_yellow.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
         else:
             yellow = None
 
 
         if self._sphero_bolt_red is not None:
-            red = self._sphero_bolt_red.get_processed_finishline_frame(config=config)
+            red = self._sphero_bolt_red.get_processed_finishline_frame(
+                config=config,
+                start_line=start_line, 
+                finish_line=finish_line
+                )
 
         else:
             red = None
 
 
         if self._sphero_bolt_green is not None:
-            green = self._sphero_bolt_green.get_processed_finishline_frame(config=config)
+            green = self._sphero_bolt_green.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
         else:
             green = None
 
 
         if self._sphero_bolt_blue is not None:
-            blue = self._sphero_bolt_blue.get_processed_finishline_frame(config=config)
+            blue = self._sphero_bolt_blue.get_processed_finishline_frame(
+                config=config, 
+                start_line=start_line, 
+                finish_line=finish_line
+                )
         else:
             blue = None
 

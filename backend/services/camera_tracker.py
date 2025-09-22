@@ -253,7 +253,9 @@ def get_tracker(
         lap.background_img = BACKGROUND
         
         returner_finishline_frame = lap.get_processed_finishline_frame(
-            finishline_detector_config
+            config=finishline_detector_config, 
+            start_line=FINISHLINE_CAP.start_line, 
+            finish_line=FINISHLINE_CAP.finish_line
         )
 
         if debug:

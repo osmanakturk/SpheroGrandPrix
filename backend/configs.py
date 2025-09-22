@@ -18,10 +18,7 @@ class CameraConfig:
     cap_width: Optional[int] = 640 
     cap_height: Optional[int] = 480 
     cap_fps: Optional[int] = 30  
-    perspective_top_left: Optional[Tuple[int, int]] = None 
-    perspective_top_right: Optional[Tuple[int, int]] = None 
-    perspective_bottom_left: Optional[Tuple[int, int]] = None 
-    perspective_bottom_right: Optional[Tuple[int, int]] = None 
+    perspective_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None
     perspective_width: Optional[int] = None 
     perspective_height: Optional[int] = None 
     start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None 
@@ -36,8 +33,6 @@ class DetectorConfig:
     hsv_ranges: HsvColorsRange = HsvColorsRange.NORMAL 
     min_radius: Optional[int] = None 
     max_radius: Optional[int] = None 
-    start_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None 
-    finish_line: Optional[Tuple[Tuple[int, int], Tuple[int, int]]] = None 
     bilateral_diameter: int = 9 
     bilateral_sigma_color: int = 75 
     bilateral_sigma_space: int = 75 

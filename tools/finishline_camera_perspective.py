@@ -169,6 +169,7 @@ while cap.isOpened():
             print(f"Top_Right: {tr_x, tr_y}") 
             print(f"Bottom-Left: {bl_x, bl_y}") 
             print(f"Bottom-Right: {br_x, br_y}")
+            print(f"Perspective Points: ({tl_x, tl_y}, {tr_x, tr_y}, {bl_x, bl_y}, {br_x, br_y})")
             print(f"Start_Line: ({0, start_line_y}, {start_line_w, start_line_y})")
             print(f"Stop_Line: ({stop_line_w, stop_line_y}, {width, stop_line_y})")
             print(f"Area: [{min(tl_y, tr_y)}:{max(bl_y, br_y)}, {min(tl_x, bl_x)}:{max(tr_x, br_x)}]")

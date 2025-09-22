@@ -21,10 +21,7 @@ class Camera():
         self._cap_fps = config.cap_fps or 30
         self._start_line = config.start_line
         self._finish_line = config.finish_line
-        self._perspective_top_left = config.perspective_top_left
-        self._perspective_top_right = config.perspective_top_right
-        self._perspective_bottom_left = config.perspective_bottom_left
-        self._perspective_bottom_right = config.perspective_bottom_right
+        self._perspective_points = config.perspective_points
         self._perspective_width = config.perspective_width
         self._perspective_height = config.perspective_height
         self._cap: Optional[cv.VideoCapture] = None
@@ -124,43 +121,15 @@ class Camera():
     def finish_line(self, finish_line:Tuple[Tuple[int, int], Tuple[int, int]]) -> None:
         self._finish_line = finish_line
 
-    
-    @property
-    def perspective_top_left(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_top_left
-    
-    @perspective_top_left.setter
-    def perspective_top_left(self, perspective_top_left: Tuple[int, int]) -> None:
-        self._perspective_top_left = perspective_top_left
 
 
     @property
-    def perspective_top_right(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_top_right
+    def perspective_points(self) -> Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]]:
+        return self._perspective_points
     
-    @perspective_top_right.setter
-    def perspective_top_right(self, perspective_top_right: Tuple[int, int]) -> None:
-        self._perspective_top_right = perspective_top_right
-
-
-
-    @property
-    def perspective_bottom_left(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_bottom_left
-    
-    @perspective_bottom_left.setter
-    def perspective_bottom_left(self, perspective_bottom_left: Tuple[int, int]) -> None:
-        self._perspective_bottom_left = perspective_bottom_left
-
-
-
-    @property
-    def perspective_bottom_right(self) -> Optional[Tuple[int, int]]:
-        return self._perspective_bottom_right
-    
-    @perspective_bottom_right.setter
-    def perspective_bottom_right(self, perspective_bottom_right: Tuple[int, int]) -> None:
-        self._perspective_bottom_right = perspective_bottom_right
+    @perspective_points.setter
+    def perspective_points(self, perspective_points: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]) -> None:
+        self._perspective_points = perspective_points
 
 
     @property
@@ -272,18 +241,12 @@ class Camera():
         if self._frame is None:
             return False
         
-        if not (self._perspective_top_left and self._perspective_top_right and
-                self._perspective_bottom_left and self._perspective_bottom_right):
+        if not self._perspective_points:
             return False
         
-
+        ((tl_x, tl_y), (tr_x, tr_y), (bl_x, bl_y), (br_x, br_y)) = self._perspective_points
         
-        tl_x, tl_y = self._perspective_top_left
-        tr_x, tr_y = self._perspective_top_right
-        bl_x, bl_y = self._perspective_bottom_left
-        br_x, br_y = self._perspective_bottom_right
 
-        
 
         if self._perspective_width is None or self._perspective_height is None:
             x_max = max(abs(tl_x - tr_x), abs(bl_x - br_x))

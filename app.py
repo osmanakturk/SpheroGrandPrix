@@ -74,24 +74,24 @@ def ensure_get_tracker():
         clahe_tile_grid_size=9, 
         morph_kernel_size=5, 
         morph_iterator=1, 
-        contours_chain_approx_simple=True
+        contours_chain_approx_simple=True 
     )
 
 
 
     finishline_detector_config = DetectorConfig(
         hsv_ranges=HsvColorsRange.NORMAL, 
-            min_radius=15, 
-            max_radius=35, 
-            bilateral_diameter=9,
-            bilateral_sigma_color=75,
-            bilateral_sigma_space=75,
-            median_kernel_size=9,
-            clahe_clip_limit=4,
-            clahe_tile_grid_size=9,
-            morph_kernel_size=5,
-            morph_iterator=1,
-            contours_chain_approx_simple=True
+        min_radius=15, 
+        max_radius=35, 
+        bilateral_diameter=9, 
+        bilateral_sigma_color=75, 
+        bilateral_sigma_space=75, 
+        median_kernel_size=9, 
+        clahe_clip_limit=4, 
+        clahe_tile_grid_size=9, 
+        morph_kernel_size=5, 
+        morph_iterator=1, 
+        contours_chain_approx_simple=True 
     )
 
 

@@ -35,32 +35,197 @@ def start_tracker(path_cap_config:CameraConfig,
     BACKGROUND = cv.imread("paths/background.png", cv.IMREAD_COLOR)
     
     with LOCK:
-        PATH_CAP = Camera(config=path_cap_config)
 
+        try:
+            PATH_CAP = Camera(config=path_cap_config)
+            path_ret =  PATH_CAP.open()
+            print(f"Path Cap Open: {path_ret}")
+        except Exception as e:
+            print(f"Path Cap Open: {e}")
 
-        path_ret =  PATH_CAP.open()
+        
 
         while not path_ret:
-            PATH_CAP.release()
+            try:
+                print("Trying to Open Path Cap")
+                PATH_CAP.release()
+                path_ret = PATH_CAP.open()
+                print(f"Path Cap Open: {path_ret}")
+            except Exception as e:
+                print(f"Path Cap Open: {e}")
+            
 
-            path_ret = PATH_CAP.open()
+        try:
+            FINISHLINE_CAP = Camera(config=finishline_cap_config)
+            finishline_ret = FINISHLINE_CAP.open()
+            print(f"Finishline Cap Open: {finishline_ret}")
+        except Exception as e:
+            print(f"Finishline Cap Open: {e}")
 
-
-        FINISHLINE_CAP = Camera(config=finishline_cap_config)
-
-
-
-        finishline_ret = FINISHLINE_CAP.open()
 
         while not finishline_ret:
-            FINISHLINE_CAP.release()
-
-            finishline_ret = FINISHLINE_CAP.open()
+            try:
+                print("Trying to Open Finishline Cap")
+                FINISHLINE_CAP.release()
+                finishline_ret = FINISHLINE_CAP.open()
+                print(f"Finishline Cap Open: {finishline_ret}")
+            except Exception as e:
+                print(f"Finishline Cap Open: {e}")
 
     return True
     
 
 
+
+def get_tracker(
+        path_detector_config: DetectorConfig, 
+        finishline_detector_config: DetectorConfig, 
+        debug: bool = False, 
+        ) -> Optional[Tuple[bytes, bytes, Lap]]:
+        
+
+    global GLOBAL_LAB, PATH_CAP, FINISHLINE_CAP
+    lap = GLOBAL_LAB
+    
+    with LOCK:
+        try:
+            ok_path = PATH_CAP.read()
+            print(f"Path Cap Read: {ok_path}")
+        except Exception as e:
+            print(f"Path Cap Read: {e}")
+
+        
+
+        while not ok_path:
+            try:
+                print("Trying to Read Finishline Cap")
+                PATH_CAP.release()
+                time.sleep(0.2)
+                PATH_CAP.open()
+                ok_path = PATH_CAP.read()
+                print(f"Path Cap Read: {ok_path}")
+            except Exception as e:
+                print(f"Path Cap Read: {e}")
+        
+
+        try:
+            ok_fin = FINISHLINE_CAP.read()
+            print(f"Finishline Cap Read: {ok_fin}")
+        except Exception as e:
+            print(f"Finishline Cap Read: {e}")
+    
+        
+        while not ok_fin:
+            try:
+                FINISHLINE_CAP.release()
+                time.sleep(0.2)
+                FINISHLINE_CAP.open()
+                ok_fin = FINISHLINE_CAP.read()
+                print(f"Finishline Cap Read: {ok_fin}")
+            except Exception as e:
+                print(f"Finishline Cap Read: {e}")
+
+
+    if debug:
+        cv.imshow("Original Path Frame", PATH_CAP.frame)
+        cv.imshow("Original Finishline Frame", FINISHLINE_CAP.frame)
+
+
+    PATH_CAP.set_perspective_frame()
+    FINISHLINE_CAP.set_perspective_frame()
+    perspectived_path_frame = PATH_CAP.perspective_frame.copy()
+    perspectived_finishline_frame = FINISHLINE_CAP.perspective_frame.copy()
+
+
+    if debug:
+        cv.imshow("Perspectived Path Frame", perspectived_path_frame)
+        cv.imshow("Perspectived Finishline Frame", perspectived_finishline_frame)
+    
+    #_, processed_path_frame_jpg_encode = cv.imencode(".jpg", processed_path_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
+    #_, processed_finishline_frame_jpg_encode = cv.imencode(".jpg", processed_finishline_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
+    #processed_path_frame_decode = cv.imdecode(processed_path_frame_jpg_encode, cv.IMREAD_COLOR)
+    #processed_finishline_frame_decode = cv.imdecode(processed_finishline_frame_jpg_encode, cv.IMREAD_COLOR)
+    
+    returned_path_frame = None
+    returner_finishline_frame = None
+    
+    if lap.is_started:
+        lap.path_frame = PATH_CAP.perspective_frame
+        lap.finishline_frame = FINISHLINE_CAP.perspective_frame
+        lap.background_img = BACKGROUND
+        returned_path_frame = lap.get_processed_path_frame(
+            config=path_detector_config
+            )
+
+
+        returner_finishline_frame = lap.get_processed_finishline_frame(
+            config=finishline_detector_config, 
+            start_line=FINISHLINE_CAP.start_line,
+            finish_line=FINISHLINE_CAP.finish_line
+        )
+
+        if debug:
+            cv.imshow("Returned Path Frame", returned_path_frame)
+            cv.imshow("Returner Finishline Frame", returner_finishline_frame)
+            cv.imshow("Canvas Red", lap.sphero_bolt_red.path_canvas)
+            cv.imshow("Canvas Yellow", lap.sphero_bolt_yellow.path_canvas)
+            cv.imshow("Canvas Blue", lap.sphero_bolt_blue.path_canvas)
+            cv.imshow("Canvas Green", lap.sphero_bolt_green.path_canvas)
+            #cv.imshow("Background", background)
+    
+    
+    
+    if returned_path_frame is not None: 
+        path_result = cv.bitwise_or(perspectived_path_frame, returned_path_frame) 
+    else:
+        cv.putText(perspectived_path_frame, "START", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        cv.putText(perspectived_path_frame, "GAME", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
+        path_result = perspectived_path_frame
+
+    
+
+
+    
+    if returner_finishline_frame is not None:
+        finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) 
+    else: 
+        cv.putText(perspectived_finishline_frame, "START", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        cv.putText(perspectived_finishline_frame, "GAME", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
+        finishline_result = perspectived_finishline_frame
+    
+
+   
+
+    if debug:
+        cv.imshow("Path Result", path_result)
+        cv.imshow("Finishline Result", finishline_result)
+
+    path_ok, path_jpg = cv.imencode(".jpg", path_result, [cv.IMWRITE_JPEG_QUALITY, 100])
+    finishline_ok, finishline_jpg = cv.imencode(".jpg", finishline_result, [cv.IMWRITE_JPEG_QUALITY, 100])
+
+    result1 = None
+    result2 = None
+
+    if path_ok:
+        result1 = path_jpg.tobytes()
+
+    if finishline_ok:
+        result2 = finishline_jpg.tobytes()
+
+    return(result1, result2, GLOBAL_LAB)
+
+
+def release_all():
+    global PATH_CAP, FINISHLINE_CAP
+
+    try:
+        PATH_CAP.release()
+        FINISHLINE_CAP.release()
+        cv.destroyAllWindows()
+    except Exception as e:
+        print(f"Release All Failed: {e}")
 
 
 
@@ -188,140 +353,8 @@ def change_username_green(username: str) -> bool:
 
 
 
-def get_tracker(
-        path_detector_config: DetectorConfig, 
-        finishline_detector_config: DetectorConfig, 
-        debug: bool = False, 
-        ) -> Optional[Tuple[bytes, bytes, Lap]]:
-        
-
-    global GLOBAL_LAB, PATH_CAP, FINISHLINE_CAP
-    lap = GLOBAL_LAB
-    
-    with LOCK:
-
-        ok_path = PATH_CAP.read()
-        
-    
-        while not ok_path:
-            print(f"Path Cap Read: {ok_path}")
-            PATH_CAP.release()
-            time.sleep(0.2)
-            PATH_CAP.open()
-            ok_path = PATH_CAP.read()
-    
-        
-        ok_fin = FINISHLINE_CAP.read()
-        
-    
-        while not ok_fin:
-            print(f"Finishline Cap Read: {ok_fin}")
-            FINISHLINE_CAP.release()
-            time.sleep(0.2)
-            FINISHLINE_CAP.open()
-            ok_fin = FINISHLINE_CAP.read()
 
 
-    if debug:
-        cv.imshow("Original Path Frame", PATH_CAP.frame)
-        cv.imshow("Original Finishline Frame", FINISHLINE_CAP.frame)
-
-
-    PATH_CAP.set_perspective_frame()
-    FINISHLINE_CAP.set_perspective_frame()
-    perspectived_path_frame = PATH_CAP.perspective_frame.copy()
-    perspectived_finishline_frame = FINISHLINE_CAP.perspective_frame.copy()
-
-
-    if debug:
-        cv.imshow("Perspectived Path Frame", perspectived_path_frame)
-        cv.imshow("Perspectived Finishline Frame", perspectived_finishline_frame)
-    
-    #_, processed_path_frame_jpg_encode = cv.imencode(".jpg", processed_path_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
-    #_, processed_finishline_frame_jpg_encode = cv.imencode(".jpg", processed_finishline_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
-    #processed_path_frame_decode = cv.imdecode(processed_path_frame_jpg_encode, cv.IMREAD_COLOR)
-    #processed_finishline_frame_decode = cv.imdecode(processed_finishline_frame_jpg_encode, cv.IMREAD_COLOR)
-    
-    returned_path_frame = None
-    returner_finishline_frame = None
-    
-    if lap.is_started:
-        lap.path_frame = PATH_CAP.perspective_frame
-        lap.finishline_frame = FINISHLINE_CAP.perspective_frame
-        lap.background_img = BACKGROUND
-        returned_path_frame = lap.get_processed_path_frame(
-            config=path_detector_config
-            )
-
-
-        returner_finishline_frame = lap.get_processed_finishline_frame(
-            config=finishline_detector_config, 
-            start_line=FINISHLINE_CAP.start_line,
-            finish_line=FINISHLINE_CAP.finish_line
-        )
-
-        if debug:
-            cv.imshow("Returned Path Frame", returned_path_frame)
-            cv.imshow("Returner Finishline Frame", returner_finishline_frame)
-            cv.imshow("Canvas Red", lap.sphero_bolt_red.path_canvas)
-            cv.imshow("Canvas Yellow", lap.sphero_bolt_yellow.path_canvas)
-            cv.imshow("Canvas Blue", lap.sphero_bolt_blue.path_canvas)
-            cv.imshow("Canvas Green", lap.sphero_bolt_green.path_canvas)
-            #cv.imshow("Background", background)
-    
-    
-    
-    if returned_path_frame is not None: 
-        path_result = cv.bitwise_or(perspectived_path_frame, returned_path_frame) 
-    else:
-        cv.putText(perspectived_path_frame, "START", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-        cv.putText(perspectived_path_frame, "GAME", (perspectived_path_frame.shape[1]//4, perspectived_path_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-
-        path_result = perspectived_path_frame
-
-    
-
-
-    
-    if returner_finishline_frame is not None:
-        finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) 
-    else: 
-        cv.putText(perspectived_finishline_frame, "START", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-        cv.putText(perspectived_finishline_frame, "GAME", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-
-        finishline_result = perspectived_finishline_frame
-    
-
-   
-
-    if debug:
-        cv.imshow("Path Result", path_result)
-        cv.imshow("Finishline Result", finishline_result)
-
-    path_ok, path_jpg = cv.imencode(".jpg", path_result, [cv.IMWRITE_JPEG_QUALITY, 100])
-    finishline_ok, finishline_jpg = cv.imencode(".jpg", finishline_result, [cv.IMWRITE_JPEG_QUALITY, 100])
-
-    result1 = None
-    result2 = None
-
-    if path_ok:
-        result1 = path_jpg.tobytes()
-
-    if finishline_ok:
-        result2 = finishline_jpg.tobytes()
-
-    return(result1, result2, GLOBAL_LAB)
-
-
-def release_all():
-    global PATH_CAP, FINISHLINE_CAP
-
-    try:
-        PATH_CAP.release()
-        FINISHLINE_CAP.release()
-        cv.destroyAllWindows()
-    except Exception as e:
-        print(f"Release All Failed: {e}")
 
 
 if __name__=="__main__":

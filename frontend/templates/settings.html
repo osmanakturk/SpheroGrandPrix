@@ -11,7 +11,8 @@
 <body>
 
 
-    <header class="d-flex flex-row align-items-center justify-content-around" style="background-color: #18acf2; height: 8vh;">
+    <header class="d-flex flex-row align-items-center justify-content-around"
+        style="background-color: #18acf2; height: 8vh;">
 
         <div class="col-1 h-100">
             <img class="img-fluid h-100" src="{{ url_for('static', filename='assets/ilsc_logo.svg') }}" alt="ilsc_logo">
@@ -30,7 +31,551 @@
 
 
     </header>
-    
+
+    <main class="d-flex flex-column p-3 container-fluid">
+
+
+        <h1 id="spherograndprix-tools-utilities" class="fs-1">SpheroGrandPrix — <code>tools/</code> Utilities</h1>
+        <br>
+
+        <p>This folder contains <strong>calibration, camera, and perspective utilities</strong> used to set up and debug
+            the Sphero BOLT Grand Prix system (HSV color segmentation, per‑camera perspective rectification, finish‑line
+            ROI placement, and pre‑processing parameter tuning). These scripts are meant to be run
+            <strong>stand‑alone</strong> during track setup and fed back into the main app as configuration values.
+        </p>
+
+
+        <br><br>
+        <h4 class="fs-4">TL;DR workflow</h4>
+        <br>
+        <ol class="list-group list-group-numbered">
+            <li class="list-group-item">Set camera backend + inspect properties → <code>camera_configuration.py</code>
+            </li>
+            <li class="list-group-item">Tune pre‑processing (blur/CLAHE/morphology) →
+                <code>frame_manipulation_parameters.py</code>
+            </li>
+            <li class="list-group-item">Calibrate HSV ranges per color → <code>color_trackbar_*.py</code> or
+                <code>select_sphero_color_range.py</code>
+            </li>
+            <li class="list-group-item">Measure sphere size in pixels → <code>select_sphero_size.py</code></li>
+            <li class="list-group-item">Define perspective crops (Finishline camera) →
+                <code>finishline_camera_perspective.py</code>
+            </li>
+            <li class="list-group-item">Define zone geometry in the status camera’s view (rear/mid/front). →
+                <code>set_status_camera_zone.py</code>
+            </li>
+            <li class="list-group-item">Paste the printed values into your project’s configs (e.g.,
+                <code>backend/constants.py</code>, camera configs)
+            </li>
+        </ol>
+
+        <br>
+        <hr>
+        <br>
+        <h2 id="prerequisites" class="fs-2">Prerequisites</h2>
+        <br>
+        <ul class="list-group">
+            <li class="list-group-item">Python 3.10+</li>
+            <li class="list-group-item">OpenCV (<code>pip install opencv-python</code>)</li>
+            <li class="list-group-item">NumPy (<code>pip install numpy</code>)</li>
+            <li class="list-group-item"><strong>Windows (recommended for these tools):</strong> use
+                <strong>DirectShow</strong> backend (<code>cv.CAP_DSHOW</code>).<br>For macOS use
+                <code>cv.CAP_AVFOUNDATION</code>; for Linux use <code>cv.CAP_V4L2</code> (or
+                <code>cv.CAP_GSTREAMER</code>)
+            </li>
+            <li class="list-group-item">Optional (Windows only): <code>pygrabber</code> for enumerating DirectShow
+                filters (<code>pip install pygrabber</code>)</li>
+            <li class="list-group-item">Cameras should be connected and selected by index in each script
+                (<code>cv.VideoCapture(index, backend)</code>)</li>
+        </ul>
+
+
+
+
+
+        <hr>
+
+
+        <br>
+        <h2 id="how-to-run" class="fs-2">How to run</h2>
+        <br>
+
+        <h5 class="fs-5">From the repository root:</h5>
+
+        <ol class="list-group list-group-numbered">
+            <span class="d-block">Activate your virtualenv if needed</span>
+            <li class="list-group-item">Explore camera backends &amp; properties (Windows):
+                <code class="d-block">&nbsp; python ./tools/camera_configuration.py</code>
+            </li>
+
+            <li class="list-group-item">Tune pre-processing:
+                <code class="d-block">&nbsp; python ./tools/frame_manipulation_parameters.py</code>
+            </li>
+
+            <li class="list-group-item">Calibrate HSV ranges with live trackbars (per color):
+                <code class="d-block">&nbsp; python ./tools/color_trackbar_red.py</code>
+                <code class="d-block">&nbsp; python ./tools/color_trackbar_yellow.py</code>
+                <code class="d-block">&nbsp; python ./tools/color_trackbar_green.py</code>
+                <code class="d-block">&nbsp; python ./tools/color_trackbar_blue.py</code>
+            </li>
+
+            <li class="list-group-item">Calibrate HSV from a circular ROI over the sphere (percentile-based):
+                <code class="d-block">&nbsp; python ./tools/select_sphero_color_range.py</code>
+            </li>
+
+            <li class="list-group-item">Measure sphere size (center, radius, diameter in pixels):
+                <code class="d-block">&nbsp; python ./tools/select_sphero_size.py</code>
+            </li>
+
+            <li class="list-group-item">Define perspective crops for finishline camera:
+                <code class="d-block">&nbsp; python ./tools/finishline_camera_perspective.py</code>
+            </li>
+
+            <li class="list-group-item">Define zone geometry in the status camera’s view (rear/mid/front):
+                <code class="d-block">&nbsp; python ./tools/set_status_camera_zone.py</code>
+            </li>
+
+            <span class="d-block">Most tools print the <strong>final parameters to the console</strong> when you press
+                <strong><code>c</code></strong>. Press <strong><code>ESC</code></strong> to exit.</span>
+
+        </ol>
+
+
+
+
+        <hr>
+
+        <br>
+
+        <h2 id="tool-by-tool-reference" class="fs-2">Tool‑by‑Tool Reference</h2>
+        <br>
+        <hr>
+
+        <h3 id="1-camera_configuration-py-" class="fs-3">1) <code>camera_configuration.py</code></h3>
+        <br>
+        <p><strong>Purpose.</strong> Inspect available <strong>OpenCV camera backends</strong> and <strong>CAP_PROP
+                settings</strong>, draw selected property values on a preview frame, and quickly test <strong>which
+                properties are writable</strong> on your device/backends.</p>
+
+
+        <h4 class="fs-4">Highlights:</h4>
+
+
+        <ul class="list-group">
+            <li class="list-group-item"><code>ALL_CAPS</code>: curated list of OpenCV backends and
+                <code>CAP_PROP_*</code> keys you can iterate over.
+            </li>
+            <li class="list-group-item"><code>find_all_caps()</code>: dumps available <code>cv.CAP_*</code> symbols
+                (useful when upgrading OpenCV).</li>
+            <li class="list-group-item"><code>is_cap_writable(cap, values)</code>: checks which properties can be set on
+                the current <code>VideoCapture</code>.</li>
+            <li class="list-group-item"><code>draw_info(cap, img, values)</code>: overlays property values onto an
+                enlarged canvas.</li>
+        </ul>
+        <br>
+        <h4>Typical outputs:</h4>
+
+        <ul class="list-group">
+            <li class="list-group-item">Backend selection (e.g., <code>cv.CAP_DSHOW</code>,
+                <code>cv.CAP_AVFOUNDATION</code>, <code>cv.CAP_V4L2</code>).
+            </li>
+            <li class="list-group-item">Writable camera properties per device (e.g., FPS, exposure, focus, white
+                balance).</li>
+            <li class="list-group-item">Live preview with a right‑hand panel of current property values.</li>
+        </ul>
+
+        <br>
+
+        <p><strong>When to use.</strong> First step of track setup to pick a <strong>stable backend</strong> and confirm
+            key <strong>camera controls</strong> are writable for your environment.</p>
+        <hr>
+
+        <br>
+        <h3 id="2-frame_manipulation_parameters-py-" class="fs-3">2) <code>frame_manipulation_parameters.py</code></h3>
+        <br>
+
+        <p><strong>Purpose.</strong> Interactive <strong>pre‑processing tuner</strong> for color segmentation. Lets you
+            adjust <strong>bilateral filter</strong>, <strong>median blur</strong>, <strong>CLAHE (on V
+                channel)</strong>, and <strong>morphology</strong> parameters, while viewing the resulting <strong>HSV
+                masks</strong> and <strong>contours</strong> for each Sphero color.</p>
+
+        <h4 class="fs-4">Trackbars:</h4>
+
+        <ul class="list-group">
+            <li class="list-group-item"><code>bilateral_d</code>, <code>s_color</code>, <code>s_space</code> — bilateral
+                filter diameter &amp; sigmas. </li>
+            <li class="list-group-item"><code>median_k</code> — median blur kernel (auto‑snapped to odd). </li>
+            <li class="list-group-item"><code>clahe_clip</code>, <code>clahe_grid</code> — contrast equalization on
+                <strong>V channel</strong> (tile grid, clip limit).
+            </li>
+            <li class="list-group-item"><code>morph_ksize</code>, <code>morph_iter</code> — ellipse kernel size &amp;
+                iteration count for open/close.</li>
+        </ul>
+
+
+        <h4 class="fs-4">Views:</h4>
+
+        <ul class="list-group">
+            <li class="list-group-item">Raw camera, bilateral output, CLAHE output.</li>
+            <li class="list-group-item">Raw and morphed binary masks for <strong>Red</strong> (two ranges),
+                <strong>Yellow</strong>, <strong>Blue</strong>, <strong>Green</strong>.
+            </li>
+            <li class="list-group-item">Contour overlays per color and masked color extracts.</li>
+        </ul>
+
+
+        <h4 class="fs-4">Typical outputs:</h4>
+
+        <ul class="list-group">
+            <li class="list-group-item">A stable set of pre‑processing parameters to copy into your detector config:
+                <code class="d-block">&nbsp; bilateral_d= 9</code>
+                <code class="d-block">&nbsp; sigma_color= 75</code>
+                <code class="d-block">&nbsp; sigma_space= 75</code>
+                <code class="d-block">&nbsp; median_k= 5</code>
+                <code class="d-block">&nbsp; clahe_clip= 3</code>
+                <code class="d-block">&nbsp; clahe_grid= 8</code>
+                <code class="d-block">&nbsp; morph_kernel= 9</code>
+                <code class="d-block">&nbsp; morph_iter= 2</code>
+            </li>
+        </ul>
+
+
+
+        <p><strong>When to use.</strong> Before HSV tuning; get smooth masks under your lighting so HSV ranges become
+            tighter and more robust.</p>
+
+        <hr>
+
+        <br>
+        <h3 class="fs-3"
+            id="3-color_trackbar_red-py-color_trackbar_yellow-py-color_trackbar_green-py-color_trackbar_blue-py-">
+            3)<code>color_trackbar_red.py</code>, <code>color_trackbar_yellow.py</code>,
+            <code>color_trackbar_green.py</code>, <code>color_trackbar_blue.py</code>
+        </h3>
+        <br>
+        <p><strong>Purpose.</strong> Live <strong>HSV range calibration</strong> per color with keyboard‑to‑console
+            export.</p>
+
+        <h4 class="fs-4">How it works:</h4>
+
+        <ul class="list-group">
+            <li class="list-group-item">Converts the frame to HSV, applies <code>inRange(lower, upper)</code> (two bands
+                for red).</li>
+            <li class="list-group-item">Shows <strong>Original</strong>, <strong>Mask</strong>, and
+                <strong>Filtered</strong> views.
+            </li>
+            <li class="list-group-item">Press <strong><code>c</code></strong> to print an easily copy‑pasteable
+                dictionary snippet for your constants.</li>
+        </ul>
+
+
+        <h4 class="fs-4">Typical outputs:</h4>
+
+        <ul class="list-group">
+            <span class="d-block"># Example:</span>
+            <li class="list-group-item"><code>"Blue": {"Lower": (90, 70, 70), "Upper": (130, 255, 255)}</code></li>
+            <li class="list-group-item"><code>"Green": {"Lower": (40, 70, 70), "Upper": (85, 255, 255)}</code></li>
+            <li class="list-group-item"><code>"Yellow": {"Lower": (20, 100, 100), "Upper": (30, 255, 255)}</code></li>
+            <span class="d-block"># Red uses two bands:</span>
+            <li class="list-group-item"><code>"Red1": {"Lower": (0, 100, 100), "Upper": (10, 255, 255)}</code></li>
+            <li class="list-group-item"><code>"Red2": {"Lower": (160, 100, 100), "Upper": (179, 255, 255)}</code></li>
+        </ul>
+
+
+
+        <p><strong>When to use.</strong> After pre‑processing is tuned. Make sure you test with the <strong>real
+                spheres</strong> and <strong>actual lighting</strong> you’ll race in.</p>
+
+        <hr>
+
+        <br>
+        <h3 id="4-select_sphero_color_range-py-" class="fs-3">4) <code>select_sphero_color_range.py</code></h3>
+        <br>
+        <p><strong>Purpose.</strong> <strong>Mouse‑driven</strong> HSV calibration: draw a <strong>circle</strong>
+            around the sphere; the script extracts pixels inside the circle and computes <strong>5th–95th
+                percentiles</strong> per HSV channel to avoid outliers.</p>
+
+        <h4 class="fs-4">Outputs:</h4>
+
+        <ul class="list-group">
+            <span class="d-block">Computed HSV range (5th–95th percentile):</span>
+            <li class="list-group-item"><code>lower = [H_low, S_low, V_low]</code></li>
+            <li class="list-group-item"><code>upper = [H_high, S_high, V_high]</code></li>
+        </ul>
+
+
+        <p>Use this as a starting range, then fine‑tune with the <code>color_trackbar_*.py</code> tools.</p>
+
+        <p><strong>When to use.</strong> Fast first‑pass calibration when you already have a clean single frame of the
+            sphere.</p>
+
+        <hr>
+        <br>
+        <h3 id="5-select_sphero_size-py-" class="fs-3">5) <code>select_sphero_size.py</code></h3>
+        <br>
+        <p><strong>Purpose.</strong> Measure <strong>center (x, y)</strong>, <strong>radius</strong>, and
+            <strong>diameter</strong> (in pixels) of your Sphero in the current camera view by
+            <strong>click‑dragging</strong> a circle.
+        </p>
+
+        <h4 class="fs-4">Outputs:</h4>
+        <ul class="list-group">
+            <span class="d-block">Sphere parameters:</span>
+            <li class="list-group-item"><code>center_x = &lt;int&gt;</code></li>
+            <li class="list-group-item"><code>center_y = &lt;int&gt;</code></li>
+            <li class="list-group-item"><code>radius   = &lt;int&gt; # in pixels</code></li>
+            <li class="list-group-item"><code>diameter = &lt;int&gt; # in pixels</code></li>
+
+        </ul>
+
+
+        <p>Feed the <strong>radius/diameter</strong> into your tracker (min/max contour area, expected circle radius,
+            etc.).</p>
+
+        <hr>
+
+        <br>
+
+        <h3 id="6-set-status-camera-zone-py-" class="fs-3">6) <code>set_status_camera_zone.py</code></h3>
+        <br>
+
+        <p>
+            <strong>Purpose.</strong>
+            Define three polygonal zones—<strong>Back</strong>, <strong>Middle</strong>, and <strong>Front</strong>—in
+            the
+            <strong>Status</strong> camera’s field of view using interactive trackbars. Visualizes the raw frame with
+            labeled
+            anchor/base points and connecting lines, plus a live <strong>filled overlay</strong> of the three zones for
+            quick,
+            visual verification.
+        </p>
+
+        <h4 class="fs-4">Parameters (trackbars):</h4>
+        <ul class="list-group">
+            <li class="list-group-item"><code>a_x</code>, <code>a_y</code> — apex/anchor point <strong>A</strong> at the
+                top of the fan.</li>
+            <li class="list-group-item"><code>bl_x</code>, <code>bl_y</code> — left base point <strong>BL</strong>.</li>
+            <li class="list-group-item"><code>cl_x</code>, <code>cl_y</code> — inner-left base point
+                <strong>CL</strong>.
+            </li>
+            <li class="list-group-item">
+                <code>b_c_x</code> — horizontal span between left and right sides (baseline width).
+                <br><em>Derived:</em> <code>br_x = bl_x + b_c_x</code>, <code>cr_x = cl_x + b_c_x</code>
+            </li>
+            <li class="list-group-item"><code>br_y</code> — right base point <strong>BR</strong> vertical position (x
+                derived).</li>
+            <li class="list-group-item"><code>cr_y</code> — inner-right base point <strong>CR</strong> vertical position
+                (x derived).</li>
+            <li class="list-group-item"><code>dl_x</code>, <code>dl_y</code> — lower-left point <strong>DL</strong> for
+                the Front zone.</li>
+            <li class="list-group-item"><code>dr_x</code>, <code>dr_y</code> — lower-right point <strong>DR</strong> for
+                the Back zone.</li>
+            <li class="list-group-item">
+                <em>Derived midpoint:</em> <code>cm_x = (cl_x + cr_x) // 2</code>,
+                <code>cm_y = (cl_y + cr_y) // 2</code> → center point <strong>CM</strong>.
+            </li>
+        </ul>
+
+        <h4 class="fs-4 mt-4">Outputs:</h4>
+        <ul class="list-group">
+            <li class="list-group-item">
+                Printed <strong>Back Points</strong>:
+                <code>Back Points : ((a_x, a_y), (cm_x, cm_y), (dr_x, dr_y))</code>
+            </li>
+            <li class="list-group-item">
+                Printed <strong>Middle Points</strong>:
+                <code>Middle Points : ((a_x, a_y), (bl_x, bl_y), (cl_x, cl_y), (cr_x, cr_y), (br_x, br_y))</code>
+            </li>
+            <li class="list-group-item">
+                Printed <strong>Front Points</strong>:
+                <code>Front Points : ((a_x, a_y), (dl_x, dl_y), (cm_x, cm_y))</code>
+            </li>
+            <li class="list-group-item">
+                Live overlay preview in the “Camera” window (polygons filled: <strong>Back = Red</strong>,
+                <strong>Middle = Green</strong>, <strong>Front = Blue</strong>) with labeled points and guide lines.
+            </li>
+            <li class="list-group-item">
+                Keyboard: <strong><code>c</code></strong> prints current zone coordinates;
+                <strong><code>ESC</code></strong> exits.
+            </li>
+        </ul>
+
+        <p class="mt-3">
+            <strong>When to use.</strong>
+            After mounting the Status camera and before racing, to finalize <strong>distance bands / safety zones / UI
+                regions</strong>
+            used by your app (e.g., warnings when a Sphero enters the Back zone, adaptive speed limits in the Middle
+            zone, or highlighting
+            entrants in the Front zone). Store the printed coordinates in your configuration so downstream logic
+            (zone-based rules,
+            overlays, or filters) stays consistent.
+        </p>
+
+
+
+        <hr>
+
+        <br>
+
+        <h3 id="7-finishline_camera_perspective-py-" class="fs-3">7) <code>finishline_camera_perspective.py</code></h3>
+        <br>
+        <p><strong>Purpose.</strong> Similar to the Path tool, but also lets you position <strong>Start</strong> and
+            <strong>Stop</strong> horizontal lines <strong>in the warped space</strong> for lap timing. Visualizes raw
+            frame, cropped canvas, and <strong>warped</strong> view with lines.
+        </p>
+
+        <h4 class="fs-4">Outputs:</h4>
+
+        <ul class="list-group">
+            <li class="list-group-item">Perspective <strong>corner points</strong> (TL, TR, BL, BR).</li>
+            <li class="list-group-item"><strong>Start line</strong> <code>y</code> &amp; width segment, <strong>Stop
+                    line</strong> <code>y</code> &amp; width segment in the warped frame.</li>
+            <li class="list-group-item">Copy these into your detector/timer config to ensure upward crossings (or your
+                chosen direction) are measured correctly.</li>
+        </ul>
+
+
+        <p><strong>When to use.</strong> After you fix the finishline camera position and height; finalizes timing
+            geometry.</p>
+
+        <hr>
+
+        <br>
+        <h2 id="keyboard-ui" class="fs-2">Keyboard &amp; UI</h2>
+        <br>
+        <ul class="list-group">
+
+            <li class="list-group-item"><strong>Drag trackbars</strong> to adjust parameters.</li>
+            <li class="list-group-item"><strong><code>c</code></strong> — print <strong>current calibration
+                    values</strong> to console (most tools). </li>
+            <li class="list-group-item"><strong><code>r</code></strong> — reset selection (selection tools). </li>
+            <li class="list-group-item"><strong><code>ESC</code></strong> — exit.</li>
+            <li class="list-group-item">Multiple <strong>named windows</strong> are opened; arrange them on a second
+                display if possible.</li>
+        </ul>
+
+        <hr>
+        <br>
+
+
+        <h2 id="tips-best-practices" class="fs-2">Tips &amp; Best Practices</h2>
+        <br>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <strong>Backend choice matters.</strong> On Windows, prefer
+                <code>cv.CAP_DSHOW</code>; on macOS <code>cv.CAP_AVFOUNDATION</code>; on Linux
+                <code>cv.CAP_V4L2</code>/<code>cv.CAP_GSTREAMER</code>.
+            </li>
+            <li class="list-group-item">
+                <strong>Warm-up cameras</strong> (read/discard ~10 frames) to stabilize auto-exposure/white balance
+                before calibration.
+            </li>
+            <li class="list-group-item">
+                Keep <strong>lighting constant</strong>; if lighting changes (e.g., sunlight), re-tune
+                <strong>CLAHE/morphology</strong> and <strong>HSV</strong>.
+            </li>
+            <li class="list-group-item">
+                Cache and <strong>reuse</strong> the perspective matrix; don’t recompute every frame.
+            </li>
+            <li class="list-group-item">
+                Red often needs <strong>two HSV bands</strong> due to hue wrap-around.
+            </li>
+            <li class="list-group-item">
+                Save your printed configs into versioned files (<code>backend/constants.py</code>) and commit them per
+                location (lab vs gym).
+            </li>
+
+
+            <li class="list-group-item">
+                <strong>Status camera zones:</strong> keep the apex <code>A</code> fixed and repeatable (same mounting
+                height/FOV). Changes in resolution or zoom
+                require re-tuning zone points.
+            </li>
+            <li class="list-group-item">
+                Use <code>b_c_x</code> to maintain left/right symmetry (<code>BR.x = BL.x + b_c_x</code>,
+                <code>CR.x = CL.x + b_c_x</code>);
+                verify the derived midpoint <code>CM = ((CL.x+CR.x)//2, (CL.y+CR.y)//2)</code>.
+            </li>
+            <li class="list-group-item">
+                Validate overlays at your **runtime FPS** with a semi-transparent blend (e.g.,
+                <code>cv.addWeighted(..., 0.5)</code>) so zones are visible without
+                obscuring the robot.
+            </li>
+            <li class="list-group-item">
+                Persist printed polygons (Back/Middle/Front) to a config and consume them downstream (UI hints, safety
+                bands, rule triggers). Re-export with <code>c</code> after any physical move.
+            </li>
+        </ul>
+
+        <hr>
+        <br>
+        <h2 id="outputs-to-copy-into-the-main-app" class="fs-2">Outputs to copy into the main app</h2>
+        <br>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <strong>Pre-processing</strong>: bilateral/median/CLAHE/morphology numbers.
+            </li>
+            <li class="list-group-item">
+                <strong>HSV ranges</strong> per color (lower/upper; red has two bands).
+            </li>
+            <li class="list-group-item">
+                <strong>Sphere size</strong> in pixels (radius/diameter, center ref if needed).
+            </li>
+            <li class="list-group-item">
+                <strong>Perspective corners</strong> and <strong>start/stop</strong> line coordinates.
+            </li>
+
+
+            <li class="list-group-item">
+                <strong>Status camera zone polygons</strong> (for <code>set_status_camera_zone.py</code>):
+                <ul class="mt-2">
+                    <li><strong>Back Points</strong>:
+                        <code>((a_x, a_y), (cm_x, cm_y), (dr_x, dr_y))</code>
+                    </li>
+                    <li><strong>Middle Points</strong>:
+                        <code>((a_x, a_y), (bl_x, bl_y), (cl_x, cl_y), (cr_x, cr_y), (br_x, br_y))</code>
+                    </li>
+                    <li><strong>Front Points</strong>:
+                        <code>((a_x, a_y), (dl_x, dl_y), (cm_x, cm_y))</code>
+                    </li>
+                </ul>
+                Store these coordinates in your configuration to drive zone-based logic (warnings, speed rules, UI
+                highlighting).
+            </li>
+        </ul>
+
+
+
+        <hr>
+
+        <br>
+
+
+        <h2 id="file-list" class="fs-2">File List</h2>
+        <br>
+        <div>
+            <span class="d-block">tools/</span>
+            <span class="d-block">├─ __init__.py # package marker</span>
+            <span class="d-block">├─ camera_configuration.py # backends, CAP_PROP inspection, writability tests</span>
+            <span class="d-block">├─ color_trackbar_red.py # HSV trackbars for Red (two hue bands)</span>
+            <span class="d-block">├─ color_trackbar_yellow.py # HSV trackbars for Yellow</span>
+            <span class="d-block">├─ color_trackbar_green.py # HSV trackbars for Green</span>
+            <span class="d-block">├─ color_trackbar_blue.py # HSV trackbars for Blue</span>
+            <span class="d-block">├─ frame_manipulation_parameters.py # bilateral/median/CLAHE/morphology tuner +
+                masks/contours</span>
+            <span class="d-block">├─ finishline_camera_perspective.py # 4-corner ROI + warp + start/stop lines
+                (Finishline)</span>
+            <span class="d-block">├─ select_sphero_color_range.py # mouse circle → percentile HSV range</span>
+            <span class="d-block">├─ select_sphero_size.py # mouse circle → center/radius/diameter (px)</span>
+            <span class="d-block">└─ set_status_camera_zone.py # polygonal zones (Back/Middle/Front) for Status
+                camera</span>
+        </div>
+
+
+
+
+    </main>
+
 
     <script src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
 </body>

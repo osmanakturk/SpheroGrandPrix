@@ -90,7 +90,7 @@ def get_tracker(
     with LOCK:
         try:
             ok_path = PATH_CAP.read()
-            print(f"Path Cap Read: {ok_path}")
+            #print(f"Path Cap Read: {ok_path}")
         except Exception as e:
             print(f"Path Cap Read: {e}")
 
@@ -110,7 +110,7 @@ def get_tracker(
 
         try:
             ok_fin = FINISHLINE_CAP.read()
-            print(f"Finishline Cap Read: {ok_fin}")
+            #print(f"Finishline Cap Read: {ok_fin}")
         except Exception as e:
             print(f"Finishline Cap Read: {e}")
     

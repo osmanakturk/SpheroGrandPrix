@@ -88,7 +88,7 @@ def get_tracker(
 
         try:
             ok_status = STATUS_CAP.read()
-            print(f"Status Cap Read: {ok_status}")
+            #print(f"Status Cap Read: {ok_status}")
         except Exception as e:
             print(f"Status Cap Read: {e}")
 
@@ -105,7 +105,7 @@ def get_tracker(
         
         try:
             ok_fin = FINISHLINE_CAP.read()
-            print(f"Finishline Cap Read: {ok_fin}")
+            #print(f"Finishline Cap Read: {ok_fin}")
         except Exception as e:
             print(f"Finishline Cap Read: {e}")
     

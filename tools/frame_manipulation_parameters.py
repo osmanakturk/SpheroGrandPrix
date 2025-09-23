@@ -1,8 +1,14 @@
 import cv2 as cv
 import numpy as np
-from backend.constants import HSV_RANGES_STRICT, HSV_RANGES_WIDE, HSV_RANGES_NORMAL
 
-
+HSV_RANGES_NORMAL = {
+    "Red1"  : {"Lower" :(0, 100, 100),   "Upper" : (10, 255, 255)},
+    "Red2"  : {"Lower" :(160, 100, 100), "Upper" : (180, 255, 255)},
+    "Yellow": {"Lower" :(20, 100, 100),  "Upper" : (30, 255, 255)},
+    "Green" : {"Lower" :(40, 70, 70),    "Upper" : (85, 255, 255)},
+    "Blue"  : {"Lower" :(90, 70, 70),    "Upper" : (130, 255, 255)},
+    "Purple": {"Lower" :(130, 50, 50),   "Upper" : (160, 255, 255)},
+}
 
 COLORS = HSV_RANGES_NORMAL
 

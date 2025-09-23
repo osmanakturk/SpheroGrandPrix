@@ -35,31 +35,186 @@ def start_tracker(status_cap_config:CameraConfig,
     BACKGROUND = cv.imread("paths/background.png", cv.IMREAD_COLOR)
     
     with LOCK:
-        STATUS_CAP = Camera(config=status_cap_config)
-
-
-        status_ret =  STATUS_CAP.open()
+        try:
+            STATUS_CAP = Camera(config=status_cap_config)
+            status_ret =  STATUS_CAP.open()
+            print(f"Status Cap Open: {status_ret}")
+        except Exception as e:
+            print(f"Status Cap Open: {e}")
+        
 
         while not status_ret:
-            STATUS_CAP.release()
+            try:
+                print("Trying to Open Status Cap")
+                STATUS_CAP.release()
+                status_ret = STATUS_CAP.open()
+                print(f"Status Cap Open: {status_ret}")
+            except Exception as e:
+                print(f"Status Cap Open: {e}")
 
-            status_ret = STATUS_CAP.open()
-
-
-        FINISHLINE_CAP = Camera(config=finishline_cap_config)
-
-
-
-        finishline_ret = FINISHLINE_CAP.open()
+        try:
+            FINISHLINE_CAP = Camera(config=finishline_cap_config)
+            finishline_ret = FINISHLINE_CAP.open()
+            print(f"Finishline Cap Open: {finishline_ret}")
+        except Exception as e:
+            print(f"Finishline Cap Open: {e}")
 
         while not finishline_ret:
-            FINISHLINE_CAP.release()
-
-            finishline_ret = FINISHLINE_CAP.open()
-
+            try:
+                print("Trying to Open Finishline Cap")
+                FINISHLINE_CAP.release()
+                finishline_ret = FINISHLINE_CAP.open()
+                print(f"Finishline Cap Open: {finishline_ret}")
+            except Exception as e:
+                print(f"Finishline Cap Open: {e}")
     return True
     
 
+
+
+def get_tracker(
+        finishline_detector_config: DetectorConfig, 
+        back_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
+        middle_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
+        front_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
+        debug: bool = False, 
+        ) -> Optional[Tuple[bytes, bytes, Lap]]:
+        
+
+    global GLOBAL_LAB, STATUS_CAP, FINISHLINE_CAP
+    lap = GLOBAL_LAB
+    
+    with LOCK:
+
+        try:
+            ok_status = STATUS_CAP.read()
+            print(f"Status Cap Read: {ok_status}")
+        except Exception as e:
+            print(f"Status Cap Read: {e}")
+
+
+        while not ok_status:
+            try:
+                STATUS_CAP.release()
+                time.sleep(0.2)
+                STATUS_CAP.open()
+                ok_status = STATUS_CAP.read()
+                print(f"Status Cap Read: {ok_status}")
+            except Exception as e:
+                print(f"Status Cap Read: {e}")
+        
+        try:
+            ok_fin = FINISHLINE_CAP.read()
+            print(f"Finishline Cap Read: {ok_fin}")
+        except Exception as e:
+            print(f"Finishline Cap Read: {e}")
+    
+
+        while not ok_fin:
+            try:
+                FINISHLINE_CAP.release()
+                time.sleep(0.2)
+                FINISHLINE_CAP.open()
+                ok_fin = FINISHLINE_CAP.read()
+                print(f"Finishline Cap Read: {ok_fin}")
+            except Exception as e:
+                print(f"Finishline Cap Read: {e}")
+
+    if debug:
+        cv.imshow("Original Status Frame", STATUS_CAP.frame)
+        cv.imshow("Original Finishline Frame", FINISHLINE_CAP.frame)
+
+
+    
+    FINISHLINE_CAP.set_perspective_frame()
+    
+    status_frame = STATUS_CAP.frame.copy()
+    perspectived_finishline_frame = FINISHLINE_CAP.perspective_frame.copy()
+
+
+    if debug:
+        cv.imshow("Perspectived Finishline Frame", perspectived_finishline_frame)
+    
+    #_, processed_path_frame_jpg_encode = cv.imencode(".jpg", processed_path_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
+    #_, processed_finishline_frame_jpg_encode = cv.imencode(".jpg", processed_finishline_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
+    #processed_path_frame_decode = cv.imdecode(processed_path_frame_jpg_encode, cv.IMREAD_COLOR)
+    #processed_finishline_frame_decode = cv.imdecode(processed_finishline_frame_jpg_encode, cv.IMREAD_COLOR)
+    
+    
+    returner_finishline_frame = None
+    
+    if lap.is_started:
+        
+        lap.finishline_frame = FINISHLINE_CAP.perspective_frame
+        lap.background_img = BACKGROUND
+        
+        returner_finishline_frame = lap.get_processed_finishline_frame(
+            config=finishline_detector_config, 
+            start_line=FINISHLINE_CAP.start_line, 
+            finish_line=FINISHLINE_CAP.finish_line
+        )
+
+        if debug:
+            
+            cv.imshow("Returner Finishline Frame", returner_finishline_frame)
+            #cv.imshow("Background", background)
+    
+
+   
+    back_points = np.array(back_points)
+    middle_points = np.array(middle_points)
+    front_points = np.array(front_points)
+    overlay = status_frame.copy()
+    
+
+    if back_points is not None:
+        cv.fillPoly(overlay, [back_points], (255, 0, 0))
+
+
+    if middle_points is not None:
+        if lap.is_started: 
+            cv.fillPoly(overlay, [middle_points], (0, 255, 0))
+        else:
+            cv.fillPoly(overlay, [middle_points], (0, 0, 255))
+        
+
+    if front_points is not None:
+        cv.fillPoly(overlay, [front_points], (255, 0, 0))
+        
+
+    status_result = cv.addWeighted(status_frame, 0.5, overlay, 0.5, 0)
+    cv.polylines(status_result, [back_points, middle_points, front_points], True, (0,0,0), 1, cv.LINE_AA)
+
+
+    
+    if returner_finishline_frame is not None:
+        finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) 
+    else: 
+        cv.putText(perspectived_finishline_frame, "START", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+        cv.putText(perspectived_finishline_frame, "GAME", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
+
+        finishline_result = perspectived_finishline_frame
+    
+
+   
+
+    if debug:
+        cv.imshow("Status Result", status_result)
+        cv.imshow("Finishline Result", finishline_result)
+
+    status_ok, status_jpg = cv.imencode(".jpg", status_result, [cv.IMWRITE_JPEG_QUALITY, 100])
+    finishline_ok, finishline_jpg = cv.imencode(".jpg", finishline_result, [cv.IMWRITE_JPEG_QUALITY, 100])
+
+    result1 = None
+    result2 = None
+
+    if status_ok:
+        result1 = status_jpg.tobytes()
+
+    if finishline_ok:
+        result2 = finishline_jpg.tobytes()
+
+    return(result1, result2, GLOBAL_LAB)
 
 
 
@@ -186,139 +341,6 @@ def change_username_green(username: str) -> bool:
     return True
 
 
-
-
-def get_tracker(
-        finishline_detector_config: DetectorConfig, 
-        back_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
-        middle_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
-        front_points: Optional[Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]]] = None, 
-        debug: bool = False, 
-        ) -> Optional[Tuple[bytes, bytes, Lap]]:
-        
-
-    global GLOBAL_LAB, STATUS_CAP, FINISHLINE_CAP
-    lap = GLOBAL_LAB
-    
-    with LOCK:
-
-        ok_status = STATUS_CAP.read()
-        
-    
-        while not ok_status:
-            print(f"Status Cap Read: {ok_status}")
-            STATUS_CAP.release()
-            time.sleep(0.2)
-            STATUS_CAP.open()
-            ok_status = STATUS_CAP.read()
-    
-        
-        ok_fin = FINISHLINE_CAP.read()
-        
-    
-        while not ok_fin:
-            print(f"Finishline Cap Read: {ok_fin}")
-            FINISHLINE_CAP.release()
-            time.sleep(0.2)
-            FINISHLINE_CAP.open()
-            ok_fin = FINISHLINE_CAP.read()
-
-
-    if debug:
-        cv.imshow("Original Status Frame", STATUS_CAP.frame)
-        cv.imshow("Original Finishline Frame", FINISHLINE_CAP.frame)
-
-
-    
-    FINISHLINE_CAP.set_perspective_frame()
-    
-    status_frame = STATUS_CAP.frame.copy()
-    perspectived_finishline_frame = FINISHLINE_CAP.perspective_frame.copy()
-
-
-    if debug:
-        cv.imshow("Perspectived Finishline Frame", perspectived_finishline_frame)
-    
-    #_, processed_path_frame_jpg_encode = cv.imencode(".jpg", processed_path_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
-    #_, processed_finishline_frame_jpg_encode = cv.imencode(".jpg", processed_finishline_frame, [cv.IMWRITE_JPEG_QUALITY, 100])
-    #processed_path_frame_decode = cv.imdecode(processed_path_frame_jpg_encode, cv.IMREAD_COLOR)
-    #processed_finishline_frame_decode = cv.imdecode(processed_finishline_frame_jpg_encode, cv.IMREAD_COLOR)
-    
-    
-    returner_finishline_frame = None
-    
-    if lap.is_started:
-        
-        lap.finishline_frame = FINISHLINE_CAP.perspective_frame
-        lap.background_img = BACKGROUND
-        
-        returner_finishline_frame = lap.get_processed_finishline_frame(
-            config=finishline_detector_config, 
-            start_line=FINISHLINE_CAP.start_line, 
-            finish_line=FINISHLINE_CAP.finish_line
-        )
-
-        if debug:
-            
-            cv.imshow("Returner Finishline Frame", returner_finishline_frame)
-            #cv.imshow("Background", background)
-    
-
-   
-    back_points = np.array(back_points)
-    middle_points = np.array(middle_points)
-    front_points = np.array(front_points)
-    overlay = status_frame.copy()
-    
-
-    if back_points is not None:
-        cv.fillPoly(overlay, [back_points], (255, 0, 0))
-
-
-    if middle_points is not None:
-        if lap.is_started: 
-            cv.fillPoly(overlay, [middle_points], (0, 255, 0))
-        else:
-            cv.fillPoly(overlay, [middle_points], (0, 0, 255))
-        
-
-    if front_points is not None:
-        cv.fillPoly(overlay, [front_points], (255, 0, 0))
-        
-
-    status_result = cv.addWeighted(status_frame, 0.5, overlay, 0.5, 0)
-    cv.polylines(status_result, [back_points, middle_points, front_points], True, (0,0,0), 1, cv.LINE_AA)
-
-
-    
-    if returner_finishline_frame is not None:
-        finishline_result = cv.bitwise_or(perspectived_finishline_frame, returner_finishline_frame) 
-    else: 
-        cv.putText(perspectived_finishline_frame, "START", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-        cv.putText(perspectived_finishline_frame, "GAME", (perspectived_finishline_frame.shape[1]//4, perspectived_finishline_frame.shape[0]//2+30), cv.FONT_HERSHEY_COMPLEX, 1, (0, 0, 255), 2, cv.LINE_AA)
-
-        finishline_result = perspectived_finishline_frame
-    
-
-   
-
-    if debug:
-        cv.imshow("Status Result", status_result)
-        cv.imshow("Finishline Result", finishline_result)
-
-    status_ok, status_jpg = cv.imencode(".jpg", status_result, [cv.IMWRITE_JPEG_QUALITY, 100])
-    finishline_ok, finishline_jpg = cv.imencode(".jpg", finishline_result, [cv.IMWRITE_JPEG_QUALITY, 100])
-
-    result1 = None
-    result2 = None
-
-    if status_ok:
-        result1 = status_jpg.tobytes()
-
-    if finishline_ok:
-        result2 = finishline_jpg.tobytes()
-
-    return(result1, result2, GLOBAL_LAB)
 
 
 def release_all():

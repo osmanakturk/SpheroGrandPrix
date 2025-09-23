@@ -164,10 +164,16 @@ class Camera():
             return True
         
         if self._cap_index is not None:
-            self._cap = cv.VideoCapture(self._cap_index, self._cap_api)
+            try: 
+                self._cap = cv.VideoCapture(self._cap_index, self._cap_api)
+            except Exception as e:
+                print(f"VideoCapture Cap Index: {self._cap} {e}")
 
         elif self._cap_source is not None:
-            self._cap = cv.VideoCapture(self._cap_source, self._cap_api)
+            try:
+                self._cap = cv.VideoCapture(self._cap_source, self._cap_api)
+            except Exception as e:
+                print(f"VideoCapture Cap Source: {self._cap_source} {e}")
 
         else:
             print(f"Index: {self._cap_index}, Source: {self._cap_source} Camera: Either cap_index or cap_source must be provided.")
@@ -203,8 +209,10 @@ class Camera():
                 return False
 
 
-
-        ret, frame = self._cap.read()
+        try:
+            ret, frame = self._cap.read()
+        except Exception as e:
+            print(f"Cap Read: {e}")
         
         if not ret or frame is None:
             blank = np.full((self._cap_height or 480, self._cap_width or 640, 3), 255, np.uint8)
@@ -232,7 +240,11 @@ class Camera():
     def release(self) -> None:
 
         if self._cap is not None:
-            self._cap.release()
+            try:
+                self._cap.release()
+            except Exception as e:
+                print(f"Cap Release: {e}")
+    
             self._cap = None
 
 

@@ -224,6 +224,7 @@ def release_all():
         PATH_CAP.release()
         FINISHLINE_CAP.release()
         cv.destroyAllWindows()
+        print("All Cameras Released")
     except Exception as e:
         print(f"Release All Failed: {e}")
 

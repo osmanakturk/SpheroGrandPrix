@@ -180,6 +180,9 @@ python app.py
 - **Stop Lap** → finalizes timing, computes per-color results and aggregates.
 - **Reset `<color>`** → clears state for a single color (`red`, `yellow`, `blue`, `green`).
 - **Change Username** → sets display name per color (shown in UI/results).
+- **Maintenance (optional UI actions):**
+  - *Release Cameras:* frees all VideoCapture handles
+  - *Delete Database:* removes database.sqlite and restarts with empty results
 - **Live Streams:**
   - *Status camera:* single-FOV view with **Back/Middle/Front** polygon overlays (semi-transparent), labeled anchor points and guide lines.
   - *Finishline camera:* rectified/warped view with **Start/Stop** lines for crossing detection.
@@ -196,6 +199,8 @@ python app.py
 - `POST /reset/<color>` — reset state for a single color (`red|yellow|blue|green`).
 - `POST /username_change/<color>/<username>` — set display name for a color.
 - `GET /paths/<filename>` — serve saved images (e.g., dashboard thumbnails).
+- `GET /release_cap` — Operational — release all open cameras.
+- `GET /delete/database` — Operational — delete database.sqlite (if present).
 
 ---
 
@@ -342,6 +347,9 @@ python app.py
 - **Stop Lap** → rond af, bereken resultaten en totaalscores.
 - **Reset `<color>`** → reset status voor één kleur (`red`, `yellow`, `blue`, `green`).
 - **Change Username** → stel weergavenaam per kleur in.
+- **Onderhoud (optionele UI-acties):**
+  - *Release Cameras:* geeft alle VideoCapture-handles vrij
+  - *Delete Database:* verwijdert database.sqlite en start met lege resultaten
 - **Live Streams:**
   - *Statuscamera:* één FOV met **Achter/Midden/Voor** overlays (semi-transparant), gelabelde ankerpunten en hulplijnen.
   - *Finishline camera:* ge-warpede view met **Start/Stop** lijnen.
@@ -357,6 +365,8 @@ python app.py
 - `POST /reset/<color>` — reset voor één kleur (`red|yellow|blue|green`).
 - `POST /username_change/<color>/<username>` — stel weergavenaam in.
 - `GET /paths/<filename>` — serveer opgeslagen afbeeldingen (bijv. dashboard thumbnails).
+- `GET /release_cap` — Operationeel — geef alle camera’s vrij.
+- `GET /delete/database` — Operationeel — verwijder database.sqlite (indien aanwezig).
 
 ---
 

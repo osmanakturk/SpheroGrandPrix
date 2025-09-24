@@ -383,11 +383,6 @@ def username_change_api(color, username):
 
 
 
-@app.route("/game_score")
-def game_score():
-    lap = get_lap()
-    pass
-
 
 @app.route("/paths/<path:filename>")
 def img_path(filename):

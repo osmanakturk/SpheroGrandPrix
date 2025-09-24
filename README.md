@@ -1,6 +1,41 @@
 # SpheroGrandPrix — BOLT Racing & Vision System
 ## Rule-Based and HSV-Color-Based Classical CV Segmentation and Tracking System
 
+<p align="center"> 
+  <a href="https://git-scm.com/" target="_blank" rel="noreferrer"> 
+ <img src="https://www.vectorlogo.zone/logos/git-scm/git-scm-icon.svg" alt="git" width="auto" height="40"/> 
+ </a> 
+ 
+ <a href="https://www.w3.org/html/" target="_blank" rel="noreferrer"> 
+ <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/html5/html5-original-wordmark.svg" alt="html5" width="40" height="40"/> 
+ </a> 
+ 
+ <a href="https://getbootstrap.com" target="_blank" rel="noreferrer"> 
+  <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/bootstrap/bootstrap-plain-wordmark.svg" alt="bootstrap" width="40" height="40"/> 
+ </a> 
+ 
+  <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank" rel="noreferrer"> 
+ <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/javascript/javascript-original.svg" alt="javascript" width="40" height="40"/> 
+ </a> 
+
+  <a href="https://www.sqlite.org/" target="_blank" rel="noreferrer"> 
+ <img src="https://www.vectorlogo.zone/logos/sqlite/sqlite-icon.svg" alt="sqlite" width="40" height="40"/> 
+ </a> 
+ 
+ <a href="https://www.python.org" target="_blank" rel="noreferrer"> 
+ <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="python" width="40" height="40"/> 
+ </a> 
+
+ <a href="https://opencv.org/" target="_blank" rel="noreferrer"> 
+ <img src="https://www.vectorlogo.zone/logos/opencv/opencv-icon.svg" alt="opencv" width="40" height="40"/> 
+ </a> 
+ 
+ <a href="https://flask.palletsprojects.com/" target="_blank" rel="noreferrer">
+ <img src="https://flask.palletsprojects.com/en/stable/_images/flask-name.svg" alt="flask" width="100" height="40"/> 
+ </a> 
+
+ </p>
+
 
 > **Versions**  
 > This repository contains **two major versions** of the project.
@@ -118,29 +153,63 @@ This project is a classical computer vision system that performs **object segmen
 
 ---
 
+
 ## Setup & Run (EN) 
 
 ```bash
-# 1) Create & activate a venv
+# 1) Clone the repo
+git clone https://github.com/osmanakturk/SpheroGrandPrix.git
+cd SpheroGrandPrix
+
+# 2) (Optional) Create & activate a virtualenv
 python -m venv .venv
 # Windows
 .venv\Scripts\activate
 # macOS/Linux
 source .venv/bin/activate
 
-# 2) Install dependencies
+# 3) Install dependencies
 pip install -r requirements.txt
 
-# 3) (Optional) Add a background for path exports
+# 4) (Optional) Add a background for path exports
 # paths/background.png
 
-# 4) Run
+# 5) Run
 python app.py
+# Open: http://localhost:5000
+
 ```
 
 **Cameras:** set `CameraConfig` with `cap_index` (or `cap_source`) and a platform backend (Windows → DirectShow, macOS → AVFoundation, Linux → V4L2/GStreamer). Define `perspective_points` and optional `start_line` / `finish_line` for the finish camera.
 
 ---
+
+## Runtime Controls (EN)
+
+
+- **Start Lap** → begins timing and tracking for all colors.
+- **Stop Lap** → finalizes timing, computes per-color results and aggregate scores.
+- **Reset <color>** → clears state for a single color (red, yellow, blue, green).
+- **Change Username** → sets display name per color (shown in UI and results).
+- **Live Streams:**
+> - *Path camera:* top-down trajectory visualization.
+> - *Finishline camera:* rectified view with Start/Stop lines for crossings.
+
+## API Endpoints (EN)
+
+> - `Base URL:` http://<host>:5000
+> - `GET /video_feed/path` — Stream — MJPEG feed from the Path camera (top-down/warped view).  
+> - `GET /video_feed/finishline` — Stream — MJPEG feed from the Finishline camera (warped with timing lines).  
+> - `POST /lap/start` — Action — start a new lap for all colors.  
+> - `POST /lap/stop` — Action — stop the lap, compute results and scores.  
+> - `GET /lap/state` — Status — current per-color state.  
+> - `GET /stats` — Aggregates — totals and dashboard entries.  
+> - `POST /reset/<color>` — Action — reset state for a single color (red|yellow|blue|green).  
+> - `POST /username_change/<color>/<username>` — Action — set display name for a color.
+> - `GET /paths/<filename>` — Static — serve saved path/score images (as listed in /stats.dashboard[].img_path).
+
+---
+
 
 ## Calibration workflow (tools/) (EN) 
 
@@ -260,23 +329,58 @@ Dit project is een klassiek computer vision-systeem dat **objectsegmentatie en t
 ## Installatie & Starten (NL) 
 
 ```bash
+# 1) Clone the repo
+git clone https://github.com/osmanakturk/SpheroGrandPrix.git
+cd SpheroGrandPrix
+
+# 2) (Optional) Create & activate a virtualenv
 python -m venv .venv
 # Windows
 .venv\Scripts\activate
 # macOS/Linux
 source .venv/bin/activate
 
+# 3) Install dependencies
 pip install -r requirements.txt
 
-# Optioneel: achtergrond voor pad-exports
+# 4) (Optional) Add a background for path exports
 # paths/background.png
 
+# 5) Run
 python app.py
+# Open: http://localhost:5000
 ```
 
 **Camera’s:** stel `CameraConfig` in met `cap_index` of `cap_source` en kies een backend (Windows → DirectShow, macOS → AVFoundation, Linux → V4L2/GStreamer). Definieer `perspective_points` en (indien nodig) `start_line`/`finish_line` voor de finish‑camera.
 
 ---
+
+## Runtime-bediening (NL)
+
+
+- **Start Lap** → start timing & tracking voor alle kleuren..
+- **Stop Lap** → rond af, bereken resultaten en totaalscores.
+- **Reset <color>** → reset status voor één kleur (red, yellow, blue, green).
+- **Change Username** → stel weergavenaam per kleur in.
+- **Live Streams:**
+> - *Path camera:* top-down traject-visualisatie
+> - *Finishline camera:* gerectificeerd beeld met Start/Stop lijnen.
+
+## API-Eindpunten (NL)
+
+> - `Base URL:` http://<host>:5000
+> - `GET /video_feed/path` — Stream — MJPEG feed van de Path camera (top-down/warp). 
+> - `GET /video_feed/finishline` — Stream — MJPEG feed van de Finishline camera (warp met timelijnen).  
+> - `POST /lap/start` — Actie — start een nieuwe ronde (alle kleuren). 
+> - `POST /lap/stop` — Actie — stop de ronde, bereken resultaten en scores.
+> - `GET /lap/state` — Status — actuele status per kleur.
+> - `GET /stats` — Totalen — aggregaten en dashboard-items.  
+> - `POST /reset/<color>` — Actie — reset voor één kleur (red|yellow|blue|green). 
+> - `POST /username_change/<color>/<username>` — Actie — stel weergavenaam in.
+> - `GET /paths/<filename>` — Static — serveer opgeslagen pad/score-afbeeldingen (zoals in /stats.dashboard[].img_path).
+
+---
+
 
 ## Kalibratie workflow (tools/) (NL) 
 

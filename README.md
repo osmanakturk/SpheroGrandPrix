@@ -195,9 +195,12 @@ python app.py
 - **Stop Lap** → finalizes timing, computes per-color results and aggregate scores.
 - **Reset <color>** → clears state for a single color (red, yellow, blue, green).
 - **Change Username** → sets display name per color (shown in UI and results).
+- **Maintenance (optional UI actions):**
+  - *Release Cameras:* frees all VideoCapture handles
+  - *Delete Database:* removes database.sqlite and restarts with empty results
 - **Live Streams:**
-> - *Path camera:* top-down trajectory visualization.
-> - *Finishline camera:* rectified view with Start/Stop lines for crossings.
+  - *Path camera:* top-down trajectory visualization.
+  - *Finishline camera:* rectified view with Start/Stop lines for crossings.
 
 ## API Endpoints (EN)
 
@@ -211,6 +214,8 @@ python app.py
 > - `POST /reset/<color>` — Action — reset state for a single color (red|yellow|blue|green).  
 > - `POST /username_change/<color>/<username>` — Action — set display name for a color.
 > - `GET /paths/<filename>` — Static — serve saved path/score images (as listed in /stats.dashboard[].img_path).
+> - `GET /release_cap` — Operational — release all open cameras.
+> - `GET /delete/database` — Operational — delete database.sqlite (if present).
 
 ---
 
@@ -366,9 +371,12 @@ python app.py
 - **Stop Lap** → rond af, bereken resultaten en totaalscores.
 - **Reset <color>** → reset status voor één kleur (red, yellow, blue, green).
 - **Change Username** → stel weergavenaam per kleur in.
+- **Onderhoud (optionele UI-acties):**
+  - *Release Cameras:* geeft alle VideoCapture-handles vrij
+  - *Delete Database:* verwijdert database.sqlite en start met lege resultaten
 - **Live Streams:**
-> - *Path camera:* top-down traject-visualisatie
-> - *Finishline camera:* gerectificeerd beeld met Start/Stop lijnen.
+  - *Path camera:* top-down traject-visualisatie
+  - *Finishline camera:* gerectificeerd beeld met Start/Stop lijnen.
 
 ## API-Eindpunten (NL)
 
@@ -382,6 +390,8 @@ python app.py
 > - `POST /reset/<color>` — Actie — reset voor één kleur (red|yellow|blue|green). 
 > - `POST /username_change/<color>/<username>` — Actie — stel weergavenaam in.
 > - `GET /paths/<filename>` — Static — serveer opgeslagen pad/score-afbeeldingen (zoals in /stats.dashboard[].img_path).
+> - `GET /release_cap` — Operationeel — geef alle camera’s vrij.
+> - `GET /delete/database` — Operationeel — verwijder database.sqlite (indien aanwezig).
 
 ---
 

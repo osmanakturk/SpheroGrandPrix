@@ -389,6 +389,22 @@ def img_path(filename):
     return send_from_directory("paths", filename)
 
 
+@app.route("/release_caps")
+def release_caps():
+    release_all()
+    print("Cameras released")
+    return redirect("/")
+
+
+@app.route("/delete/database")
+def delete_database():
+    if os.path.exists("database.sqlite"):
+        os.remove("database.sqlite")
+        print("Database deleted")
+    else:
+        print("Database not exists")
+    return redirect("/")
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True, threaded=True)

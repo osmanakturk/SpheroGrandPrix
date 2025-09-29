@@ -45,15 +45,15 @@ def ensure_tracker_started() -> bool:
             
             finishline_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
-                cap_index=2, 
-                perspective_points=((240, 0), (640, 0), (240, 480), (640, 480)),
-                start_line=((0, 240), (190, 240)), 
-                finish_line=((210, 240), (400, 240))
+                cap_index=1, 
+                perspective_points=((57, 0), (492, 0), (81, 417), (477, 417)),
+                start_line= ((0, 186), (185, 186)), 
+                finish_line=((231, 187), (435, 187))
                 ), 
 
             status_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
-                cap_index=1
+                cap_index=2
                 )
             )
             
@@ -61,9 +61,9 @@ def ensure_tracker_started() -> bool:
 
 
 def ensure_get_tracker():
-    back_points=((296, 65), (353, 381), (395, 90))
-    middle_points=((296, 65), (226, 120), (246, 366), (460, 396), (440, 140))
-    front_points= ((296, 65), (310, 480), (353, 381))
+    back_points=((186, 18), (284, 407), (386, 302))
+    middle_points=((186, 18), (173, 101), (191, 357), (377, 458), (359, 122))
+    front_points= ((186, 18), (188, 480), (284, 407))
 
     finishline_detector_config = DetectorConfig(
         hsv_ranges=HsvColorsRange.NORMAL, 

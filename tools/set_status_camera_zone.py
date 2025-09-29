@@ -7,7 +7,7 @@ def trackbar_callback(val):
 
 
 def main(test:bool = False):
-    cap = cv.VideoCapture(1, cv.CAP_DSHOW)
+    cap = cv.VideoCapture(2, cv.CAP_DSHOW)
 
     HEIGHT = int(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     WIDTH = int(cap.get(cv.CAP_PROP_FRAME_WIDTH))
@@ -190,4 +190,4 @@ def main(test:bool = False):
 
 
 if __name__=="__main__":
-    main(test=True)
+    main(test=False)

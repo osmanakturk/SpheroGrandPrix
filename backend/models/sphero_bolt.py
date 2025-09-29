@@ -340,11 +340,11 @@ class SpheroBolt():
 
     def reset(self) -> bool:
         
-        if self._is_finished or self._is_lap_stopped:
-            return False
+        #if self._is_finished or self._is_lap_stopped:
+        #    return False
         
-        if not self._is_lap_started:
-            return False
+        #if not self._is_lap_started:
+        #    return False
 
         try:
             self._is_started = False

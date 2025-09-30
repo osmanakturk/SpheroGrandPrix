@@ -318,8 +318,9 @@ class Detector:
                     
                     
                     if sphero_bolt.finishline_canvas is not None:
-                        cv.line(sphero_bolt.finishline_canvas, sphero_bolt.finishline_previous_center, sphero_bolt.finishline_center, 
-                                COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
+                        if (start_line[0][0] <= sphero_bolt.finishline_center[0] <= start_line[1][0] and start_line[0][0] <= sphero_bolt.finishline_previous_center[0] <= start_line[1][0]) or (finish_line[0][0] <= sphero_bolt.finishline_center[0] <= finish_line[1][0] and finish_line[0][0] <= sphero_bolt.finishline_previous_center[0] <= finish_line[1][0]):
+                            cv.line(sphero_bolt.finishline_canvas, sphero_bolt.finishline_previous_center, sphero_bolt.finishline_center, 
+                                    COLORS_BGR[sphero_bolt.color.value], 3, cv.LINE_AA)
 
                     if config.debug:
                         cv.waitKey(1)

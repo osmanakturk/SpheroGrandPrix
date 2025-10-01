@@ -19,7 +19,7 @@ GLOBAL_USERNAME_GREEN = "Green"
 
 
 
-BACKGROUND = None
+
 STATUS_CAP: Optional[Camera] = None
 FINISHLINE_CAP: Optional[Camera] = None
 
@@ -30,9 +30,9 @@ def start_tracker(status_cap_config:CameraConfig,
                   finishline_cap_config:CameraConfig
                   ) -> bool:
 
-    global BACKGROUND, STATUS_CAP, FINISHLINE_CAP
+    global STATUS_CAP, FINISHLINE_CAP
 
-    BACKGROUND = cv.imread("paths/background.png", cv.IMREAD_COLOR)
+
     
     with LOCK:
         try:
@@ -146,7 +146,7 @@ def get_tracker(
     if lap.is_started:
         
         lap.finishline_frame = FINISHLINE_CAP.perspective_frame
-        lap.background_img = BACKGROUND
+   
         
         returner_finishline_frame = lap.get_processed_finishline_frame(
             config=finishline_detector_config, 
@@ -157,7 +157,7 @@ def get_tracker(
         if debug:
             
             cv.imshow("Returner Finishline Frame", returner_finishline_frame)
-            #cv.imshow("Background", background)
+  
     
 
    

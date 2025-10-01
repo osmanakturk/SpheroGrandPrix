@@ -10,7 +10,7 @@ def trackbar_callback(val):
 
 
 
-cap = cv.VideoCapture(2, cv.CAP_DSHOW)
+cap = cv.VideoCapture(1, cv.CAP_DSHOW)
 
 #cap.set(cv.CAP_PROP_SETTINGS, 1)
 

@@ -1,3 +1,6 @@
+#### **EN:** This project was developed for and showcased at the **I Love Science Festival 2025**, on behalf of **Erasmushogeschool Brussel (EhB)**.
+#### **NL:** Dit project werd in opdracht van **Erasmushogeschool Brussel (EhB)** ontwikkeld voor en voorgesteld op het **I Love Science Festival 2025**.
+##
 # SpheroGrandPrix — BOLT Racing & Vision System
 ## Rule-Based and HSV-Color-Based Classical CV Segmentation and Tracking System
 
@@ -43,16 +46,15 @@
 
 <div align="center">
 
-<!-- Replace these placeholders with real images in your repo -->
-<img src="docs/images/cover_v2.jpg" alt="SpheroGrandPrix v2 Cover" width="70%"/>
+<br/><br/>
+<img src="docs/images/version2_1.png" alt="SpheroGrandPrix_v2_1" width="70%"/>
 
 <br/><br/>
 
-<img src="docs/images/architecture_v2.png" alt="System Architecture v2" width="70%"/>
+<img src="docs/images/version2_2.png" alt="SpheroGrandPrix_v2_2" width="70%"/>
 
 <br/><br/>
 
-<img src="docs/images/game_ui_v2.png" alt="Game UI & Stats v2" width="70%"/>
 
 </div>
 

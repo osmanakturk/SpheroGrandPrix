@@ -1,3 +1,6 @@
+#### **EN:** This project was developed for and showcased at the **I Love Science Festival 2025**, on behalf of **Erasmushogeschool Brussel (EhB)**.
+#### **NL:** Dit project werd in opdracht van **Erasmushogeschool Brussel (EhB)** ontwikkeld voor en voorgesteld op het **I Love Science Festival 2025**.
+##
 # SpheroGrandPrix — BOLT Racing & Vision System
 ## Rule-Based and HSV-Color-Based Classical CV Segmentation and Tracking System
 
@@ -54,17 +57,56 @@
 
 <div align="center">
 
+<br/><br/>
 
-<!-- Replace these placeholders with real images in your repo -->
-<img src="docs/images/cover.jpg" alt="SpheroGrandPrix Cover" width="70%"/>
+<img src="docs/images/main1.png" alt="SpheroGrandPrix1" width="70%"/>
 
 <br/><br/>
 
-<img src="docs/images/architecture.png" alt="System Architecture" width="70%"/>
+<img src="docs/images/main2.png" alt="SpheroGrandPrix2" width="70%"/>
 
 <br/><br/>
 
-<img src="docs/images/game_ui.png" alt="Game UI & Stats" width="70%"/>
+<img src="docs/images/main3.png" alt="SpheroGrandPrix3" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main4.png" alt="SpheroGrandPrix4" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main5.png" alt="SpheroGrandPrix5" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main6.png" alt="SpheroGrandPrix6" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main7.png" alt="SpheroGrandPrix7" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main8.png" alt="SpheroGrandPrix8" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main9.png" alt="SpheroGrandPrix9" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main10.png" alt="SpheroGrandPrix10" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main11.png" alt="SpheroGrandPrix11" width="70%"/>
+
+<br/><br/>
+
+<img src="docs/images/main12.png" alt="SpheroGrandPrix12" width="70%"/>
+
+<br/><br/>
+
 
 </div>
 

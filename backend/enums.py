@@ -9,6 +9,7 @@ class CaptureApi(Enum):
     Linux = cv.CAP_V4L2
     Mac = cv.CAP_AVFOUNDATION
     FFMPEG = cv.CAP_FFMPEG
+    GSTREAMER = cv.CAP_GSTREAMER
 
 
 

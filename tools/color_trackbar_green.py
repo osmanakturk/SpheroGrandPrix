@@ -6,7 +6,7 @@ def trackbar(val):
     pass
 
 
-cap = cv.VideoCapture(1, cv.CAP_DSHOW)
+cap = cv.VideoCapture(2, cv.CAP_DSHOW)
 
 
 cv.namedWindow("Original Frame", cv.WINDOW_KEEPRATIO)

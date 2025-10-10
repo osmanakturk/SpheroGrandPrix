@@ -6,7 +6,7 @@ import numpy as np
 def trackbar(val): 
     pass
 
-cap = cv.VideoCapture(1, cv.CAP_DSHOW)
+cap = cv.VideoCapture(2, cv.CAP_DSHOW)
 
 
 

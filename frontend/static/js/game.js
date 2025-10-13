@@ -78,7 +78,7 @@ async function updateStats() {
         let total_blue = document.getElementById("total_blue");
         let total_green = document.getElementById("total_green");
         let dashboard_list = document.getElementById("dashboard_list")
-
+        dashboard_list.innerText = ""
 
         total_games.textContent = totals.games ?? 0
         total_spheros.textContent = totals.spheros ?? 0

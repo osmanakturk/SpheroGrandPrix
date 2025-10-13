@@ -46,9 +46,9 @@ def ensure_tracker_started() -> bool:
             finishline_cap_config=CameraConfig(
                 cap_api=CaptureApi.Windows, 
                 cap_index=2, 
-                perspective_points=((86, 0), (465, 0), (71, 480), (472, 479)),
-                start_line= ((0, 350), (216, 350)),
-                finish_line=  ((248, 350), (401, 350))
+                perspective_points=((20, 0), (414, 0), (19, 480), (418, 476)),
+                start_line=((0, 300), (207, 300)),
+                finish_line=((232, 300), (399, 300))
                 ), 
 
             status_cap_config=CameraConfig(
